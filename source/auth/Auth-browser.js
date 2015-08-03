@@ -20,7 +20,7 @@ _.extend(Auth.prototype, {
     registerURL: {ssl: true, host: 'reg.pryv.io'},
     registerStagingURL: {ssl: true, host: 'reg.pryv.in'},
     localDevel : false,
-    sdkFullPath: 'https://dlw0lofo79is5.cloudfront.net/lib-javascript/latest'
+    sdkFullPath: 'https://api.pryv.com/lib-javascript/latest'
   },
   state: null,  // actual state
   window: null,  // popup window reference (if any)
