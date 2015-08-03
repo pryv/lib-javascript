@@ -7,8 +7,6 @@ var utility = require('./utility/utility'),
  */
 var eventTypes = module.exports = {};
 
-// staging cloudfront: https://d1kp76srklnnah.cloudfront.net/dist/data-types/event-extras.json
-// staging direct: https://sw.pryv.li/dist/data-types/event-extras.json
 var HOSTNAME = 'api.pryv.com',
     PORT = 443,
     SSL = true,
