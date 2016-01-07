@@ -18,8 +18,6 @@ _.extend(Auth.prototype, {
   config: {
     // TODO: clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
     registerURL: {ssl: true, host: 'reg.pryv.io'},
-    registerStagingURL: {ssl: true, host: 'reg.pryv.in'},
-    localDevel : false,
     sdkFullPath: 'https://api.pryv.com/lib-javascript/latest'
   },
   state: null,  // actual state
@@ -53,10 +51,6 @@ Auth._init = function (i) {
     Auth.prototype.config.sdkFullPath + '/assets/buttonSigninPryv.css', 'css');
 
   var urlInfo = utility.urls.parseClientURL();
-  console.log('detected environment: ' + urlInfo.environment);
-  if (urlInfo.environment === 'staging') {
-    Auth.prototype.config.registerURL = Auth.prototype.config.registerStagingURL;
-  }
 
   console.log('init done');
 };
@@ -313,7 +307,7 @@ Auth.prototype.login = function (settings) {
   }
 
   var urlInfo = utility.urls.parseClientURL();
-  var defaultDomain = utility.urls.domains.server[urlInfo.environment];
+  var defaultDomain = utility.urls.defaultDomain;
   this.settings = settings = _.defaults(settings, {
     ssl: true,
     domain: defaultDomain
@@ -381,7 +375,7 @@ Auth.prototype.trustedLogout = function () {
 
 Auth.prototype.whoAmI = function (settings) {
   var urlInfo = utility.urls.parseClientURL();
-  var defaultDomain = utility.urls.domains.server[urlInfo.environment];
+  var defaultDomain = utility.urls.defaultDomain;
   this.settings = settings = _.defaults(settings, {
     ssl: true,
     domain: defaultDomain
@@ -437,7 +431,7 @@ Auth.prototype.whoAmI = function (settings) {
 
 Auth.prototype.loginWithCookie = function (settings) {
   var urlInfo = utility.urls.parseClientURL();
-  var defaultDomain = utility.urls.domains.server[urlInfo.environment];
+  var defaultDomain = utility.urls.defaultDomain;
   this.settings = settings = _.defaults(settings, {
     ssl: true,
     domain: defaultDomain
@@ -536,14 +530,10 @@ Auth.prototype.setup = function (settings) {
     returnURL : settings.returnURL
   };
 
-  if (this.config.localDevel) {
-    // return url will be forced to https://l.pryv.in:4443/Auth.html
-    params.localDevel = this.config.localDevel;
-  }
-
   this.stateInitialization();
   // TODO: clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
-  var domain = (this.config.registerURL.host === 'reg.pryv.io') ? 'pryv.io' : 'pryv.in';
+  var parts =  this.config.registerURL.host.split('.').reverse();
+  var domain = parts[1] + '.' + parts[0];
 
   this.connection = new Connection(null, null, {ssl: this.config.registerURL.ssl, domain: domain});
   // look if we have a returning user (document.cookie)
