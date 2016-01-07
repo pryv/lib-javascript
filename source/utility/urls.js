@@ -6,43 +6,8 @@ var urls = module.exports = {};
  * The one and only reference for Pryv domain names.
  * TODO: client and server will merge
  */
-urls.domains = {
-  client: {
-    production: 'pryv.me',
-    staging: 'pryv.li',
-    test: 'rec.la'
-  },
-  server: {
-    production: 'pryv.io',
-    staging: 'pryv.in',
-    test: 'pryv.in'
-  }
-};
+urls.defaultDomain = 'pryv.io';
 
-/**
- * Detects the Pryv environment from the given domain and client/server indication.
- *
- * @param {string} domain
- * @param {string} type "client" or "server"
- * @returns {string} "production", "staging" or "other"
- */
-urls.getEnvironment = function (domain, type) {
-  var domains = this.domains[type];
-  if (! type || ! domains) {
-    throw new Error('Invalid type "' + type + '"; expected "client" or "server"');
-  }
-
-  switch (domain) {
-  case domains.production:
-    return 'production';
-  case domains.staging:
-    return 'staging';
-  case domains.test:
-    return 'test';
-  default:
-    return 'other';
-  }
-};
 
 /* jshint -W101 */
 /**
@@ -103,17 +68,10 @@ function URLInfo(url, type) {
 
   var splitHostname = loc.hostname.split('.');
   if (splitHostname.length >= 3 /* TODO: check & remove, shouldn't be necessary && splitHostname[0].match(this.regex.username)*/) {
-    this.subdomain = splitHostname[0];
+    this.username = splitHostname[0];
   }
   this.domain = loc.hostname.substr(loc.hostname.indexOf('.') + 1);
 
-  this.environment = urls.getEnvironment(this.domain, this.type);
-
-  // if known environment, extract username
-  // (we currently assume username === subdomain; this will change for client URLs)
-  if (this.subdomain && this.environment !== 'other') {
-    this.username = this.subdomain;
-  }
 }
 
 URLInfo.prototype.isSSL = function () {

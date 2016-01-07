@@ -1,5 +1,3 @@
-var utility = require('../../../source/utility/utility.js');
-
 
 module.exports.connectionSettings = {
   username: 'libjs-test-pryv',
@@ -11,8 +9,8 @@ module.exports.loginParams = {
   username: 'libjs-test-pryv',
   password: 'poilonez',
   appId: 'pryv-test-app',
-  domain: utility.urls.domains.server.staging,
-  origin: utility.urls.domains.client.staging
+  domain: 'pryv.io',
+  origin: 'pryv.me'
 };
 
 module.exports.testDiaryStreamId = 'diary';
