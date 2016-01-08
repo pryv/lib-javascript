@@ -305,6 +305,7 @@ Auth.prototype.login = function (settings) {
     this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1) ? true : false;
   }
 
+
   var defaultDomain = utility.urls.defaultDomain;
   this.settings = settings = _.defaults(settings, {
     ssl: true,
@@ -375,6 +376,7 @@ Auth.prototype.trustedLogout = function () {
 };
 
 Auth.prototype.whoAmI = function (settings) {
+
   var defaultDomain = utility.urls.defaultDomain;
   this.settings = settings = _.defaults(settings, {
     ssl: true,
@@ -430,6 +432,7 @@ Auth.prototype.whoAmI = function (settings) {
 };
 
 Auth.prototype.loginWithCookie = function (settings) {
+
   var defaultDomain = utility.urls.defaultDomain;
   this.settings = settings = _.defaults(settings, {
     ssl: true,
