@@ -3,7 +3,7 @@
  */
 
 
-var _ = require('lodash');
+var _ = require('underscore');
 
 var SignalEmitter = module.exports = function (messagesMap) {
   SignalEmitter.extend(this, messagesMap);

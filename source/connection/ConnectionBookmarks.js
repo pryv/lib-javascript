@@ -1,6 +1,6 @@
 var apiPathBookmarks = '/followed-slices',
   Connection = require('../Connection.js'),
-  _ = require('lodash'),
+  _ = require('underscore'),
   CC = require('./ConnectionConstants.js');
 
 /**

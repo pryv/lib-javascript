@@ -1,5 +1,5 @@
 var apiPathAccesses = '/accesses';
-var _ = require('lodash'),
+var _ = require('underscore'),
   CC = require('./ConnectionConstants.js');
 
 /**

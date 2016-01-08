@@ -1,4 +1,4 @@
-var _ = require('lodash'),
+var _ = require('underscore'),
     utility = require('../utility/utility'),
     Monitor = require('../Monitor');
 

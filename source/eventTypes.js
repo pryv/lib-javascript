@@ -1,5 +1,5 @@
 var utility = require('./utility/utility'),
-    _ = require('lodash'),
+    _ = require('underscore'),
     CC = require('./connection/ConnectionConstants.js');
 
 /**

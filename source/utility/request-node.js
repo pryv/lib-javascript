@@ -3,7 +3,7 @@
 //TODO: sort out the callback convention
 
 var FormData = require('form-data');
-var _ = require('lodash');
+var _ = require('underscore');
 
 /**
  * executes the low-level HTTP request.

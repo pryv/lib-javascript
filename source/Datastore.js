@@ -3,7 +3,7 @@
  * @private
  */
 
-var _ = require('lodash');
+var _ = require('underscore');
 var Event = require('./Event');
 var Stream = require('./Stream');
 

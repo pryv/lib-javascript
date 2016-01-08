@@ -8,7 +8,7 @@ var utility = require('./utility/utility.js'),
     ConnectionAccount = require('./connection/ConnectionAccount.js'),
     CC = require('./connection/ConnectionConstants.js'),
     Datastore = require('./Datastore.js'),
-    _ = require('lodash');
+    _ = require('underscore');
 
 /**
  * @class Connection

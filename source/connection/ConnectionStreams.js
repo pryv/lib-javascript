@@ -1,4 +1,4 @@
-var _ = require('lodash'),
+var _ = require('underscore'),
   utility = require('../utility/utility.js'),
   Stream = require('../Stream.js'),
   CC = require('./ConnectionConstants.js');

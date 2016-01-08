@@ -1,5 +1,5 @@
 
-var _ = require('lodash');
+var _ = require('underscore');
 
 var RW_PROPERTIES =
   ['streamId', 'time', 'duration', 'type', 'content', 'tags', 'description',

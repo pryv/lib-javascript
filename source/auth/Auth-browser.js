@@ -2,7 +2,7 @@
 
 var utility = require('../utility/utility.js');
 var Connection = require('../Connection.js');
-var _ = require('lodash');
+var _ = require('underscore');
 
 
 //--------------------- access ----------//
@@ -240,11 +240,13 @@ Auth.prototype.stateAccepted = function () {
   if (this.cookieEnabled) {
     utility.docCookies.setItem('access_username', this.state.username, 3600);
     utility.docCookies.setItem('access_token', this.state.token, 3600);
+    utility.docCookies.setItem('access_domain', this.settings.domain, 3600);
   }
   this.updateButton(this.uiInButton(this.state.username));
 
   this.connection.username = this.state.username;
   this.connection.auth = this.state.token;
+  this.connection.domain = this.settings.domain;
   if (this.settings.callbacks.accepted) {
     this.settings.callbacks.accepted(this.state.username, this.state.token, this.state.lang);
   }
@@ -270,6 +272,7 @@ Auth.prototype.logout = function () {
   if (this.cookieEnabled) {
     utility.docCookies.removeItem('access_username');
     utility.docCookies.removeItem('access_token');
+    utility.docCookies.removeItem('access_domain');
   }
   this.state = null;
   if (this.settings.callbacks.accepted) {
@@ -335,6 +338,7 @@ Auth.prototype.login = function (settings) {
         }
         console.log('set cookie', this.cookieEnabled, settings.rememberMe,
           utility.docCookies.getItem('access_username'),
+          utility.docCookies.getItem('access_domain'),
           utility.docCookies.getItem('access_token'));
         this.connection.username = settings.username;
         this.connection.auth = data.token;
@@ -451,9 +455,11 @@ Auth.prototype.loginWithCookie = function (settings) {
   }
   var cookieUserName = this.cookieEnabled ? utility.docCookies.getItem('access_username') : false;
   var cookieToken = this.cookieEnabled ? utility.docCookies.getItem('access_token') : false;
-  console.log('get cookie', cookieUserName, cookieToken);
-  if (cookieUserName && cookieToken) {
+  var cookieDomain = this.cookieEnabled ? utility.docCookies.getItem('access_domain') : false;
+  console.log('get cookie', cookieUserName, cookieDomain, cookieToken);
+  if (cookieUserName && cookieToken && cookieDomain) {
     this.connection.username = cookieUserName;
+    this.connection.domain = cookieDomain;
     this.connection.auth = cookieToken;
     if (typeof(this.settings.callbacks.signedIn) === 'function') {
       this.settings.callbacks.signedIn(this.connection);
@@ -525,6 +531,11 @@ Auth.prototype.setup = function (settings) {
   //  spanButtonID is checked only when possible
   this.settings = settings;
 
+
+  // TODO: clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
+  var parts =  this.config.registerURL.host.split('.').reverse();
+  this.settings.domain = parts[1] + '.' + parts[0];
+
   var params = {
     requestingAppId : settings.requestingAppId,
     requestedPermissions : settings.requestedPermissions,
@@ -533,22 +544,21 @@ Auth.prototype.setup = function (settings) {
   };
 
   this.stateInitialization();
-  // TODO: clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
-  var parts =  this.config.registerURL.host.split('.').reverse();
-  var domain = parts[1] + '.' + parts[0];
 
-  this.connection = new Connection(null, null, {ssl: this.config.registerURL.ssl, domain: domain});
+
+  this.connection = new Connection(null, null, {ssl: true, domain: this.settings.domain});
   // look if we have a returning user (document.cookie)
   var cookieUserName = this.cookieEnabled ? utility.docCookies.getItem('access_username') : false;
   var cookieToken = this.cookieEnabled ? utility.docCookies.getItem('access_token') : false;
-
+  var cookieDomain = this.cookieEnabled ? utility.docCookies.getItem('access_domain') : false;
   // look in the URL if we are returning from a login process
   var stateFromURL =  this._getStatusFromURL();
 
   if (stateFromURL && (! this.ignoreStateFromURL)) {
     this.stateChanged(stateFromURL);
-  } else if (cookieToken && cookieUserName) {
-    this.stateChanged({status: 'ACCEPTED', username: cookieUserName, token: cookieToken});
+  } else if (cookieToken && cookieUserName && cookieDomain) {
+    this.stateChanged({status: 'ACCEPTED', username: cookieUserName,
+      token: cookieToken, domain: cookieDomain});
   } else { // launch process $
 
     var pack = {
