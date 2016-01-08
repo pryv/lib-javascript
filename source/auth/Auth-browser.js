@@ -238,9 +238,8 @@ Auth.prototype.stateNeedSignin = function () {
 //STATE 2 User logged in and authorized
 Auth.prototype.stateAccepted = function () {
   if (this.cookieEnabled) {
-    utility.docCookies.setItem('access_username', this.state.username, 3600);
-    utility.docCookies.setItem('access_token', this.state.token, 3600);
-    utility.docCookies.setItem('access_domain', this.settings.domain, 3600);
+    utility.docCookies.setItem('access_username' + this.settings.domain, this.state.username, 3600);
+    utility.docCookies.setItem('access_token' + this.settings.domain, this.state.token, 3600);
   }
   this.updateButton(this.uiInButton(this.state.username));
 
@@ -270,9 +269,8 @@ Auth.prototype.stateRefused = function () {
 Auth.prototype.logout = function () {
   this.ignoreStateFromURL = true;
   if (this.cookieEnabled) {
-    utility.docCookies.removeItem('access_username');
-    utility.docCookies.removeItem('access_token');
-    utility.docCookies.removeItem('access_domain');
+    utility.docCookies.removeItem('access_username' + this.settings.domain);
+    utility.docCookies.removeItem('access_token' + this.settings.domain);
   }
   this.state = null;
   if (this.settings.callbacks.accepted) {
@@ -332,14 +330,16 @@ Auth.prototype.login = function (settings) {
     success: function (data)  {
       if (data.token) {
         if (this.cookieEnabled && settings.rememberMe) {
-          utility.docCookies.setItem('access_username', settings.username, 3600);
-          utility.docCookies.setItem('access_token', data.token, 3600);
-          utility.docCookies.setItem('access_preferredLanguage', data.preferredLanguage, 3600);
+          utility.docCookies.setItem('access_username' + this.settings.domain,
+             settings.username, 3600);
+          utility.docCookies.setItem('access_token' + this.settings.domain,
+            data.token, 3600);
+          utility.docCookies.setItem('access_preferredLanguage' + this.settings.domain,
+            data.preferredLanguage, 3600);
         }
         console.log('set cookie', this.cookieEnabled, settings.rememberMe,
-          utility.docCookies.getItem('access_username'),
-          utility.docCookies.getItem('access_domain'),
-          utility.docCookies.getItem('access_token'));
+          utility.docCookies.getItem('access_username' + this.settings.domain),
+          utility.docCookies.getItem('access_token' + this.settings.domain));
         this.connection.username = settings.username;
         this.connection.auth = data.token;
         if (typeof(this.settings.callbacks.signedIn)  === 'function') {
@@ -453,13 +453,14 @@ Auth.prototype.loginWithCookie = function (settings) {
     document.cookie = 'testcookie';
     this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1) ? true : false;
   }
-  var cookieUserName = this.cookieEnabled ? utility.docCookies.getItem('access_username') : false;
-  var cookieToken = this.cookieEnabled ? utility.docCookies.getItem('access_token') : false;
-  var cookieDomain = this.cookieEnabled ? utility.docCookies.getItem('access_domain') : false;
-  console.log('get cookie', cookieUserName, cookieDomain, cookieToken);
-  if (cookieUserName && cookieToken && cookieDomain) {
+  var cookieUserName = this.cookieEnabled ?
+    utility.docCookies.getItem('access_username' + this.settings.domain) : false;
+  var cookieToken = this.cookieEnabled ?
+    utility.docCookies.getItem('access_token' + this.settings.domain) : false;
+  console.log('get cookie', cookieUserName, this.settings.domain, cookieToken);
+  if (cookieUserName && cookieToken) {
     this.connection.username = cookieUserName;
-    this.connection.domain = cookieDomain;
+    this.connection.domain = this.settings.domain;
     this.connection.auth = cookieToken;
     if (typeof(this.settings.callbacks.signedIn) === 'function') {
       this.settings.callbacks.signedIn(this.connection);
@@ -548,17 +549,19 @@ Auth.prototype.setup = function (settings) {
 
   this.connection = new Connection(null, null, {ssl: true, domain: this.settings.domain});
   // look if we have a returning user (document.cookie)
-  var cookieUserName = this.cookieEnabled ? utility.docCookies.getItem('access_username') : false;
-  var cookieToken = this.cookieEnabled ? utility.docCookies.getItem('access_token') : false;
-  var cookieDomain = this.cookieEnabled ? utility.docCookies.getItem('access_domain') : false;
+  var cookieUserName = this.cookieEnabled ?
+    utility.docCookies.getItem('access_username' + this.settings.domain) : false;
+  var cookieToken = this.cookieEnabled ?
+    utility.docCookies.getItem('access_token' + this.settings.domain) : false;
+
   // look in the URL if we are returning from a login process
   var stateFromURL =  this._getStatusFromURL();
 
   if (stateFromURL && (! this.ignoreStateFromURL)) {
     this.stateChanged(stateFromURL);
-  } else if (cookieToken && cookieUserName && cookieDomain) {
+  } else if (cookieToken && cookieUserName) {
     this.stateChanged({status: 'ACCEPTED', username: cookieUserName,
-      token: cookieToken, domain: cookieDomain});
+      token: cookieToken, domain: this.settings.domain});
   } else { // launch process $
 
     var pack = {
