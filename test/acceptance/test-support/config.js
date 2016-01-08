@@ -2,18 +2,19 @@ var utility = require('../../../source/utility/utility.js');
 
 
 module.exports.connectionSettings = {
-  username: 'perkikiki',
-  auth: 'chu2cc0zy0000iawkyrw7g9gq',
-  staging: true
+  username: 'libjs-test-pryv',
+  auth: 'cij5h3idx0rlz1fyq1ztpnij8',
+  domain: 'pryv.io'
 };
 
 module.exports.loginParams = {
-  username: 'perkikiki',
+  username: 'libjs-test-pryv',
   password: 'poilonez',
   appId: 'pryv-test-app',
   domain: utility.urls.domains.server.staging,
   origin: utility.urls.domains.client.staging
 };
 
-module.exports.testStreamId = 'diary';
-
+module.exports.testDiaryStreamId = 'diary';
+module.exports.testActivityStreamId = 'activity';
+module.exports.testNoChildStreamId = 'nochildstream';

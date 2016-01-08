@@ -177,7 +177,7 @@ describe('Connection', function () {
 
     it('must instantiate a monitor with the provided filter', function (done) {
       var filter = new Pryv.Filter();
-      filter.streams = ['diary', 'activity'];
+      filter.streams = [config.testDiaryStreamId, config.testActivityStreamId];
       connection.monitor(filter);
       done();
     });

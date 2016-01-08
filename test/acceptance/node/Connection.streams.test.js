@@ -35,7 +35,7 @@ describe('Connection.streams', function () {
     });
 
     it('must return streams matching the given filter', function (done) {
-      var filter = {parentId: 'diary', state: 'all'};
+      var filter = {parentId: config.testDiaryStreamId, state: 'all'};
       connection.streams.get(filter, function (error, streams) {
         should.exist(streams);
         streams.forEach(function (stream) {
@@ -46,7 +46,7 @@ describe('Connection.streams', function () {
     });
 
     it('must return an empty array if there are no matching streams', function (done) {
-      var filter = {parentId: 'notes'}; // be sure that this stream has no child
+      var filter = {parentId: config.testNoChildStreamId}; // be sure that this stream has no child
       connection.streams.get(filter, function (error, streams) {
         should.not.exist(error);
         streams.length.should.equal(0);

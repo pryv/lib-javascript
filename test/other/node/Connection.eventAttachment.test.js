@@ -12,7 +12,7 @@ var pryv = require('../../../source/main'),
 var testEvents = function () {
 
 
-  var streamId = config.testStreamId;
+  var streamId = config.testDiaryStreamId;
 
   describe('Connection.events', function () {
     this.timeout(15000);

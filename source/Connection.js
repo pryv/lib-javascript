@@ -17,8 +17,8 @@ var utility = require('./utility/utility.js'),
  * http[s]://&lt;username>.&lt;domain>:&lt;port>/&lt;extraPath>?auth=&lt;auth>
  *
  * @example
- * // create a connection for the user 'perkikiki' with the token 'TTZycvBTiq'
- * var conn = new pryv.Connection({username: 'perkikiki', auth: 'TTZycvBTiq'});
+ * // create a connection for the user 'pryvtest' with the token 'TTZycvBTiq'
+ * var conn = new pryv.Connection({username: 'pryvtest', auth: 'TTZycvBTiq'});
  *
  * @constructor
  * @this {Connection}

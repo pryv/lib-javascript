@@ -1,6 +1,7 @@
 /* global before, describe, it */
 var pryv = require('../../../source/main'),
   utility = require('../../../source/utility/utility'),
+  config = require('../../acceptance/test-support/config.js'),
   nock = require('nock'),
   should = require('should'),
   _ = require('lodash'),
@@ -34,7 +35,7 @@ var testEvents = function (preFetchStructure) {
           .get('/access-info')
           .reply(200, { type: 'app',
             name: 'diary-read-only',
-            permissions: [ { streamId: 'diary', level: 'read' } ] },
+            permissions: [ { streamId: config.testDiaryStreamId, level: 'read' } ] },
             responses.headersStandard);
 
 
@@ -113,7 +114,7 @@ var testEvents = function (preFetchStructure) {
     // TODO remove because covered in acceptance
     describe('create( event )' + localEnabledStr, function () {
 
-      var eventData = {streamId : 'diary', type : 'note/txt', content: 'hello'},
+      var eventData = {streamId : config.testDiaryStreamId, type : 'note/txt', content: 'hello'},
           event = new pryv.Event(connection, eventData);
 
       var response = {event: _.extend({id : 'Tet5slAP9q'}, eventData)};
@@ -143,7 +144,9 @@ var testEvents = function (preFetchStructure) {
             .reply(400, {error: {id: 'invalid-parameters-format', message: 'Test message'}},
              responses.headersStandard);
 
-        connection.events.create({streamId : 'diary', type : 'note/txt', content: 'hello'},
+        connection.events.create(
+          {streamId : config.testDiaryStreamId,
+              type : 'note/txt', content: 'hello'},
             function (err, resultEvent) {
           should.exist(err);
           should.not.exist(resultEvent);
@@ -160,7 +163,7 @@ var testEvents = function (preFetchStructure) {
     // TODO remove because covered in acceptance
     describe('create( eventData )' + localEnabledStr, function () {
 
-      var eventData = {streamId : 'diary', type : 'note/txt', content: 'hello'};
+      var eventData = {streamId : config.testDiaryStreamId, type : 'note/txt', content: 'hello'};
 
       var response = {event: _.extend({id: 'Tet5slAP9q'}, eventData)};
 
@@ -185,7 +188,7 @@ var testEvents = function (preFetchStructure) {
 
       // make sure that testing stream is singleActivity
 
-      var eventData = {streamId : 'activity', type : 'activity/plain'};
+      var eventData = {streamId : config.testActivityStreamId, type : 'activity/plain'};
 
       var response = {event: _.extend({id: 'Tet5slAP9q'}, eventData)};
 
@@ -228,7 +231,7 @@ var testEvents = function (preFetchStructure) {
     // TODO remove because covered in acceptance
     describe('start( eventData )  - stopStream( stream ) 1' + localEnabledStr, function () {
 
-      var eventData = {streamId : 'activity', type : 'activity/plain'};
+      var eventData = {streamId : config.testActivityStreamId, type : 'activity/plain'};
 
       var response = {event: _.extend({id: 'Tet5slAP9q'}, eventData)};
 
