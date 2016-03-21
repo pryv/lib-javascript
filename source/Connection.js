@@ -470,6 +470,60 @@ Connection.login = function (params, callback) {
 };
 
 
+// --------- batch call
+
+/**
+ * address multiple methods to the API in a single batch call
+ *
+ * @example
+ * // make a batch call to create an event and update a stream
+ *  connection.batchCall(
+ *  [
+ *    { method: 'events.create',
+ *      params: {
+ *        streamId: 'diary',
+ *        type: 'note/txt',
+ *        content: 'hello'
+ *     }
+ *    },
+ *    { method: 'streams.update',
+ *      params: {
+ *        id': 'diary',
+ *        params: {
+ *          update: { name: 'new diary' }
+ *    }
+ *  ], function (err, results) {
+ *    if (err) {
+ *      return console.log(err);
+ *    }
+ *    results.forEach(function (result) {
+ *      console.log(result);
+ *    }
+ *  });
+ * @param {Array} methodsData - array of methods to execute on the API,
+ * @param {Function} callback - callback
+ */
+Connection.prototype.batchCall = function(methodsData, callback) {
+  if (typeof(callback) !== 'function') {
+    throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
+  }
+  if (!_.isArray(methodsData)) { methodsData = [methodsData]; }
+
+  this.request({
+    method: 'POST',
+    path: '/',
+    jsonData: methodsData,
+    callback: function (err, res) {
+
+      if (! res || ! res.results) {
+        return callback('No result found', res);
+      }
+      callback(err, res.results);
+    }.bind(this)
+  });
+};
+
+
 // --------- private utils
 
 function getHostname(connection) {

@@ -184,11 +184,166 @@ describe('Connection', function () {
 
   });
 
-  // do tests? do only unit tests? because its usage is already tested in other modules
-  // (ConnectionEvents,ConnectionStreams, ...
-  describe('request()', function () {
+  describe('batchCall()', function () {
 
-    it('must ');
+    var connection = new Pryv.Connection(config.connectionSettings);
+
+    it.skip('execute the requested calls in the appropriate order', function (done) {
+
+      var streamId = 'batchCallStreamId',
+          streamName = 'batchCallStreamToDelete',
+          eventType = 'pressure/mmhg';
+
+      var methodsData = [
+        {
+          'method': 'streams.create',
+          'params': {
+            'id': streamId,
+            'name': streamName
+          }
+        },
+        {
+          'method': 'events.create',
+          'params': {
+            'time': 1385046854.282,
+            'streamId': streamId,
+            'type': eventType,
+            'content': 120
+          }
+        },
+        {
+          'method': 'events.create',
+          'params': {
+            'time': 1385046854.282,
+            'streamId': streamId,
+            'type': eventType,
+            'content': 80
+          }
+        },
+        {
+          'method': 'streams.delete',
+          'params': {
+            'id': streamId,
+            'mergeEventsWithParent': false
+          }
+        },
+        {
+          'method': 'streams.delete',
+          'params': {
+            'id': streamId,
+            'mergeEventsWithParent': false
+          }
+        }
+      ];
+
+      connection.batchCall(methodsData, function (err, data) {
+        should.exist(data);
+        data.length.should.eql(methodsData.length);
+        data.forEach(function (result) {
+          if (result.event) {
+            var eventResult = result.event;
+            should.exist(eventResult.id);
+            should.exist(eventResult.created);
+            should.exist(eventResult.createdBy);
+            should.exist(eventResult.modified);
+            should.exist(eventResult.modifiedBy);
+            should.exist(eventResult.tags);
+            eventResult.streamId.should.eql(streamId);
+            eventResult.type.should.eql(eventType);
+          } else if (result.stream) {
+            var streamResult = result.stream;
+            should.exist(streamResult.created);
+            should.exist(streamResult.createdBy);
+            should.exist(streamResult.modified);
+            should.exist(streamResult.modifiedBy);
+            should.not.exist(streamResult.parentId);
+            streamResult.id.should.eql(streamId);
+            streamResult.name.should.eql(streamName);
+          } else if (result.streamDeletion) {
+            var streamDeletion = result.streamDeletion;
+            streamDeletion.id.should.eql(streamId);
+          } else {
+            done('unknown result', result);
+          }
+        });
+        done(err);
+      });
+    });
+
+    it('should return an error when the request has the wrong format', function (done) {
+
+      var methodsData = 'I am going to generate an error because I am not an array';
+
+      connection.batchCall(methodsData, function (err, data) {
+        should.exist(err);
+        should.not.exist(data);
+        done();
+      });
+    });
+
+    it('should generate an error for each failing call', function (done) {
+
+      var streamId = 'myOneGoodStreamInMyBatchCall';
+
+      var methodsData = [
+        {
+          method: 'wrong method name',
+          params: {
+            id: 'stuff that should not be processed'
+          }
+        },
+        {
+          method: 'streams.create',
+          params: {
+            id: streamId,
+            name: 'myOneGoodStreamInMyBatchCall'
+          }
+        },
+        {
+          'method': 'events.create',
+          'params': {
+            streamId: 'aStreamIdThatDoesNotExist',
+            type: 'note/txt',
+            content: 'youhou'
+          }
+        },
+        {
+          method: 'streams.update',
+          params: {
+            update: {
+              id: streamId,
+              wrongField: 'this is an unsupported field that should generate an error'
+            }
+          }
+        },
+        {
+          'method': 'streams.delete',
+          'params': {
+            'id': streamId,
+            'mergeEventsWithParent': false
+          }
+        },
+        {
+          'method': 'streams.delete',
+          'params': {
+            'id': streamId,
+            'mergeEventsWithParent': false
+          }
+        }
+      ];
+
+      connection.batchCall(methodsData, function (err, data) {
+        should.exist(data);
+        data.length.should.eql(methodsData.length);
+        should.exist(data[0].error);
+        should.exist(data[1].stream);
+        should.exist(data[2].error);
+        should.exist(data[3].error);
+        should.exist(data[4].stream);
+        should.exist(data[5].streamDeletion);
+        done(err);
+      });
+    });
   });
 
 });
