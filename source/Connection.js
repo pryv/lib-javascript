@@ -515,10 +515,10 @@ Connection.prototype.batchCall = function(methodsData, callback) {
     jsonData: methodsData,
     callback: function (err, res) {
 
-      if (! res || ! res.results) {
-        return callback('No result found', res);
+      if (err) {
+        return callback(err);
       }
-      callback(err, res.results);
+      callback(null, res.results);
     }.bind(this)
   });
 };
