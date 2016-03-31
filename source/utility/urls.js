@@ -39,7 +39,7 @@ urls.parseServerURL = function (url) {
  */
 function URLInfo(url, type) {
   var loc;
-  if (document) {
+  if (typeof document !== 'undefined') {
     // browser
     if (url) {
       loc = document.createElement('a');
