@@ -1,6 +1,6 @@
 /* global confirm, document, navigator, location, window */
 
-var utility = require('../utility/utility.js');
+var utility = require('../utility/Utility.js');
 var Connection = require('../Connection.js');
 var _ = require('underscore');
 
