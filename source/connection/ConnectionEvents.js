@@ -1,4 +1,4 @@
-var utility = require('../utility/Utility.js'),
+var utility = require('../utility/utility.js'),
   _ = require('underscore'),
   Filter = require('../Filter'),
   Event = require('../Event'),

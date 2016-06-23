@@ -1,4 +1,4 @@
-var utility = require('./utility/Utility.js'),
+var utility = require('./utility/utility.js'),
     ConnectionEvents = require('./connection/ConnectionEvents.js'),
     ConnectionStreams = require('./connection/ConnectionStreams.js'),
     ConnectionProfile = require('./connection/ConnectionProfile.js'),

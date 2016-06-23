@@ -1,5 +1,5 @@
 var _ = require('underscore'),
-  utility = require('../utility/Utility.js'),
+  utility = require('../utility/utility.js'),
   Stream = require('../Stream.js'),
   CC = require('./ConnectionConstants.js');
 
