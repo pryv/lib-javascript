@@ -44,9 +44,9 @@
     "underscore": "latest"
   },
   "devDependencies": {
-    "coffee-script": "latest",
     "async": "latest",
     "blanket": "latest",
+    "coffee-script": "latest",
     "grunt": "latest",
     "grunt-browserify": "latest",
     "grunt-contrib-copy": "latest",
@@ -57,6 +57,7 @@
     "grunt-jsdoc": "latest",
     "grunt-mocha-test": "latest",
     "grunt-shell": "latest",
+    "mocha": "latest",
     "nock": "latest",
     "replay": "latest",
     "should": "latest"

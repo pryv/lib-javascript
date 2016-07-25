@@ -7,11 +7,10 @@ var Pryv = require('../../../source/main'),
 describe('Connection.accesses', function () {
   this.timeout(10000);
 
-  var accessConnection, streamConnection;
+  var accessConnection;
 
 
   before(function (done) {
-    streamConnection = new Pryv.Connection(config.connectionSettings);
     Pryv.Connection.login(config.loginParams, function (err, newConnection) {
       accessConnection = newConnection;
       done(err);
@@ -20,7 +19,7 @@ describe('Connection.accesses', function () {
 
   describe('get()', function () {
     it('must return the list of connection accesses', function (done) {
-      streamConnection.accesses.get(function (err, res) {
+      accessConnection.accesses.get(function (err, res) {
         should.not.exist(err);
         should.exist(res);
         res.should.be.instanceOf(Array);
