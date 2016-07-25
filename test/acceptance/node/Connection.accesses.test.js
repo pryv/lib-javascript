@@ -14,6 +14,7 @@ describe('Connection.accesses', function () {
     Pryv.Connection.login(config.loginParams, function (err, newConnection) {
       accessConnection = newConnection;
       done(err);
+
     });
   });
 

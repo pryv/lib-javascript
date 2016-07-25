@@ -13,6 +13,26 @@ describe('Connection.streams', function () {
 
   describe('get()', function () {
     // TODO: maybe verify tree structure
+
+    before(function () {
+      var streamData = {
+        name: 'Diary',
+        id: config.testDiaryStreamId,
+        parentId: null
+      };
+      var stream = new Pryv.Stream(connection, streamData);
+      connection.streams.create(stream, function (err) {
+        if (err) { return console.error(err); }
+      });
+    });
+
+    after (function () {
+      var streamData = { id: config.testDiaryStreamId };
+      connection.streams.delete(streamData, function (err) {
+        if (err) { return console.error(err); }
+      }, false);
+    });
+
     it('must return a tree of non-trashed Stream objects by default', function (done) {
       connection.streams.get(null, function (error, streams) {
         should.not.exist(error);

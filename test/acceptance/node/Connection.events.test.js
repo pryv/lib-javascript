@@ -42,7 +42,7 @@ describe('Connection.events', function () {
 
   describe('get()', function () {
 
-    var deletedEventId, testStartTime;
+    var deletedEventId, testStartTime, eventCreated;
 
     before(function (done) {
       testStartTime = new Date().getTime() / 1000;
@@ -52,7 +52,19 @@ describe('Connection.events', function () {
         type: 'note/txt',
         streamId: testStream.id
       };
-
+      async.times(20, function (n, next) {
+        var eventData = {
+          streamId: 'ConnectionEventsTestStream',
+          type: 'note/txt',
+          content: 'Event ' + (n + 1)
+        };
+        connection.events.create(eventData, function (err, event) {
+          next(err, event);
+        });
+      }, function (err, events) {
+        if (err) { return console.error(err); }
+        eventCreated = events;
+      });
       async.series([
         function (stepDone) {
           connection.events.create(eventDeleted, function (err, event) {
@@ -69,9 +81,19 @@ describe('Connection.events', function () {
         function (stepDone) {
           connection.events.delete(eventDeleted, function (err) {
             stepDone(err);
-          });
+        });
         }
       ], done);
+    });
+
+    after(function () {
+      async.times(20, function (i, next) {
+        connection.events.delete(eventCreated[i], function (err, event) {
+          next(err, event);
+        });
+      }, function (err) {
+        if (err) { return console.error(err); }
+      });
     });
 
     it('must return the last 20 non-trashed Event objects (sorted descending) by default',

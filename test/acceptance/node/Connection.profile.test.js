@@ -45,7 +45,8 @@ describe('Connection.profile', function () {
       });
     });
 
-    it('must return an error', function (done) {
+    // TODO Connect with invalid token
+    it.skip('must return an error', function (done) {
       errorConnection.profile.getPublic(null, function (err) {
         should.exist(err);
         done();
