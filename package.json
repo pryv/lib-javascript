@@ -1,6 +1,6 @@
 {
   "name": "pryv",
-  "version": "0.1.10",
+  "version": "1.0.0",
   "description": "Javascript library (browser & Node.js) to access and manipulate Pryv users data",
   "keywords": [
     "pryv",
@@ -28,6 +28,14 @@
     {
       "name": "Simon Goumaz",
       "url": "http://github.com/sgoumaz"
+    },
+    {
+      "name": "Quentin Kermaidic",
+      "url": "https://github.com/kerma0"
+    },
+    {
+      "name": "Ilia Kebets",
+      "url": "https://github.com/kebetsi"
     }
   ],
   "files": [
