@@ -5,3 +5,4 @@ lib-javascript.iml
 dist
 fixtures
 .idea/
+npm-debug.log
