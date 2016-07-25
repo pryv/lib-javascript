@@ -199,6 +199,7 @@ ConnectionStreams.prototype.getById = function (streamId) {
 // ------------- Raw calls to the API ----------- //
 
 /**
+ * TODO rename _getStreams
  * get streams on the API
  * @private
  * @param {ConnectionStreams~options} opts
