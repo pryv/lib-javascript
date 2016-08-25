@@ -1,5 +1,5 @@
 var apiPathPrivateProfile = '/profile/private';
-var apiPathPublicProfile = '/profile/app';
+var apiPathPublicProfile = '/profile/public';
 var CC = require('./ConnectionConstants.js');
 
 /**
