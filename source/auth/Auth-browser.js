@@ -695,7 +695,7 @@ Auth.prototype._getStatusFromURL = function () {
 
   //TODO check validity of status
 
-  return (vars.key) ? vars : false;
+  return (vars.status) ? vars : false;
 };
 
 //util to grab parameters from url query string
