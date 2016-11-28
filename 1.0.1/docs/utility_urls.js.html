@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utility/urls.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utility/urls.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* global document */
+
+var urls = module.exports = {};
+
+/**
+ * The one and only reference for Pryv domain names.
+ * TODO: client and server will merge
+ */
+urls.defaultDomain = 'pryv.io';
+
+
+/* jshint -W101 */
+/**
+ * Extracts base components from a browser URL string
+ * (e.g. today: "https://username.pryv.me:443/some/path").
+ *
+ * @param url Defaults to `document.location` if available
+ * @returns {URLInfo}
+ */
+urls.parseClientURL = function (url) {
+  return new URLInfo(url, 'client');
+};
+
+/**
+ * Extracts base components from a standard Pryv API URL string
+ * (e.g. "https://username.pryv.io:443/some/path").
+ *
+ * @param url
+ * @returns {URLInfo}
+ */
+urls.parseServerURL = function (url) {
+  return new URLInfo(url, 'server');
+};
+
+/**
+ * @param {String} url
+ * @param {String} type "client" or "server"
+ * @constructor
+ */
+function URLInfo(url, type) {
+  var loc;
+  if (typeof document !== 'undefined') {
+    // browser
+    if (url) {
+      loc = document.createElement('a');
+      loc.href = url;
+    } else {
+      loc = document.location;
+    }
+  } else {
+    // node
+    if (! url) {
+      throw new Error('`url` is required');
+    }
+    loc = require('url').parse(url);
+  }
+  if (! (type === 'client' || type === 'server')) {
+    throw new Error('`type` must be either "client" or "server"');
+  }
+  this.type = type;
+
+  this.protocol = loc.protocol;
+  this.hostname = loc.hostname;
+  this.port = loc.port || (this.protocol === 'https:' ? 443 : 80);
+  this.path = loc.pathname;
+  this.hash = loc.hash;
+  this.search = loc.search;
+
+  var splitHostname = loc.hostname.split('.');
+  if (splitHostname.length >= 3 /* TODO: check &amp; remove, shouldn't be necessary &amp;&amp; splitHostname[0].match(this.regex.username)*/) {
+    this.username = splitHostname[0];
+  }
+  this.domain = loc.hostname.substr(loc.hostname.indexOf('.') + 1);
+
+}
+
+URLInfo.prototype.isSSL = function () {
+  return this.protocol === 'https:';
+};
+
+URLInfo.prototype.parseQuery = function () {
+  var objURL = {};
+  this.search.replace(new RegExp('([^?=&amp;]+)(=([^&amp;]*))?', 'g'), function ($0, $1, $2, $3) {
+    objURL[$1] = $3;
+  });
+  return objURL;
+};
+
+URLInfo.prototype.parseSharingTokens = function () {
+  if (this.type !== 'client') {
+    throw new Error('Can only parse on client URLs');
+  }
+  var splitPath = this.hash.split('/');
+  var sharingsIndex = splitPath.indexOf('sharings');
+  if (sharingsIndex !== -1) {
+    return splitPath.splice(sharingsIndex + 1).filter(function (s) { return s.length > 0; });
+  } else {
+    return [];
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#accesses">accesses</a></li><li><a href="global.html#bookmarks">bookmarks</a></li><li><a href="global.html#events">events</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#FormData">FormData</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#monitors">monitors</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#profile">profile</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#streams">streams</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li><li><a href="global.html#utility">utility</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Mon Nov 28 2016 10:31:55 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
