@@ -8037,6 +8037,60 @@ Connection.login = function (params, callback) {
 };
 
 
+// --------- batch call
+
+/**
+ * address multiple methods to the API in a single batch call
+ *
+ * @example
+ * // make a batch call to create an event and update a stream
+ *  connection.batchCall(
+ *  [
+ *    { method: 'events.create',
+ *      params: {
+ *        streamId: 'diary',
+ *        type: 'note/txt',
+ *        content: 'hello'
+ *     }
+ *    },
+ *    { method: 'streams.update',
+ *      params: {
+ *        id': 'diary',
+ *        params: {
+ *          update: { name: 'new diary' }
+ *    }
+ *  ], function (err, results) {
+ *    if (err) {
+ *      return console.log(err);
+ *    }
+ *    results.forEach(function (result) {
+ *      console.log(result);
+ *    }
+ *  });
+ * @param {Array} methodsData - array of methods to execute on the API,
+ * @param {Function} callback - callback
+ */
+Connection.prototype.batchCall = function(methodsData, callback) {
+  if (typeof(callback) !== 'function') {
+    throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
+  }
+  if (!_.isArray(methodsData)) { methodsData = [methodsData]; }
+
+  this.request({
+    method: 'POST',
+    path: '/',
+    jsonData: methodsData,
+    callback: function (err, res) {
+
+      if (err) {
+        return callback(err);
+      }
+      callback(null, res.results);
+    }.bind(this)
+  });
+};
+
+
 // --------- private utils
 
 function getHostname(connection) {
@@ -8257,7 +8311,6 @@ var Event = module.exports = function Event(connection, data) {
   this.connection = connection;
   this.trashed = false;
   this.serialId = this.connection.serialId + '>E' + this.connection._eventSerialCounter++;
-  escapeHtml(data);
   _.extend(this, data);
 };
 
@@ -10073,7 +10126,7 @@ Auth.prototype._getStatusFromURL = function () {
 
   //TODO check validity of status
 
-  return (vars.key) ? vars : false;
+  return (vars.status) ? vars : false;
 };
 
 //util to grab parameters from url query string
@@ -11383,6 +11436,7 @@ ConnectionStreams.prototype.getById = function (streamId) {
 // ------------- Raw calls to the API ----------- //
 
 /**
+ * TODO rename _getStreams
  * get streams on the API
  * @private
  * @param {ConnectionStreams~options} opts
@@ -16148,7 +16202,7 @@ module.exports={
   }
 }
 },{}],32:[function(require,module,exports){
-module.exports={
+module.exports=  {
   "version": "0.2.9",
   "types": {
     "activity/plain": {
@@ -18316,7 +18370,7 @@ urls.parseServerURL = function (url) {
  */
 function URLInfo(url, type) {
   var loc;
-  if (document) {
+  if (typeof document !== 'undefined') {
     // browser
     if (url) {
       loc = document.createElement('a');
