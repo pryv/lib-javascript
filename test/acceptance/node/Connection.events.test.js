@@ -3,8 +3,7 @@ var Pryv = require('../../../source/main'),
   should = require('should'),
   config = require('../test-support/config.js'),
   async = require('async'),
-  fs = require('fs'),
-  _ = require('lodash');
+  fs = require('fs');
 
 
 describe('Connection.events', function () {
@@ -81,7 +80,7 @@ describe('Connection.events', function () {
         function (stepDone) {
           connection.events.delete(eventDeleted, function (err) {
             stepDone(err);
-        });
+          });
         }
       ], done);
     });
@@ -121,7 +120,7 @@ describe('Connection.events', function () {
         should.not.exist(err);
         should.exist(events.eventDeletions);
         var found = false;
-        _.forEach(events.eventDeletions, function (deletedEvent) {
+        events.eventDeletions.forEach(function (deletedEvent) {
           if (deletedEvent.id === deletedEventId) {
             found = true;
           }

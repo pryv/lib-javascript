@@ -11,19 +11,36 @@ describe('Connection.streams', function () {
 
   var connection = new Pryv.Connection(config.connectionSettings);
 
-  describe('get()', function () {
+  describe('get()', function (done) {
     // TODO: maybe verify tree structure
+
+    var testTimeStart;
 
     before(function () {
       var streamData = {
-        name: 'Diary',
-        id: config.testDiaryStreamId,
-        parentId: null
-      };
-      var stream = new Pryv.Stream(connection, streamData);
-      connection.streams.create(stream, function (err) {
-        if (err) { return console.error(err); }
-      });
+          name: 'Diary',
+          id: config.testDiaryStreamId,
+          parentId: null
+        },
+        streamDelete = {
+          name: 'Deleted',
+          id: config.testDeletedStreamId,
+          parentId: null
+        };
+      async.series([
+        function (stepDone) {
+          var stream = new Pryv.Stream(connection, streamData);
+          connection.streams.create(stream, stepDone);
+        },
+        function (stepDone) {
+          var stream = new Pryv.Stream(connection, streamDelete);
+          connection.streams.create(stream, stepDone);
+        },
+        function (stepDone) {
+          testTimeStart = new Date().getTime() / 1000;
+          connection.streams.delete(config.testDeletedStreamId, stepDone);
+        }
+      ], done);
     });
 
     after (function () {
@@ -49,13 +66,12 @@ describe('Connection.streams', function () {
             }
           });
         })(streams);
-
         done();
       });
     });
 
     it('must return streams matching the given filter', function (done) {
-      var filter = {parentId: config.testDiaryStreamId, state: 'all'};
+      var filter = {parentId: config.testDiaryStreamId};
       connection.streams.get(filter, function (error, streams) {
         should.exist(streams);
         streams.forEach(function (stream) {
@@ -74,9 +90,21 @@ describe('Connection.streams', function () {
       });
     });
 
-    // TODO: create and delete an stream, then call get() with modifiedSince at the time of the
-    // stream's deletion.
-    it('must return deleted streams when the flag includeDeletions is set');
+    it('must return deleted streams when the field state is set to \'all\'', function (done) {
+      var filter = {state: 'all'};
+      connection.streams.get(filter, function (err, streams) {
+        should.not.exists(err);
+        should.exists(streams);
+        var found = false;
+        streams.forEach(function (stream) {
+          if (stream.id === config.testDeletedStreamId) {
+            found = true;
+          }
+        });
+        found.should.equal(true);
+        done();
+      });
+    });
 
     it('must return an error if the given filter contains invalid parameters', function (done) {
       var filter = {parentId: 42, state: 'toto'};

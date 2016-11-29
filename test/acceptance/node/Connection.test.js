@@ -1,8 +1,7 @@
 /* global describe, it */
 var Pryv = require('../../../source/main'),
   should = require('should'),
-  config = require('../test-support/config.js'),
-  _ = require('lodash');
+  config = require('../test-support/config.js');
 
 describe('Connection', function () {
   this.timeout(10000);
@@ -89,7 +88,13 @@ describe('Connection', function () {
     });
 
     it('must return an error when the credentials are invalid', function (done) {
-      var errorParams = _.clone(config.loginParams);
+      var errorParams = {
+        username: config.loginParams.username,
+        password: config.loginParams.password,
+        appId: config.loginParams.appId,
+        domain: config.loginParams.domain,
+        origin: config.loginParams.origin
+      };
       errorParams.password = 'falsePassword';
       Pryv.Connection.login(errorParams, function (err) {
         should.exist(err);
