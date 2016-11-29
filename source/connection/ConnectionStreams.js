@@ -43,6 +43,8 @@ ConnectionStreams.prototype.get = function (options, callback) {
     var resultTree = [];
     if (options && _.has(options, 'parentId')) {
       resultTree = this.connection.datastore.getStreamById(options.parentId).children;
+    } else if (options && _.has(options, 'state')) {
+      resultTree = this.connection.datastore.getStreams(options.state);
     } else {
       resultTree = this.connection.datastore.getStreams();
     }
