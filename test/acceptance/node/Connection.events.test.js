@@ -4,7 +4,7 @@ var Pryv = require('../../../source/main'),
   config = require('../test-support/config.js'),
   async = require('async'),
   fs = require('fs'),
-  _ = require('lodash');
+  _ = require('underscore');
 
 
 describe('Connection.events', function () {

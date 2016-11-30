@@ -2,7 +2,7 @@
 var Pryv = require('../../../source/main'),
   should = require('should'),
   config = require('../test-support/config.js'),
-  _ = require('lodash');
+  _ = require('underscore');
 
 describe('Connection', function () {
   this.timeout(10000);
