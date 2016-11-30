@@ -29,12 +29,10 @@ describe('Connection.streams', function () {
         };
       async.series([
         function (stepDone) {
-          var stream = new Pryv.Stream(connection, streamData);
-          connection.streams.create(stream, stepDone);
+          connection.streams.create(new Pryv.Stream(connection, streamData), stepDone);
         },
         function (stepDone) {
-          var stream = new Pryv.Stream(connection, streamDelete);
-          connection.streams.create(stream, stepDone);
+          connection.streams.create(new Pryv.Stream(connection, streamDelete), stepDone);
         },
         function (stepDone) {
           testTimeStart = new Date().getTime() / 1000;
