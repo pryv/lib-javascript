@@ -1,8 +1,8 @@
 /* global describe, it */
 var Pryv = require('../../../source/main'),
   should = require('should'),
-  config = require('../test-support/config.js'),
-  _ = require('lodash');
+  _ = require('underscore'),
+  config = require('../test-support/config.js');
 
 describe('Connection', function () {
   this.timeout(10000);

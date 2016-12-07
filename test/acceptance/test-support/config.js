@@ -14,5 +14,6 @@ module.exports.loginParams = {
 };
 
 module.exports.testDiaryStreamId = 'diary';
+module.exports.testDeletedStreamId = 'deleted';
 module.exports.testActivityStreamId = 'activity';
 module.exports.testNoChildStreamId = 'nochildstream';
