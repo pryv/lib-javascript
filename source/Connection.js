@@ -69,7 +69,8 @@ function Connection() {
     // nowLocalTime - nowServerTime
     deltaTime: null,
     apiVersion: null,
-    lastSeenLT: null
+    lastSeenLT: null,
+    lastSeenST: null,
   };
 
   this._accessInfo = null;
@@ -330,9 +331,17 @@ Connection.prototype.request = function (params) {
     if (_.has(responseInfo.headers, CC.Api.Headers.ServerTime)) {
       this.serverInfos.deltaTime = (this.serverInfos.lastSeenLT / 1000) -
       responseInfo.headers[CC.Api.Headers.ServerTime];
+      this.serverInfos.lastSeenST = CC.Api.Headers.ServerTime;
     }
 
-    params.callback(null, data, responseInfo);
+
+    var extraInfos = {};
+    if (data && data.meta) {
+      extraInfos.meta = data.meta;
+    }
+
+
+    params.callback(null, data, extraInfos);
   }
 
   function onError(error, responseInfo) {

@@ -212,14 +212,20 @@ Monitor.prototype._initEvents = function (batch) {
 
 
   this.connection.events.get(filterWith,
-    function (error, events) {
+    function (error, events, extraInfos) {
+
       if (error) {
         this._fireEvent(Messages.ON_ERROR, error, batch);
         batch.done('Monitor:initEvents error');
         return;
       }
 
-      if (! this.initWithPrefetch) { this.lastSynchedST = this.connection.getServerTime(); }
+
+      if (! this.initWithPrefetch) {
+        if (extraInfos && extraInfos.meta && extraInfos.meta.serverTime) {
+          this.lastSynchedST = extraInfos.meta.serverTime;
+        }
+      }
 
       var result = [];
 
@@ -274,12 +280,15 @@ Monitor.prototype._connectionEventsGetChanges = function (batch) {
     filterWith = REALLY_ALL_EVENTS;
     filterWith = _.extend(filterWith, options);
   }
-  this.lastSynchedST = this.connection.getServerTime();
+  //this.lastSynchedST = this.connection.getServerTime();
 
   var result = { created : [], trashed : [], modified: []};
 
   this.connection.events.get(filterWith,
-    function (error, events) {
+    function (error, events, extraInfos) {
+      if (extraInfos && extraInfos.meta && extraInfos.meta.serverTime) {
+        this.lastSynchedST = extraInfos.meta.serverTime;
+      }
       if (error) {
         this._fireEvent(Messages.ON_ERROR, error, batch);
         batch.done('connectionEventsGetChanges error');
@@ -405,7 +414,7 @@ Monitor.prototype._connectionStreamsGetChanges = function (batch) {
  * @private
  */
 Monitor.prototype._connectionEventsGetAllAndCompare = function (signal, extracontent, batch) {
-  this.lastSynchedST = this.connection.getServerTime();
+  //this.lastSynchedST = this.connection.getServerTime();
 
 
   if (this.useCacheForEventsGetAllAndCompare) {
@@ -457,7 +466,10 @@ Monitor.prototype._connectionEventsGetAllAndCompare = function (signal, extracon
 
     batch = this.startBatch('connectionEventsGetAllAndCompare:online', batch);
     this.connection.events.get(this.filter.getData(true, EXTRA_ALL_EVENTS),
-      function (error, events) {
+      function (error, events, extraInfos) {
+        if (extraInfos && extraInfos.meta && extraInfos.meta.serverTime) {
+          this.lastSynchedST = extraInfos.meta.serverTime;
+        }
         if (error) {
           this._fireEvent(Messages.ON_ERROR, error, batch);
           batch.done('connectionEventsGetAllAndCompare:online error');

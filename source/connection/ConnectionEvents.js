@@ -46,7 +46,7 @@ ConnectionEvents.prototype.get = function (filter, doneCallback, partialResultCa
   //TODO handle caching
   var result = [];
   filter = filter || {};
-  this._get(filter, function (error, res) {
+  this._get(filter, function (error, res, extraInfos) {
     if (error) {
       result = null;
     } else {
@@ -67,7 +67,8 @@ ConnectionEvents.prototype.get = function (filter, doneCallback, partialResultCa
         result.eventDeletions = res.eventDeletions;
       }
     }
-    doneCallback(error, result);
+
+    doneCallback(error, result, extraInfos);
 
     if (partialResultCallback) { partialResultCallback(result); }
   }.bind(this));
@@ -481,7 +482,7 @@ ConnectionEvents.prototype._get = function (filter, callback) {
   var tParams = filter;
   if (filter instanceof Filter) { tParams = filter.getData(true); }
   if (_.has(tParams, 'streams') && tParams.streams.length === 0) { // dead end filter..
-    return callback(null, []);
+    return callback(null, [], {});
   }
   this.connection.request({
     method: 'GET',
