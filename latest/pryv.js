@@ -7636,7 +7636,8 @@ function Connection() {
     // nowLocalTime - nowServerTime
     deltaTime: null,
     apiVersion: null,
-    lastSeenLT: null
+    lastSeenLT: null,
+    lastSeenST: null,
   };
 
   this._accessInfo = null;
@@ -7897,9 +7898,17 @@ Connection.prototype.request = function (params) {
     if (_.has(responseInfo.headers, CC.Api.Headers.ServerTime)) {
       this.serverInfos.deltaTime = (this.serverInfos.lastSeenLT / 1000) -
       responseInfo.headers[CC.Api.Headers.ServerTime];
+      this.serverInfos.lastSeenST = CC.Api.Headers.ServerTime;
     }
 
-    params.callback(null, data, responseInfo);
+
+    var extraInfos = {};
+    if (data && data.meta) {
+      extraInfos.meta = data.meta;
+    }
+
+
+    params.callback(null, data, extraInfos);
   }
 
   function onError(error, responseInfo) {
@@ -9023,14 +9032,20 @@ Monitor.prototype._initEvents = function (batch) {
 
 
   this.connection.events.get(filterWith,
-    function (error, events) {
+    function (error, events, extraInfos) {
+
       if (error) {
         this._fireEvent(Messages.ON_ERROR, error, batch);
         batch.done('Monitor:initEvents error');
         return;
       }
 
-      if (! this.initWithPrefetch) { this.lastSynchedST = this.connection.getServerTime(); }
+
+      if (! this.initWithPrefetch) {
+        if (extraInfos && extraInfos.meta && extraInfos.meta.serverTime) {
+          this.lastSynchedST = extraInfos.meta.serverTime;
+        }
+      }
 
       var result = [];
 
@@ -9085,12 +9100,15 @@ Monitor.prototype._connectionEventsGetChanges = function (batch) {
     filterWith = REALLY_ALL_EVENTS;
     filterWith = _.extend(filterWith, options);
   }
-  this.lastSynchedST = this.connection.getServerTime();
+  //this.lastSynchedST = this.connection.getServerTime();
 
   var result = { created : [], trashed : [], modified: []};
 
   this.connection.events.get(filterWith,
-    function (error, events) {
+    function (error, events, extraInfos) {
+      if (extraInfos && extraInfos.meta && extraInfos.meta.serverTime) {
+        this.lastSynchedST = extraInfos.meta.serverTime;
+      }
       if (error) {
         this._fireEvent(Messages.ON_ERROR, error, batch);
         batch.done('connectionEventsGetChanges error');
@@ -9216,7 +9234,7 @@ Monitor.prototype._connectionStreamsGetChanges = function (batch) {
  * @private
  */
 Monitor.prototype._connectionEventsGetAllAndCompare = function (signal, extracontent, batch) {
-  this.lastSynchedST = this.connection.getServerTime();
+  //this.lastSynchedST = this.connection.getServerTime();
 
 
   if (this.useCacheForEventsGetAllAndCompare) {
@@ -9268,7 +9286,10 @@ Monitor.prototype._connectionEventsGetAllAndCompare = function (signal, extracon
 
     batch = this.startBatch('connectionEventsGetAllAndCompare:online', batch);
     this.connection.events.get(this.filter.getData(true, EXTRA_ALL_EVENTS),
-      function (error, events) {
+      function (error, events, extraInfos) {
+        if (extraInfos && extraInfos.meta && extraInfos.meta.serverTime) {
+          this.lastSynchedST = extraInfos.meta.serverTime;
+        }
         if (error) {
           this._fireEvent(Messages.ON_ERROR, error, batch);
           batch.done('connectionEventsGetAllAndCompare:online error');
@@ -10452,7 +10473,7 @@ ConnectionEvents.prototype.get = function (filter, doneCallback, partialResultCa
   //TODO handle caching
   var result = [];
   filter = filter || {};
-  this._get(filter, function (error, res) {
+  this._get(filter, function (error, res, extraInfos) {
     if (error) {
       result = null;
     } else {
@@ -10473,7 +10494,8 @@ ConnectionEvents.prototype.get = function (filter, doneCallback, partialResultCa
         result.eventDeletions = res.eventDeletions;
       }
     }
-    doneCallback(error, result);
+
+    doneCallback(error, result, extraInfos);
 
     if (partialResultCallback) { partialResultCallback(result); }
   }.bind(this));
@@ -10887,7 +10909,7 @@ ConnectionEvents.prototype._get = function (filter, callback) {
   var tParams = filter;
   if (filter instanceof Filter) { tParams = filter.getData(true); }
   if (_.has(tParams, 'streams') && tParams.streams.length === 0) { // dead end filter..
-    return callback(null, []);
+    return callback(null, [], {});
   }
   this.connection.request({
     method: 'GET',
@@ -11068,7 +11090,7 @@ module.exports = ConnectionMonitors;
 
 },{"../Monitor":17,"../utility/utility":41,"underscore":12}],28:[function(require,module,exports){
 var apiPathPrivateProfile = '/profile/private';
-var apiPathPublicProfile = '/profile/app';
+var apiPathPublicProfile = '/profile/public';
 var CC = require('./ConnectionConstants.js');
 
 /**
@@ -11280,6 +11302,8 @@ ConnectionStreams.prototype.get = function (options, callback) {
     var resultTree = [];
     if (options && _.has(options, 'parentId')) {
       resultTree = this.connection.datastore.getStreamById(options.parentId).children;
+    } else if (options && _.has(options, 'state')) {
+      resultTree = this.connection.datastore.getStreams(options.state);
     } else {
       resultTree = this.connection.datastore.getStreams();
     }
