@@ -17,7 +17,7 @@ _.extend(Auth.prototype, {
   connection: null, // actual connection managed by Auth
   config: {
     // TODO: clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
-    registerURL: {ssl: true, host: 'reg.pryv.io'},
+    registerURL: {ssl: true, host: 'reg.pryv.me'},
     sdkFullPath: 'https://api.pryv.com/lib-javascript/latest'
   },
   state: null,  // actual state

@@ -6,7 +6,7 @@ var urls = module.exports = {};
  * The one and only reference for Pryv domain names.
  * TODO: client and server will merge
  */
-urls.defaultDomain = 'pryv.io';
+urls.defaultDomain = 'pryv.me';
 
 
 /* jshint -W101 */

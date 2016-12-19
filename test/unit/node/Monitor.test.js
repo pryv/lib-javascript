@@ -20,12 +20,12 @@ var testMonitor = function (preFetchStructure) {
 
     if (preFetchStructure) {
       before(function (done) {
-        nock('https://' + username + '.pryv.in')
+        nock('https://' + username + '.pryv.li')
           .get('/access-info')
           .reply(200, responses.accessInfo, responses.headersStandard);
 
 
-        nock('https://' + username + '.pryv.in')
+        nock('https://' + username + '.pryv.li')
           .get('/streams?state=all')
           .reply(200, responses.streams, responses.headersStandard);
 
@@ -46,12 +46,12 @@ var testMonitor = function (preFetchStructure) {
 
     describe('_onIoStreamsChanged', function () {
       before(function (done) {
-        nock('https://' + username + '.pryv.in')
+        nock('https://' + username + '.pryv.li')
           .get('/access-info')
           .reply(200, responses.accessInfo, responses.headersStandard);
 
 
-        nock('https://' + username + '.pryv.in')
+        nock('https://' + username + '.pryv.li')
           .get('/streams?state=all')
           .reply(200, responses.streams, responses.headersStandard);
 
@@ -79,7 +79,7 @@ var testMonitor = function (preFetchStructure) {
           '{"name":"Victoria","parentId":"PVxE_JMMzM","id":"victoria","children":[]}');
         newStructure.streams[0].children.push(newStream);
 
-        nock('https://' + username + '.pryv.in')
+        nock('https://' + username + '.pryv.li')
           .get('/streams?state=all')
           .reply(200, newStructure, responses.headersStandard);
         //console.log('MONITOR', connection.datastore.getStreams()[0].children[0].clientData);

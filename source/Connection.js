@@ -26,7 +26,7 @@ var utility = require('./utility/utility.js'),
  * @param {string} settings.username
  * @param {string} settings.auth - the authorization token for this username
  * @param {number} [settings.port = 443]
- * @param {string} [settings.domain = 'pryv.io'] change the domain.
+ * @param {string} [settings.domain = 'pryv.me'] change the domain.
  * @param {boolean} [settings.ssl = true] Use ssl (https) or no
  * @param {string} [settings.extraPath = ''] append to the connections. Must start with a '/'
  */
