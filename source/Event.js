@@ -88,7 +88,7 @@ Event.prototype.getPicturePreview = function (width, height) {
   width = width ? '&w=' + width : '';
   height = height ? '&h=' + height : '';
   var url = this.connection.settings.ssl ? 'https://' : 'http://';
-  url += this.connection.username + '.' + this.connection.settings.domain + ':3443/events/' +
+  url += this.connection.username + '.' + this.connection.settings.domain + '/previews/events/' +
     this.id + '?auth=' + this.connection.auth + width + height;
   return url;
 };

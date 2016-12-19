@@ -1,6 +1,6 @@
 {
   "name": "pryv",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Javascript library (browser & Node.js) to access and manipulate Pryv users data",
   "keywords": [
     "pryv",
