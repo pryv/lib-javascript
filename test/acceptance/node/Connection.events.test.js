@@ -44,7 +44,7 @@ describe('Connection.events', function () {
     var deletedEventId, testStartTime, eventCreated;
 
     before(function (done) {
-      testStartTime = new Date().getTime() / 1000;
+      testStartTime = connection.getServerTime(new Date().getTime() / 1000);
 
       var eventDeleted = {
         content: 'I am a deleted test event from js lib, please kill me',
@@ -67,9 +67,12 @@ describe('Connection.events', function () {
       async.series([
         function (stepDone) {
           connection.events.create(eventDeleted, function (err, event) {
+            if(err) {
+              return stepDone(err);
+            }
             eventDeleted = event;
             deletedEventId = event.id;
-            return stepDone(err);
+            stepDone();
           });
         },
         function (stepDone) {
