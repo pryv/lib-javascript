@@ -278,12 +278,11 @@ Auth.prototype.retry = Auth.prototype.logout;
  */
 Auth.prototype.login = function (settings) {
   // cookies
-  this.cookieEnabled = (navigator.cookieEnabled) ? true : false;
+  this.cookieEnabled = navigator.cookieEnabled;
   if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
     document.cookie = 'testcookie';
-    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1) ? true : false;
+    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
   }
-
 
   var defaultDomain = utility.urls.defaultDomain;
   this.settings = settings = _.defaults(settings, {
