@@ -142,27 +142,27 @@ Auth.prototype.uiRefusedButton = function (message) {
 
 Auth.prototype.updateButton = function (html) {
   this.buttonHTML = html;
-  if (! this.settings.spanButtonID) { return; }
-
-  utility.domReady(function () {
-    if (! this.spanButton) {
-      var element = document.getElementById(this.settings.spanButtonID);
-      if (typeof(element) === 'undefined' || element === null) {
-        throw new Error('access-SDK cannot find span ID: "' +
-          this.settings.spanButtonID + '"');
-      } else {
-        this.spanButton = element;
+  if (this.settings.spanButtonID) {
+    utility.domReady(function () {
+      if (!this.spanButton) {
+        var element = document.getElementById(this.settings.spanButtonID);
+        if (typeof(element) === 'undefined' || element === null) {
+          throw new Error('access-SDK cannot find span ID: "' +
+            this.settings.spanButtonID + '"');
+        } else {
+          this.spanButton = element;
+        }
       }
-    }
-    this.spanButton.innerHTML = this.buttonHTML;
-    this.spanButton.onclick = function (e) {
-      e.preventDefault();
-      var element = document.getElementById('pryv-access-btn');
-      console.log('onClick', this.spanButton,
-        element.getAttribute('data-onclick-action'));
-      this.onClick[element.getAttribute('data-onclick-action')]();
-    }.bind(this);
-  }.bind(this));
+      this.spanButton.innerHTML = this.buttonHTML;
+      this.spanButton.onclick = function (e) {
+        e.preventDefault();
+        var element = document.getElementById('pryv-access-btn');
+        console.log('onClick', this.spanButton,
+          element.getAttribute('data-onclick-action'));
+        this.onClick[element.getAttribute('data-onclick-action')]();
+      }.bind(this);
+    }.bind(this));
+  }
 };
 
 Auth.prototype.internalError = function (message, jsonData) {
