@@ -37,25 +37,15 @@ _.extend(Auth.prototype, {
  * @method _init
  * @access private
  */
-Auth._init = function (i) {
-  // start only if utility is loaded
-  if (typeof utility === 'undefined') {
-    if (i > 100) {
-      throw new Error('Cannot find utility');
-    }
-    i++;
-    return setTimeout('Auth._init(' + i + ')', 10 * i);
-  }
-
+Auth._init = function () {
   utility.loadExternalFiles(
     Auth.prototype.config.sdkFullPath + '/assets/buttonSigninPryv.css', 'css');
-
 
   console.log('init done');
 };
 
 
-Auth._init(1);
+Auth._init();
 
 //--------------------- UI Content -----------//
 
