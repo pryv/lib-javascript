@@ -436,15 +436,11 @@ Auth.prototype.loginWithCookie = function (settings) {
     if (typeof(this.settings.callbacks.signedIn) === 'function') {
       this.settings.callbacks.signedIn(this.connection);
     }
-    
+
     return this.connection;
   }
   return false;
 };
-
-
-
-
 
 /**
  *
@@ -457,12 +453,11 @@ Auth.prototype.setup = function (settings) {
 
   //--- check the browser capabilities
 
-
   // cookies
-  this.cookieEnabled = (navigator.cookieEnabled) ? true : false;
+  this.cookieEnabled = (navigator.cookieEnabled);
   if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
     document.cookie = 'testcookie';
-    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1) ? true : false;
+    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
   }
 
   //TODO check settings..
