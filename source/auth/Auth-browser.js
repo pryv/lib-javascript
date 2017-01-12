@@ -416,23 +416,27 @@ Auth.prototype.loginWithCookie = function (settings) {
     domain: settings.domain
   });
 
-  this.cookieEnabled = (navigator.cookieEnabled) ? true : false;
+  this.cookieEnabled = (navigator.cookieEnabled);
   if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
     document.cookie = 'testcookie';
-    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1) ? true : false;
+    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
   }
   var cookieUserName = this.cookieEnabled ?
     utility.docCookies.getItem('access_username' + this.settings.domain) : false;
   var cookieToken = this.cookieEnabled ?
     utility.docCookies.getItem('access_token' + this.settings.domain) : false;
+
   console.log('get cookie', cookieUserName, this.settings.domain, cookieToken);
+
   if (cookieUserName && cookieToken) {
     this.connection.username = cookieUserName;
     this.connection.domain = this.settings.domain;
     this.connection.auth = cookieToken;
+
     if (typeof(this.settings.callbacks.signedIn) === 'function') {
       this.settings.callbacks.signedIn(this.connection);
     }
+    
     return this.connection;
   }
   return false;
