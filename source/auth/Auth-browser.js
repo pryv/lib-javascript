@@ -322,10 +322,8 @@ Auth.prototype.login = function (settings) {
         if (typeof(this.settings.callbacks.signedIn)  === 'function') {
           this.settings.callbacks.signedIn(this.connection);
         }
-      } else {
-        if (typeof(this.settings.callbacks.error) === 'function') {
-          this.settings.callbacks.error(data);
-        }
+      } else if (typeof(this.settings.callbacks.error) === 'function') {
+        this.settings.callbacks.error(data);
       }
     }.bind(this),
     error: function (jsonError) {
