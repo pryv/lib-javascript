@@ -607,14 +607,15 @@ Auth.prototype.poll = function poll() {
 //messaging between browser window and window.opener
 Auth.prototype.popupCallBack = function (event) {
   // Do not use 'this' here !
-  if (this.settings.forcePolling) { return; }
-  if (event.source !== this.window) {
-    console.log('popupCallBack event.source does not match Auth.window');
-    return false;
+  if (!this.settings.forcePolling) {
+    if (event.source !== this.window) {
+      console.log('popupCallBack event.source does not match Auth.window');
+      return false;
+    }
+    console.log('from popup >>> ' + JSON.stringify(event.data));
+    this.pollingIsOn = false; // if we can receive messages we stop polling
+    this.stateChanged(event.data);
   }
-  console.log('from popup >>> ' + JSON.stringify(event.data));
-  this.pollingIsOn = false; // if we can receive messages we stop polling
-  this.stateChanged(event.data);
 };
 
 
