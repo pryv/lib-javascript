@@ -664,13 +664,12 @@ Auth.prototype.popupLogin = function popupLogin() {
   }
 };
 
-
-
+var statusRegexp = /[?#&]+prYv([^=&]+)=([^&]*)/gi;
 
 //util to grab parameters from url query string
 Auth.prototype._getStatusFromURL = function () {
   var vars = {};
-  window.location.href.replace(/[?#&]+prYv([^=&]+)=([^&]*)/gi,
+  window.location.href.replace(statusRegexp,
     function (m, key, value) {
       vars[key] = value;
     });
@@ -682,7 +681,7 @@ Auth.prototype._getStatusFromURL = function () {
 
 //util to grab parameters from url query string
 Auth.prototype._cleanStatusFromURL = function () {
-  return window.location.href.replace(/[?#&]+prYv([^=&]+)=([^&]*)/gi, '');
+  return window.location.href.replace(statusRegexp, '');
 };
 
 //-------------------- UTILS ---------------------//
