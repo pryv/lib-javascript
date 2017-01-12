@@ -504,7 +504,7 @@ Auth.prototype.setup = function (settings) {
         var myParams = settings.returnURL.substring(4);
         // eventually clean-up current url from previous pryv returnURL
         settings.returnURL = this._cleanStatusFromURL() + myParams;
-    } else {
+    } else if(settings.returnURL.indexOf('auto') === 0 && !utility.browserIsMobileOrTablet()) {
       settings.returnURL = false;
     }
 
