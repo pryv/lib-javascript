@@ -277,12 +277,7 @@ Auth.prototype.retry = Auth.prototype.logout;
  * @param settings
  */
 Auth.prototype.login = function (settings) {
-  // cookies
-  this.cookieEnabled = navigator.cookieEnabled;
-  if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
-    document.cookie = 'testcookie';
-    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
-  }
+  this._checkCookies();
 
   var defaultDomain = utility.urls.defaultDomain;
   this.settings = settings = _.defaults(settings, {
@@ -416,11 +411,8 @@ Auth.prototype.loginWithCookie = function (settings) {
     domain: settings.domain
   });
 
-  this.cookieEnabled = (navigator.cookieEnabled);
-  if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
-    document.cookie = 'testcookie';
-    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
-  }
+  this._checkCookies();
+
   var cookieUserName = this.cookieEnabled ?
     utility.docCookies.getItem('access_username' + this.settings.domain) : false;
   var cookieToken = this.cookieEnabled ?
@@ -453,12 +445,7 @@ Auth.prototype.setup = function (settings) {
 
   //--- check the browser capabilities
 
-  // cookies
-  this.cookieEnabled = (navigator.cookieEnabled);
-  if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
-    document.cookie = 'testcookie';
-    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
-  }
+  this._checkCookies();
 
   //TODO check settings..
 
@@ -659,6 +646,14 @@ Auth.prototype._getStatusFromURL = function () {
 //util to grab parameters from url query string
 Auth.prototype._cleanStatusFromURL = function () {
   return window.location.href.replace(statusRegexp, '');
+};
+
+Auth.prototype._checkCookies = function () {
+  this.cookieEnabled = (navigator.cookieEnabled);
+  if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
+    document.cookie = 'testcookie';
+    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
+  }
 };
 
 //-------------------- UTILS ---------------------//
