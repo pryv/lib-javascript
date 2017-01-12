@@ -172,7 +172,6 @@ Auth.prototype.internalError = function (message, jsonData) {
 //STATE HUB
 Auth.prototype.stateChanged  = function (data) {
 
-
   if (data.id) { // error
     if (this.settings.callbacks.error) {
       this.settings.callbacks.error(data.id, data.message);
@@ -182,28 +181,17 @@ Auth.prototype.stateChanged  = function (data) {
     // this.logout();   Why should I retry if it failed already once?
   }
 
-  if (data.status === this.state.status) {
-    return;
+  // Skip if data.status === this.state.status || data.status === 'LOADED' || data.status === 'POPUPINIT'
+  switch(data.status) {
+    case 'NEED_SIGNIN':
+      this.stateNeedSignin();
+      break;
+    case 'REFUSED':
+      this.stateRefused();
+      break;
+    case 'REFUSED':
+      this.stateAccepted();
   }
-  if (data.status === 'LOADED') { // skip
-    return;
-  }
-  if (data.status === 'POPUPINIT') { // skip
-    return;
-  }
-
-  this.state = data;
-  if (this.state.status === 'NEED_SIGNIN') {
-    this.stateNeedSignin();
-  }
-  if (this.state.status === 'REFUSED') {
-    this.stateRefused();
-  }
-
-  if (this.state.status === 'ACCEPTED') {
-    this.stateAccepted();
-  }
-
 };
 
 //STATE 0 Init
