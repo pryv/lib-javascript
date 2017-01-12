@@ -345,8 +345,7 @@ Auth.prototype.trustedLogout = function () {
       callback: function (error) {
         if (error && typeof(this.settings.callbacks.error) === 'function') {
           return this.settings.callbacks.error(error);
-        }
-        if (!error && typeof(this.settings.callbacks.signedOut) === 'function') {
+        } else if (!error && typeof(this.settings.callbacks.signedOut) === 'function') {
           return this.settings.callbacks.signedOut(this.connection);
         }
       }.bind(this)
@@ -383,21 +382,15 @@ Auth.prototype.whoAmI = function (settings) {
         console.log('before access info', this.connection);
         conn.accessInfo(function (error) {
           console.log('after access info', this.connection);
-          if (!error) {
-            if (typeof(this.settings.callbacks.signedIn)  === 'function') {
-              this.settings.callbacks.signedIn(this.connection);
-            }
-          } else {
-            if (typeof(this.settings.callbacks.error) === 'function') {
-              this.settings.callbacks.error(error);
-            }
+          if(error && (typeof(this.settings.callbacks.error) === 'function')) {
+            this.settings.callbacks.error(error);
+          } else if(!error && typeof(this.settings.callbacks.signedIn)  === 'function') {
+            this.settings.callbacks.signedIn(this.connection);
           }
         }.bind(this));
 
-      } else {
-        if (typeof(this.settings.callbacks.error) === 'function') {
-          this.settings.callbacks.error(data);
-        }
+      } else if (typeof(this.settings.callbacks.error) === 'function') {
+        this.settings.callbacks.error(data);
       }
     }.bind(this),
     error : function (jsonError) {
