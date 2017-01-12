@@ -499,23 +499,18 @@ Auth.prototype.setup = function (settings) {
     }
 
     // set self as return url?
-    var returnself = (settings.returnURL.indexOf('self') === 0);
-    if (settings.returnURL.indexOf('auto') === 0) {
-      returnself = utility.browserIsMobileOrTablet();
-      if (!returnself) { settings.returnURL = false; }
+    if((settings.returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet())
+    || (settings.returnURL.indexOf('self') === 0)) {
+        var myParams = settings.returnURL.substring(4);
+        // eventually clean-up current url from previous pryv returnURL
+        settings.returnURL = this._cleanStatusFromURL() + myParams;
+    } else {
+      settings.returnURL = false;
     }
 
-    if (returnself) {
-      var myParams = settings.returnURL.substring(4);
-      // eventually clean-up current url from previous pryv returnURL
-      settings.returnURL = this._cleanStatusFromURL() + myParams;
-    }
-
-    if (settings.returnURL) {
-      if (settings.returnURL.indexOf('http') < 0) {
+    if (settings.returnURL && settings.returnURL.indexOf('http') < 0) {
         throw new Error('Pryv access: --returnURL setting-- does not start with http: ' +
           settings.returnURL);
-      }
     }
   }
 
