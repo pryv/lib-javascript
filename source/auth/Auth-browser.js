@@ -621,51 +621,47 @@ Auth.prototype.popupCallBack = function (event) {
 
 
 Auth.prototype.popupLogin = function popupLogin() {
-  if ((! this.state) || (! this.state.url)) {
+  if (!this.state || !this.state.url) {
     throw new Error('Pryv Sign-In Error: NO SETUP. Please call Auth.setup() first.');
   }
 
   if (this.settings.returnURL) {
     location.href = this.state.url;
-    return;
-  }
+  } else {
+    // start polling
+    setTimeout(this.poll(), 1000);
 
-  // start polling
-  setTimeout(this.poll(), 1000);
-
-  var screenX = typeof window.screenX !== 'undefined' ? window.screenX : window.screenLeft,
-    screenY = typeof window.screenY !== 'undefined' ? window.screenY : window.screenTop,
-    outerWidth = typeof window.outerWidth !== 'undefined' ?
-      window.outerWidth : document.body.clientWidth,
-    outerHeight = typeof window.outerHeight !== 'undefined' ?
-      window.outerHeight : (document.body.clientHeight - 22),
-    width    = 270,
-    height   = 420,
-    left     = parseInt(screenX + ((outerWidth - width) / 2), 10),
-    top      = parseInt(screenY + ((outerHeight - height) / 2.5), 10),
-    features = (
-      'width=' + width +
+    var screenX = typeof window.screenX !== 'undefined' ? window.screenX : window.screenLeft,
+      screenY = typeof window.screenY !== 'undefined' ? window.screenY : window.screenTop,
+      outerWidth = typeof window.outerWidth !== 'undefined' ?
+        window.outerWidth : document.body.clientWidth,
+      outerHeight = typeof window.outerHeight !== 'undefined' ?
+        window.outerHeight : (document.body.clientHeight - 22),
+      width    = 270,
+      height   = 420,
+      left     = parseInt(screenX + ((outerWidth - width) / 2), 10),
+      top      = parseInt(screenY + ((outerHeight - height) / 2.5), 10),
+      features = (
+        'width=' + width +
         ',height=' + height +
         ',left=' + left +
         ',top=' + top +
         ',scrollbars=yes'
       );
 
+    window.addEventListener('message', this.popupCallBack.bind(this), false);
 
-  window.addEventListener('message', this.popupCallBack.bind(this), false);
+    this.window = window.open(this.state.url, 'prYv Sign-in', features);
 
-  this.window = window.open(this.state.url, 'prYv Sign-in', features);
-
-  if (! this.window) {
-    // TODO try to fall back on access
-    console.log('FAILED_TO_OPEN_WINDOW');
-  } else {
-    if (window.focus) {
+    if (!this.window) {
+      // TODO try to fall back on access
+      console.log('FAILED_TO_OPEN_WINDOW');
+    } else if(window.focus) {
       this.window.focus();
     }
-  }
 
-  return false;
+    return false;
+  }
 };
 
 
