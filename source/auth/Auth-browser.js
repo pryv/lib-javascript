@@ -189,7 +189,7 @@ Auth.prototype.stateChanged  = function (data) {
     case 'REFUSED':
       this.stateRefused();
       break;
-    case 'REFUSED':
+    case 'ACCEPTED':
       this.stateAccepted();
   }
 };
