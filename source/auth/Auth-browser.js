@@ -181,16 +181,18 @@ Auth.prototype.stateChanged  = function (data) {
     // this.logout();   Why should I retry if it failed already once?
   }
 
-  // Skip if data.status === this.state.status || data.status === 'LOADED' || data.status === 'POPUPINIT'
-  switch(data.status) {
-    case 'NEED_SIGNIN':
-      this.stateNeedSignin();
-      break;
-    case 'REFUSED':
-      this.stateRefused();
-      break;
-    case 'ACCEPTED':
-      this.stateAccepted();
+  if(!(data.status === this.state.status || data.status === 'LOADED' || data.status === 'POPUPINIT')) {
+    this.state = data;
+    switch(this.state.status) {
+      case 'NEED_SIGNIN':
+        this.stateNeedSignin();
+        break;
+      case 'REFUSED':
+        this.stateRefused();
+        break;
+      case 'ACCEPTED':
+        this.stateAccepted();
+    }
   }
 };
 
