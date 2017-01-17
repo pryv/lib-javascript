@@ -493,6 +493,15 @@ Auth.prototype.setup = function (settings) {
     returnURL : settings.returnURL
   };
 
+  if (settings.oauthState) {
+    params.oauthState = settings.oauthState;
+  }
+
+  if (this.config.reclaDevel) {
+    // return url will be forced to https://se.rec.la + reclaDevel
+    params.reclaDevel = this.config.reclaDevel;
+  }
+
   this.stateInitialization();
 
 
