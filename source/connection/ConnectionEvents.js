@@ -182,7 +182,10 @@ function _create(newEventlike, callback, start) {
     method: 'POST',
     path: url,
     jsonData: event.getData(),
-    callback: function (err, result/*, resultInfo*/) {
+    callback: function (err, result, resultInfo) {
+      if (!err && resultInfo.code !== 201) {
+        err = {id: CC.Errors.INVALID_RESULT_CODE};
+      }
 
       /**
        * Change will happend with offline caching...
@@ -274,7 +277,10 @@ ConnectionEvents.prototype.stopStream = function (streamLike, date, type, callba
     method: 'POST',
     path: '/events/stop',
     jsonData: data,
-    callback: function (err, result/*, resultInfo*/) {
+    callback: function (err, result, resultInfo) {
+      if (!err && resultInfo.code !== 200) {
+        err = {id: CC.Errors.INVALID_RESULT_CODE};
+      }
 
       // TODO if err === API_UNREACHABLE then cache the stop instruction for later synch
 
