@@ -44,7 +44,6 @@ describe('Connection.events', function () {
     var deletedEventId, testStartTime, eventCreated;
 
     before(function (done) {
-      testStartTime = connection.getServerTime(new Date().getTime() / 1000);
 
       var eventDeleted = {
         content: 'I am a deleted test event from js lib, please kill me',
@@ -58,6 +57,7 @@ describe('Connection.events', function () {
           content: 'Event ' + (n + 1)
         };
         connection.events.create(eventData, function (err, event) {
+          testStartTime = event.time;
           next(err, event);
         });
       }, function (err, events) {

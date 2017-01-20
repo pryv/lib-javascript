@@ -181,7 +181,9 @@ Auth.prototype.stateChanged  = function (data) {
     // this.logout();   Why should I retry if it failed already once?
   }
 
-  if(!(data.status === this.state.status || data.status === 'LOADED' || data.status === 'POPUPINIT')) {
+  if(!(data.status === this.state.status ||
+    data.status === 'LOADED' ||
+    data.status === 'POPUPINIT')) {
     this.state = data;
     switch(this.state.status) {
       case 'NEED_SIGNIN':
@@ -465,8 +467,8 @@ Auth.prototype.setup = function (settings) {
     }
 
     // set self as return url?
-    if((settings.returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet())
-    || (settings.returnURL.indexOf('self') === 0)) {
+    if((settings.returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet()) ||
+      (settings.returnURL.indexOf('self') === 0)) {
         var myParams = settings.returnURL.substring(4);
         // eventually clean-up current url from previous pryv returnURL
         settings.returnURL = this._cleanStatusFromURL() + myParams;
