@@ -335,13 +335,12 @@ Connection.prototype.request = function (params) {
     }
 
 
-    var extraInfos = {};
     if (data && data.meta) {
-      extraInfos.meta = data.meta;
+      responseInfo.meta = data.meta;
     }
 
 
-    params.callback(null, data, extraInfos);
+    params.callback(null, data, responseInfo);
   }
 
   function onError(error, responseInfo) {
