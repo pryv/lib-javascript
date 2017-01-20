@@ -37,25 +37,15 @@ _.extend(Auth.prototype, {
  * @method _init
  * @access private
  */
-Auth._init = function (i) {
-  // start only if utility is loaded
-  if (typeof utility === 'undefined') {
-    if (i > 100) {
-      throw new Error('Cannot find utility');
-    }
-    i++;
-    return setTimeout('Auth._init(' + i + ')', 10 * i);
-  }
-
+Auth._init = function () {
   utility.loadExternalFiles(
     Auth.prototype.config.sdkFullPath + '/assets/buttonSigninPryv.css', 'css');
-
 
   console.log('init done');
 };
 
 
-Auth._init(1);
+Auth._init();
 
 //--------------------- UI Content -----------//
 
@@ -152,27 +142,27 @@ Auth.prototype.uiRefusedButton = function (message) {
 
 Auth.prototype.updateButton = function (html) {
   this.buttonHTML = html;
-  if (! this.settings.spanButtonID) { return; }
-
-  utility.domReady(function () {
-    if (! this.spanButton) {
-      var element = document.getElementById(this.settings.spanButtonID);
-      if (typeof(element) === 'undefined' || element === null) {
-        throw new Error('access-SDK cannot find span ID: "' +
-          this.settings.spanButtonID + '"');
-      } else {
-        this.spanButton = element;
+  if (this.settings.spanButtonID) {
+    utility.domReady(function () {
+      if (!this.spanButton) {
+        var element = document.getElementById(this.settings.spanButtonID);
+        if (typeof(element) === 'undefined' || element === null) {
+          throw new Error('access-SDK cannot find span ID: "' +
+            this.settings.spanButtonID + '"');
+        } else {
+          this.spanButton = element;
+        }
       }
-    }
-    this.spanButton.innerHTML = this.buttonHTML;
-    this.spanButton.onclick = function (e) {
-      e.preventDefault();
-      var element = document.getElementById('pryv-access-btn');
-      console.log('onClick', this.spanButton,
-        element.getAttribute('data-onclick-action'));
-      this.onClick[element.getAttribute('data-onclick-action')]();
-    }.bind(this);
-  }.bind(this));
+      this.spanButton.innerHTML = this.buttonHTML;
+      this.spanButton.onclick = function (e) {
+        e.preventDefault();
+        var element = document.getElementById('pryv-access-btn');
+        console.log('onClick', this.spanButton,
+          element.getAttribute('data-onclick-action'));
+        this.onClick[element.getAttribute('data-onclick-action')]();
+      }.bind(this);
+    }.bind(this));
+  }
 };
 
 Auth.prototype.internalError = function (message, jsonData) {
@@ -181,7 +171,6 @@ Auth.prototype.internalError = function (message, jsonData) {
 
 //STATE HUB
 Auth.prototype.stateChanged  = function (data) {
-
 
   if (data.id) { // error
     if (this.settings.callbacks.error) {
@@ -192,28 +181,19 @@ Auth.prototype.stateChanged  = function (data) {
     // this.logout();   Why should I retry if it failed already once?
   }
 
-  if (data.status === this.state.status) {
-    return;
+  if(!(data.status === this.state.status || data.status === 'LOADED' || data.status === 'POPUPINIT')) {
+    this.state = data;
+    switch(this.state.status) {
+      case 'NEED_SIGNIN':
+        this.stateNeedSignin();
+        break;
+      case 'REFUSED':
+        this.stateRefused();
+        break;
+      case 'ACCEPTED':
+        this.stateAccepted();
+    }
   }
-  if (data.status === 'LOADED') { // skip
-    return;
-  }
-  if (data.status === 'POPUPINIT') { // skip
-    return;
-  }
-
-  this.state = data;
-  if (this.state.status === 'NEED_SIGNIN') {
-    this.stateNeedSignin();
-  }
-  if (this.state.status === 'REFUSED') {
-    this.stateRefused();
-  }
-
-  if (this.state.status === 'ACCEPTED') {
-    this.stateAccepted();
-  }
-
 };
 
 //STATE 0 Init
@@ -299,13 +279,7 @@ Auth.prototype.retry = Auth.prototype.logout;
  * @param settings
  */
 Auth.prototype.login = function (settings) {
-  // cookies
-  this.cookieEnabled = (navigator.cookieEnabled) ? true : false;
-  if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
-    document.cookie = 'testcookie';
-    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1) ? true : false;
-  }
-
+  this._checkCookies();
 
   var defaultDomain = utility.urls.defaultDomain;
   this.settings = settings = _.defaults(settings, {
@@ -345,10 +319,8 @@ Auth.prototype.login = function (settings) {
         if (typeof(this.settings.callbacks.signedIn)  === 'function') {
           this.settings.callbacks.signedIn(this.connection);
         }
-      } else {
-        if (typeof(this.settings.callbacks.error) === 'function') {
-          this.settings.callbacks.error(data);
-        }
+      } else if (typeof(this.settings.callbacks.error) === 'function') {
+        this.settings.callbacks.error(data);
       }
     }.bind(this),
     error: function (jsonError) {
@@ -370,8 +342,7 @@ Auth.prototype.trustedLogout = function () {
       callback: function (error) {
         if (error && typeof(this.settings.callbacks.error) === 'function') {
           return this.settings.callbacks.error(error);
-        }
-        if (!error && typeof(this.settings.callbacks.signedOut) === 'function') {
+        } else if (!error && typeof(this.settings.callbacks.signedOut) === 'function') {
           return this.settings.callbacks.signedOut(this.connection);
         }
       }.bind(this)
@@ -408,21 +379,15 @@ Auth.prototype.whoAmI = function (settings) {
         console.log('before access info', this.connection);
         conn.accessInfo(function (error) {
           console.log('after access info', this.connection);
-          if (!error) {
-            if (typeof(this.settings.callbacks.signedIn)  === 'function') {
-              this.settings.callbacks.signedIn(this.connection);
-            }
-          } else {
-            if (typeof(this.settings.callbacks.error) === 'function') {
-              this.settings.callbacks.error(error);
-            }
+          if(error && (typeof(this.settings.callbacks.error) === 'function')) {
+            this.settings.callbacks.error(error);
+          } else if(!error && typeof(this.settings.callbacks.signedIn)  === 'function') {
+            this.settings.callbacks.signedIn(this.connection);
           }
         }.bind(this));
 
-      } else {
-        if (typeof(this.settings.callbacks.error) === 'function') {
-          this.settings.callbacks.error(data);
-        }
+      } else if (typeof(this.settings.callbacks.error) === 'function') {
+        this.settings.callbacks.error(data);
       }
     }.bind(this),
     error : function (jsonError) {
@@ -448,31 +413,28 @@ Auth.prototype.loginWithCookie = function (settings) {
     domain: settings.domain
   });
 
-  this.cookieEnabled = (navigator.cookieEnabled) ? true : false;
-  if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
-    document.cookie = 'testcookie';
-    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1) ? true : false;
-  }
+  this._checkCookies();
+
   var cookieUserName = this.cookieEnabled ?
     utility.docCookies.getItem('access_username' + this.settings.domain) : false;
   var cookieToken = this.cookieEnabled ?
     utility.docCookies.getItem('access_token' + this.settings.domain) : false;
+
   console.log('get cookie', cookieUserName, this.settings.domain, cookieToken);
+
   if (cookieUserName && cookieToken) {
     this.connection.username = cookieUserName;
     this.connection.domain = this.settings.domain;
     this.connection.auth = cookieToken;
+
     if (typeof(this.settings.callbacks.signedIn) === 'function') {
       this.settings.callbacks.signedIn(this.connection);
     }
+
     return this.connection;
   }
   return false;
 };
-
-
-
-
 
 /**
  *
@@ -485,13 +447,7 @@ Auth.prototype.setup = function (settings) {
 
   //--- check the browser capabilities
 
-
-  // cookies
-  this.cookieEnabled = (navigator.cookieEnabled) ? true : false;
-  if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
-    document.cookie = 'testcookie';
-    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1) ? true : false;
-  }
+  this._checkCookies();
 
   //TODO check settings..
 
@@ -509,23 +465,18 @@ Auth.prototype.setup = function (settings) {
     }
 
     // set self as return url?
-    var returnself = (settings.returnURL.indexOf('self') === 0);
-    if (settings.returnURL.indexOf('auto') === 0) {
-      returnself = utility.browserIsMobileOrTablet();
-      if (!returnself) { settings.returnURL = false; }
+    if((settings.returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet())
+    || (settings.returnURL.indexOf('self') === 0)) {
+        var myParams = settings.returnURL.substring(4);
+        // eventually clean-up current url from previous pryv returnURL
+        settings.returnURL = this._cleanStatusFromURL() + myParams;
+    } else if(settings.returnURL.indexOf('auto') === 0 && !utility.browserIsMobileOrTablet()) {
+      settings.returnURL = false;
     }
 
-    if (returnself) {
-      var myParams = settings.returnURL.substring(4);
-      // eventually clean-up current url from previous pryv returnURL
-      settings.returnURL = this._cleanStatusFromURL() + myParams;
-    }
-
-    if (settings.returnURL) {
-      if (settings.returnURL.indexOf('http') < 0) {
+    if (settings.returnURL && settings.returnURL.indexOf('http') < 0) {
         throw new Error('Pryv access: --returnURL setting-- does not start with http: ' +
           settings.returnURL);
-      }
     }
   }
 
@@ -543,6 +494,15 @@ Auth.prototype.setup = function (settings) {
     languageCode : settings.languageCode,
     returnURL : settings.returnURL
   };
+
+  if (settings.oauthState) {
+    params.oauthState = settings.oauthState;
+  }
+
+  if (this.config.reclaDevel) {
+    // return url will be forced to https://se.rec.la + reclaDevel
+    params.reclaDevel = this.config.reclaDevel;
+  }
 
   this.stateInitialization();
 
@@ -622,73 +582,69 @@ Auth.prototype.poll = function poll() {
 //messaging between browser window and window.opener
 Auth.prototype.popupCallBack = function (event) {
   // Do not use 'this' here !
-  if (this.settings.forcePolling) { return; }
-  if (event.source !== this.window) {
-    console.log('popupCallBack event.source does not match Auth.window');
-    return false;
+  if (!this.settings.forcePolling) {
+    if (event.source !== this.window) {
+      console.log('popupCallBack event.source does not match Auth.window');
+      return false;
+    }
+    console.log('from popup >>> ' + JSON.stringify(event.data));
+    this.pollingIsOn = false; // if we can receive messages we stop polling
+    this.stateChanged(event.data);
   }
-  console.log('from popup >>> ' + JSON.stringify(event.data));
-  this.pollingIsOn = false; // if we can receive messages we stop polling
-  this.stateChanged(event.data);
 };
 
 
 
 Auth.prototype.popupLogin = function popupLogin() {
-  if ((! this.state) || (! this.state.url)) {
+  if (!this.state || !this.state.url) {
     throw new Error('Pryv Sign-In Error: NO SETUP. Please call Auth.setup() first.');
   }
 
   if (this.settings.returnURL) {
     location.href = this.state.url;
-    return;
-  }
+  } else {
+    // start polling
+    setTimeout(this.poll(), 1000);
 
-  // start polling
-  setTimeout(this.poll(), 1000);
-
-  var screenX = typeof window.screenX !== 'undefined' ? window.screenX : window.screenLeft,
-    screenY = typeof window.screenY !== 'undefined' ? window.screenY : window.screenTop,
-    outerWidth = typeof window.outerWidth !== 'undefined' ?
-      window.outerWidth : document.body.clientWidth,
-    outerHeight = typeof window.outerHeight !== 'undefined' ?
-      window.outerHeight : (document.body.clientHeight - 22),
-    width    = 270,
-    height   = 420,
-    left     = parseInt(screenX + ((outerWidth - width) / 2), 10),
-    top      = parseInt(screenY + ((outerHeight - height) / 2.5), 10),
-    features = (
-      'width=' + width +
+    var screenX = typeof window.screenX !== 'undefined' ? window.screenX : window.screenLeft,
+      screenY = typeof window.screenY !== 'undefined' ? window.screenY : window.screenTop,
+      outerWidth = typeof window.outerWidth !== 'undefined' ?
+        window.outerWidth : document.body.clientWidth,
+      outerHeight = typeof window.outerHeight !== 'undefined' ?
+        window.outerHeight : (document.body.clientHeight - 22),
+      width    = 270,
+      height   = 420,
+      left     = parseInt(screenX + ((outerWidth - width) / 2), 10),
+      top      = parseInt(screenY + ((outerHeight - height) / 2.5), 10),
+      features = (
+        'width=' + width +
         ',height=' + height +
         ',left=' + left +
         ',top=' + top +
         ',scrollbars=yes'
       );
 
+    window.addEventListener('message', this.popupCallBack.bind(this), false);
 
-  window.addEventListener('message', this.popupCallBack.bind(this), false);
+    this.window = window.open(this.state.url, 'prYv Sign-in', features);
 
-  this.window = window.open(this.state.url, 'prYv Sign-in', features);
-
-  if (! this.window) {
-    // TODO try to fall back on access
-    console.log('FAILED_TO_OPEN_WINDOW');
-  } else {
-    if (window.focus) {
+    if (!this.window) {
+      // TODO try to fall back on access
+      console.log('FAILED_TO_OPEN_WINDOW');
+    } else if(window.focus) {
       this.window.focus();
     }
-  }
 
-  return false;
+    return false;
+  }
 };
 
-
-
+var statusRegexp = /[?#&]+prYv([^=&]+)=([^&]*)/gi;
 
 //util to grab parameters from url query string
 Auth.prototype._getStatusFromURL = function () {
   var vars = {};
-  window.location.href.replace(/[?#&]+prYv([^=&]+)=([^&]*)/gi,
+  window.location.href.replace(statusRegexp,
     function (m, key, value) {
       vars[key] = value;
     });
@@ -700,7 +656,15 @@ Auth.prototype._getStatusFromURL = function () {
 
 //util to grab parameters from url query string
 Auth.prototype._cleanStatusFromURL = function () {
-  return window.location.href.replace(/[?#&]+prYv([^=&]+)=([^&]*)/gi, '');
+  return window.location.href.replace(statusRegexp, '');
+};
+
+Auth.prototype._checkCookies = function () {
+  this.cookieEnabled = (navigator.cookieEnabled);
+  if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
+    document.cookie = 'testcookie';
+    this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
+  }
 };
 
 //-------------------- UTILS ---------------------//

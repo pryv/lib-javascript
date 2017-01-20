@@ -1,7 +1,7 @@
 
 module.exports.connectionSettings = {
   username: 'libjs-test-pryv',
-  auth: 'cij5h3idx0rlz1fyq1ztpnij8',
+  auth: 'ciy4i4bn50qws3pyqtyqtkjrw',
   domain: 'pryv.me'
 };
 

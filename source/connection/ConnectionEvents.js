@@ -186,6 +186,7 @@ function _create(newEventlike, callback, start) {
       if (!err && resultInfo.code !== 201) {
         err = {id: CC.Errors.INVALID_RESULT_CODE};
       }
+
       /**
        * Change will happend with offline caching...
        *
