@@ -289,50 +289,29 @@ Auth.prototype.login = function (settings) {
     domain: defaultDomain
   });
 
-  this.connection = new Connection({
-    ssl: settings.ssl,
-    domain: settings.domain
-  });
+  pryv.Connection.login(settings, function(err, conn, res) {
+    if((err || !res.token) && typeof(this.settings.callbacks.error) === 'function') {
+      return this.settings.callbacks.error(err || res);
+    }
 
-  var pack = {
-    ssl: settings.ssl,
-    host: settings.username + '.' + settings.domain,
-    path: '/auth/login',
-    params: {
-      appId : settings.appId,
-      username : settings.username,
-      password : settings.password
-    },
-    success: function (data)  {
-      if (data.token) {
-        if (this.cookieEnabled && settings.rememberMe) {
-          utility.docCookies.setItem('access_username' + this.settings.domain,
-             settings.username, 3600);
-          utility.docCookies.setItem('access_token' + this.settings.domain,
-            data.token, 3600);
-          utility.docCookies.setItem('access_preferredLanguage' + this.settings.domain,
-            data.preferredLanguage, 3600);
-        }
-        console.log('set cookie', this.cookieEnabled, settings.rememberMe,
-          utility.docCookies.getItem('access_username' + this.settings.domain),
-          utility.docCookies.getItem('access_token' + this.settings.domain));
-        this.connection.username = settings.username;
-        this.connection.auth = data.token;
-        if (typeof(this.settings.callbacks.signedIn)  === 'function') {
-          this.settings.callbacks.signedIn(this.connection);
-        }
-      } else if (typeof(this.settings.callbacks.error) === 'function') {
-        this.settings.callbacks.error(data);
-      }
-    }.bind(this),
-    error: function (jsonError) {
-      if (typeof(this.settings.callbacks.error) === 'function') {
-        this.settings.callbacks.error(jsonError);
-      }
-    }.bind(this)
-  };
+    this.connection = conn;
 
-  utility.request(pack);
+    if (this.cookieEnabled && settings.rememberMe) {
+      utility.docCookies.setItem('access_username' + this.settings.domain,
+        settings.username, 3600);
+      utility.docCookies.setItem('access_token' + this.settings.domain,
+        res.token, 3600);
+      utility.docCookies.setItem('access_preferredLanguage' + this.settings.domain,
+        res.preferredLanguage, 3600);
+    }
+    console.log('set cookie', this.cookieEnabled, settings.rememberMe,
+      utility.docCookies.getItem('access_username' + this.settings.domain),
+      utility.docCookies.getItem('access_token' + this.settings.domain));
+
+    if (typeof(this.settings.callbacks.signedIn)  === 'function') {
+      this.settings.callbacks.signedIn(this.connection);
+    }
+  }.bind(this));
 };
 
 // TODO: must be an instance member of Connection instead
