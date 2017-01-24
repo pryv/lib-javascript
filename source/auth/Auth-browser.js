@@ -289,7 +289,7 @@ Auth.prototype.login = function (settings) {
     domain: defaultDomain
   });
 
-  pryv.Connection.login(settings, function(err, conn, res) {
+  Connection.login(settings, function(err, conn, res) {
     if((err || !res.token) && typeof(this.settings.callbacks.error) === 'function') {
       return this.settings.callbacks.error(err || res);
     }
@@ -304,9 +304,6 @@ Auth.prototype.login = function (settings) {
       utility.docCookies.setItem('access_preferredLanguage' + this.settings.domain,
         res.preferredLanguage, 3600);
     }
-    console.log('set cookie', this.cookieEnabled, settings.rememberMe,
-      utility.docCookies.getItem('access_username' + this.settings.domain),
-      utility.docCookies.getItem('access_token' + this.settings.domain));
 
     if (typeof(this.settings.callbacks.signedIn)  === 'function') {
       this.settings.callbacks.signedIn(this.connection);
@@ -314,9 +311,11 @@ Auth.prototype.login = function (settings) {
   }.bind(this));
 };
 
-// TODO: must be an instance member of Connection instead
+// TODO: see Connection.trustedLogout
 Auth.prototype.trustedLogout = function () {
   if (this.connection) {
+    this.connection.trustedLogout(this.settings.callbacks);
+    /*
     this.connection.request({
       method: 'POST',
       path: '/auth/logout',
@@ -328,6 +327,7 @@ Auth.prototype.trustedLogout = function () {
         }
       }.bind(this)
     });
+    */
   }
 };
 
@@ -357,7 +357,7 @@ Auth.prototype.whoAmI = function (settings) {
           ssl: settings.ssl,
           domain: settings.domain
         });
-        console.log('before access info', this.connection);
+
         conn.accessInfo(function (error) {
           console.log('after access info', this.connection);
           if(error && (typeof(this.settings.callbacks.error) === 'function')) {
@@ -400,8 +400,6 @@ Auth.prototype.loginWithCookie = function (settings) {
     utility.docCookies.getItem('access_username' + this.settings.domain) : false;
   var cookieToken = this.cookieEnabled ?
     utility.docCookies.getItem('access_token' + this.settings.domain) : false;
-
-  console.log('get cookie', cookieUserName, this.settings.domain, cookieToken);
 
   if (cookieUserName && cookieToken) {
     this.connection.username = cookieUserName;

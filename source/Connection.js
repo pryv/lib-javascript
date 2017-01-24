@@ -531,6 +531,20 @@ Connection.prototype.batchCall = function(methodsData, callback) {
   });
 };
 
+Connection.prototype.trustedLogout = function(callbacks) {
+  this.request({
+    method: 'POST',
+    path: '/auth/logout',
+    callback: function (error) {
+      if (error && typeof(callbacks.error) === 'function') {
+        return callbacks.error(error);
+      } else if (!error && typeof(callbacks.signedOut) === 'function') {
+        return callbacks.signedOut(this);
+      }
+    }.bind(this)
+  });
+};
+
 
 // --------- private utils
 
