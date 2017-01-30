@@ -32,23 +32,11 @@ _.extend(Auth.prototype, {
   ignoreStateFromURL: false // turned to true in case of loggout
 });
 
-/**
- * Method to initialize the data required for authorization.
- * @method _init
- * @access private
- */
-Auth._init = function () {
-  utility.loadExternalFiles(
-    Auth.prototype.config.sdkFullPath + '/assets/buttonSigninPryv.css', 'css');
-
-  console.log('init done');
-};
-
-
-Auth._init();
+// Initialize the data required for authorization.
+utility.loadExternalFiles(
+  Auth.prototype.config.sdkFullPath + '/assets/buttonSigninPryv.css', 'css');
 
 //--------------------- UI Content -----------//
-
 
 Auth.prototype.uiSupportedLanguages = ['en', 'fr'];
 
