@@ -30,44 +30,39 @@ _.extend(Auth.prototype, {
   ignoreStateFromURL: false // turned to true in case of loggout
 });
 
-// Initialize the data required for authorization.
-utility.loadExternalFiles(
-  Auth.prototype.config.sdkFullPath + '/assets/buttonSigninPryv.css', 'css');
-
+// Initialize style sheet and supported languages
+utility.loadExternalFiles(Auth.prototype.config.sdkFullPath + '/assets/buttonSigninPryv.css', 'css');
 Auth.prototype.uiSupportedLanguages = ['en', 'fr'];
 
 /**
  * Setup the authentication process
+ * //TODO check settings
  * @param settings: initialization settings
  * @returns {Connection}: the connection managed by Auth. A new one is created each time setup is called.
  */
 Auth.prototype.setup = function (settings) {
   this.state = null;
 
-  //--- check the browser capabilities
-
   this._checkCookies();
-
-  //TODO check settings..
 
   settings.languageCode =
     utility.getPreferredLanguage(this.uiSupportedLanguages, settings.languageCode);
 
-  //-- returnURL
+  // ReturnURL
   settings.returnURL = settings.returnURL || 'auto#';
   if (settings.returnURL) {
-    // check the trailer
+    // Check the trailer
     var trailer = settings.returnURL.charAt(settings.returnURL.length - 1);
     if ('#&?'.indexOf(trailer) < 0) {
       throw new Error('Pryv access: Last character of --returnURL setting-- is not ' +
         '"?", "&" or "#": ' + settings.returnURL);
     }
 
-    // set self as return url?
+    // Set self as return url?
     if((settings.returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet()) ||
       (settings.returnURL.indexOf('self') === 0)) {
       var myParams = settings.returnURL.substring(4);
-      // eventually clean-up current url from previous pryv returnURL
+      // Eventually clean-up current url from previous pryv returnURL
       settings.returnURL = this._cleanStatusFromURL() + myParams;
     } else if(settings.returnURL.indexOf('auto') === 0 && !utility.browserIsMobileOrTablet()) {
       settings.returnURL = false;
@@ -79,11 +74,9 @@ Auth.prototype.setup = function (settings) {
     }
   }
 
-  //  spanButtonID is checked only when possible
   this.settings = settings;
 
-
-  // TODO: clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
+  // TODO: Clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
   var parts =  this.config.registerURL.host.split('.').reverse();
   this.settings.domain = parts[1] + '.' + parts[0];
 
@@ -94,26 +87,27 @@ Auth.prototype.setup = function (settings) {
     returnURL : settings.returnURL
   };
 
+  // Advanced dev. option for oauth
   if (settings.oauthState) {
     params.oauthState = settings.oauthState;
   }
 
+  // Advanced dev. option for local testing with rec-la
   if (this.config.reclaDevel) {
-    // return url will be forced to https://se.rec.la + reclaDevel
+    // Return url will be forced to https://se.rec.la + reclaDevel
     params.reclaDevel = this.config.reclaDevel;
   }
 
   this.stateInitialization();
 
-
   this.connection = new Connection(null, null, {ssl: true, domain: this.settings.domain});
-  // look if we have a returning user (document.cookie)
+  // Look if we have a returning user (document.cookie)
   var cookieUserName = this.cookieEnabled ?
     utility.docCookies.getItem('access_username' + this.settings.domain) : false;
   var cookieToken = this.cookieEnabled ?
     utility.docCookies.getItem('access_token' + this.settings.domain) : false;
 
-  // look in the URL if we are returning from a login process
+  // Look in the URL if we are returning from a login process
   var stateFromURL =  this._getStatusFromURL();
 
   if (stateFromURL && (! this.ignoreStateFromURL)) {
@@ -121,8 +115,8 @@ Auth.prototype.setup = function (settings) {
   } else if (cookieToken && cookieUserName) {
     this.stateChanged({status: 'ACCEPTED', username: cookieUserName,
       token: cookieToken, domain: this.settings.domain});
-  } else { // launch process $
-
+  } else {
+    // Launch process
     var pack = {
       path :  '/access',
       params : params,
@@ -300,7 +294,6 @@ Auth.prototype.stateChanged  = function (data) {
       this.settings.callbacks.error(data.id, data.message);
     }
     this.updateButton(this.uiErrorButton());
-    console.log('Error: ' + JSON.stringify(data));
     // this.logout();   Why should I retry if it failed already once?
   }
 
@@ -378,6 +371,11 @@ Auth.prototype.stateRefused = function () {
   }
 };
 
+/**
+ * Throw an internal error
+ * @param message: error message
+ * @param jsonData: error data
+ */
 Auth.prototype.internalError = function (message, jsonData) {
   this.stateChanged({id: 'INTERNAL_ERROR', message: message, data: jsonData});
 };
@@ -550,8 +548,11 @@ Auth.prototype.loginWithCookie = function (settings) {
  */
 Auth.prototype.poll = function poll() {
   if (this.pollingIsOn && this.state.poll_rate_ms) {
-    // remove eventually waiting poll..
-    if (this.pollingID) { clearTimeout(this.pollingID); }
+
+    // Remove eventually pending poll
+    if (this.pollingID) {
+      clearTimeout(this.pollingID);
+    }
 
     var pack = {
       path :  '/access/' + this.state.key,
@@ -585,7 +586,7 @@ Auth.prototype.popupCallBack = function (event) {
       return false;
     }
     console.log('from popup >>> ' + JSON.stringify(event.data));
-    this.pollingIsOn = false; // if we can receive messages we stop polling
+    this.pollingIsOn = false; // If we can receive messages we stop polling
     this.stateChanged(event.data);
   }
 };
@@ -602,7 +603,7 @@ Auth.prototype.popupLogin = function popupLogin() {
   if (this.settings.returnURL) {
     location.href = this.state.url;
   } else {
-    // start polling
+    // Start polling
     setTimeout(this.poll(), 1000);
 
     var screenX = typeof window.screenX !== 'undefined' ? window.screenX : window.screenLeft,
