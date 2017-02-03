@@ -9,6 +9,10 @@ var Pryv = require('../../../source/main'),
 describe('Connection.streams', function () {
   this.timeout(20000);
 
+  function getRandomNum(max) {
+    return Math.floor(Math.random() * max);
+  }
+
   var connection = new Pryv.Connection(config.connectionSettings);
 
   describe('get()', function () {
@@ -18,19 +22,19 @@ describe('Connection.streams', function () {
 
     before(function (done) {
       diaryStream = {
-          name: 'Diary' + Math.floor(Math.random() * 10000)
+          name: 'Diary' + getRandomNum(10000)
         };
       streamDelete = {
-          name: 'Deleted' + Math.floor(Math.random() * 10000)
+          name: 'Deleted' + getRandomNum(10000)
         };
       streamWithNoChildren = {
-        name: 'nochildstream' + Math.floor(Math.random() * 10000)
+        name: 'nochildstream' + getRandomNum(10000)
       };
 
       async.series([
         function (stepDone) {
           connection.streams.create(streamWithNoChildren, function (err, stream) {
-            if (err) {
+            if (err && err.id !== 'item-already-exists') {
               return stepDone(err);
             }
             streamWithNoChildren = stream;
@@ -39,7 +43,7 @@ describe('Connection.streams', function () {
         },
         function (stepDone) {
           connection.streams.create(diaryStream, function (err, stream) {
-            if (err) {
+            if (err && err.id !== 'item-already-exists') {
               return stepDone(err);
             }
             diaryStream = stream;
@@ -49,7 +53,7 @@ describe('Connection.streams', function () {
         function (stepDone) {
           connection.streams.create({parentId: diaryStream.id, name: 'diaryChild'},
             function (err, stream) {
-              if (err) {
+              if (err && err.id !== 'item-already-exists') {
                 return stepDone(err);
               }
               diaryStream = stream;
@@ -58,7 +62,7 @@ describe('Connection.streams', function () {
         },
         function (stepDone) {
           connection.streams.create(streamDelete, function (err, stream) {
-            if (err) {
+            if (err && err.id !== 'item-already-exists') {
               return stepDone(err);
             }
             streamDelete = stream;
@@ -185,10 +189,10 @@ describe('Connection.streams', function () {
 
     before(function (done) {
       streamData1 = {
-        name: 'testStreamName1' + Math.floor(Math.random() * 10000)
+        name: 'testStreamName1' + getRandomNum(10000)
       };
       streamData2 = {
-        name: 'testStreamName2' + Math.floor(Math.random() * 10000)
+        name: 'testStreamName2' + getRandomNum(10000)
       };
       done();
     });
@@ -259,15 +263,15 @@ describe('Connection.streams', function () {
 
   describe('update()', function () {
     var streamParent = {
-      name: 'libjs-test-stream-parent-update' + Math.floor(Math.random() * 10000),
+      name: 'libjs-test-stream-parent-update' + getRandomNum(10000),
       parentId: null
     };
     var streamToUpdate = {
-      name: 'libjs-test-stream-update-to-update' + Math.floor(Math.random() * 10000),
+      name: 'libjs-test-stream-update-to-update' + getRandomNum(10000),
       parentId: streamParent.id
     };
     var streamToMove = {
-      name: 'libjs-test-stream-update-to-move' + Math.floor(Math.random() * 10000),
+      name: 'libjs-test-stream-update-to-move' + getRandomNum(10000),
       parentId: streamParent.id
     };
 
