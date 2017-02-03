@@ -11,41 +11,94 @@ describe('Connection.streams', function () {
 
   var connection = new Pryv.Connection(config.connectionSettings);
 
-  describe('get()', function (done) {
+  describe('get()', function () {
     // TODO: maybe verify tree structure
 
-    var testTimeStart;
+    var testTimeStart, diaryStream, streamDelete, streamWithNoChildren;
 
-    before(function () {
-      var streamData = {
-          name: 'Diary',
-          id: config.testDiaryStreamId,
-          parentId: null
-        },
-        streamDelete = {
-          name: 'Deleted',
-          id: config.testDeletedStreamId,
-          parentId: null
+    before(function (done) {
+      diaryStream = {
+          name: 'Diary' + Math.floor(Math.random() * 10000)
         };
+      streamDelete = {
+          name: 'Deleted' + Math.floor(Math.random() * 10000)
+        };
+      streamWithNoChildren = {
+        name: 'nochildstream' + Math.floor(Math.random() * 10000)
+      };
+
       async.series([
         function (stepDone) {
-          connection.streams.create(new Pryv.Stream(connection, streamData), stepDone);
+          connection.streams.create(streamWithNoChildren, function (err, stream) {
+            if (err) {
+              return stepDone(err);
+            }
+            streamWithNoChildren = stream;
+            stepDone();
+          });
         },
         function (stepDone) {
-          connection.streams.create(new Pryv.Stream(connection, streamDelete), stepDone);
+          connection.streams.create(diaryStream, function (err, stream) {
+            if (err) {
+              return stepDone(err);
+            }
+            diaryStream = stream;
+            stepDone();
+          });
+        },
+        function (stepDone) {
+          connection.streams.create({parentId: diaryStream.id, name: 'diaryChild'},
+            function (err, stream) {
+              if (err) {
+                return stepDone(err);
+              }
+              diaryStream = stream;
+              stepDone();
+            });
+        },
+        function (stepDone) {
+          connection.streams.create(streamDelete, function (err, stream) {
+            if (err) {
+              return stepDone(err);
+            }
+            streamDelete = stream;
+            stepDone();
+          });
         },
         function (stepDone) {
           testTimeStart = new Date().getTime() / 1000;
-          connection.streams.delete(config.testDeletedStreamId, stepDone);
+          connection.streams.delete(streamDelete, stepDone);
         }
       ], done);
     });
 
-    after (function () {
-      var streamData = { id: config.testDiaryStreamId };
-      connection.streams.delete(streamData, function (err) {
-        if (err) { return console.error(err); }
-      }, false);
+    after (function (done) {
+      async.series([
+        function trashDataStream(stepDone) {
+          connection.streams.delete(diaryStream, function (err) {
+            if (err) { console.error(err); }
+            stepDone();
+          });
+        },
+        function deleteDataStream(stepDone) {
+          connection.streams.delete(diaryStream, function (err) {
+            if (err) { console.error(err); }
+            stepDone();
+          }, false);
+        },
+        function deleteStreamWithNoChild(stepDone) {
+          connection.streams.delete(streamWithNoChildren, function (err) {
+            if (err) { console.error(err); }
+            stepDone();
+          });
+        },
+        function deleteStreamWithNoChild(stepDone) {
+          connection.streams.delete(streamWithNoChildren, function (err) {
+            if (err) { console.error(err); }
+            stepDone();
+          }, false);
+        }
+      ], done);
     });
 
     it('must return a tree of non-trashed Stream objects by default', function (done) {
@@ -69,7 +122,7 @@ describe('Connection.streams', function () {
     });
 
     it('must return streams matching the given filter', function (done) {
-      var filter = {parentId: config.testDiaryStreamId};
+      var filter = {parentId: diaryStream.id};
       connection.streams.get(filter, function (error, streams) {
         should.exist(streams);
         streams.forEach(function (stream) {
@@ -80,7 +133,7 @@ describe('Connection.streams', function () {
     });
 
     it('must return an empty array if there are no matching streams', function (done) {
-      var filter = {parentId: config.testNoChildStreamId}; // be sure that this stream has no child
+      var filter = {parentId: streamWithNoChildren.id};
       connection.streams.get(filter, function (error, streams) {
         should.not.exist(error);
         streams.length.should.equal(0);
@@ -88,14 +141,14 @@ describe('Connection.streams', function () {
       });
     });
 
-    it('must return deleted streams when the field state is set to \'all\'', function (done) {
+    it('must return trashed streams when the field state is set to \'all\'', function (done) {
       var filter = {state: 'all'};
       connection.streams.get(filter, function (err, streams) {
         should.not.exists(err);
         should.exists(streams);
         var found = false;
         streams.forEach(function (stream) {
-          if (stream.id === config.testDeletedStreamId) {
+          if (stream.id === streamDelete.id) {
             found = true;
           }
         });
@@ -132,12 +185,10 @@ describe('Connection.streams', function () {
 
     before(function (done) {
       streamData1 = {
-        id: 'testStream1',
-        name: 'testStreamName1'
+        name: 'testStreamName1' + Math.floor(Math.random() * 10000)
       };
       streamData2 = {
-        id: 'testStream2',
-        name: 'testStreamName2'
+        name: 'testStreamName2' + Math.floor(Math.random() * 10000)
       };
       done();
     });
@@ -145,30 +196,16 @@ describe('Connection.streams', function () {
     after(function (done) {
       async.series([
         function (stepDone) {
-          connection.streams.delete(stream, function (err, trashedStream) {
-            should.not.exist(err);
-            stream = trashedStream;
-            stepDone();
-          });
+          connection.streams.delete(stream, stepDone);
         },
         function (stepDone) {
-          connection.streams.delete(stream, function(err) {
-            should.not.exist(err);
-            stepDone();
-          });
+          connection.streams.delete(stream, stepDone, false);
         },
         function (stepDone) {
-          connection.streams.delete(stream2, function (err, trashedStream) {
-            should.not.exist(err);
-            stream2 = trashedStream;
-            stepDone();
-          });
+          connection.streams.delete(stream2, stepDone);
         },
         function (stepDone) {
-          connection.streams.delete(stream2, function(err) {
-            should.not.exist(err);
-            stepDone();
-          });
+          connection.streams.delete(stream2, stepDone, false);
         }
       ]);
       done();
@@ -222,18 +259,15 @@ describe('Connection.streams', function () {
 
   describe('update()', function () {
     var streamParent = {
-      id: 'testStreamParentId',
-      name: 'libjs-test-stream-parent-update',
+      name: 'libjs-test-stream-parent-update' + Math.floor(Math.random() * 10000),
       parentId: null
     };
     var streamToUpdate = {
-      id: 'testStreamToUpdateId',
-      name: 'libjs-test-stream-update-to-update',
+      name: 'libjs-test-stream-update-to-update' + Math.floor(Math.random() * 10000),
       parentId: streamParent.id
     };
     var streamToMove = {
-      id: 'testStreamToMoveId',
-      name: 'libjs-test-stream-update-to-move',
+      name: 'libjs-test-stream-update-to-move' + Math.floor(Math.random() * 10000),
       parentId: streamParent.id
     };
 
@@ -263,37 +297,22 @@ describe('Connection.streams', function () {
     after(function (done) {
       async.series([
         function (stepDone) {
-          connection.streams.delete(streamToMove.id, function (err, trashedStream) {
-            streamToMove = trashedStream;
-            stepDone(err);
-          });
+          connection.streams.delete(streamToMove, stepDone);
         },
         function (stepDone) {
-          connection.streams.delete(streamToMove.id, function (err) {
-            stepDone(err);
-          });
+          connection.streams.delete(streamToMove, stepDone, false);
         },
         function (stepDone) {
-          connection.streams.delete(streamToUpdate.id, function (err, trashedStream) {
-            streamToUpdate = trashedStream;
-            stepDone(err);
-          });
+          connection.streams.delete(streamToUpdate, stepDone);
         },
         function (stepDone) {
-          connection.streams.delete(streamToUpdate.id, function (err) {
-            stepDone(err);
-          });
+          connection.streams.delete(streamToUpdate, stepDone, false);
         },
         function (stepDone) {
-          connection.streams.delete(streamParent.id, function (err, trashedStream) {
-            streamParent = trashedStream;
-            stepDone(err);
-          });
+          connection.streams.delete(streamParent, stepDone);
         },
         function (stepDone) {
-          connection.streams.delete(streamParent.id, function (err) {
-            stepDone(err);
-          });
+          connection.streams.delete(streamParent, stepDone, false);
         }
       ], done);
     });
