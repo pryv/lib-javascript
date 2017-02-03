@@ -37,7 +37,7 @@ describe('Connection.account', function () {
   describe('changePassword()', function () {
 
     var newPassword = 'testPassword';
-    var truePassword = 'poilonez';
+    var truePassword = config.loginParams.password;
 
     after(function (done) {
       connection.account.changePassword(newPassword, truePassword, function (err) {

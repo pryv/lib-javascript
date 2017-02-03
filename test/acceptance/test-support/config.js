@@ -1,19 +1,16 @@
 
 module.exports.connectionSettings = {
-  username: 'libjs-test-pryv',
-  auth: 'ciy4i4bn50qws3pyqtyqtkjrw',
-  domain: 'pryv.me'
+  username: 'testuser',
+  auth: 'ciypvpa530000kb57acjwwp04',
+  domain: 'pryv.li'
 };
 
 module.exports.loginParams = {
-  username: 'libjs-test-pryv',
-  password: 'poilonez',
-  appId: 'pryv-test-app',
-  domain: 'pryv.me',
-  origin: 'pryv.me'
+  username: 'testuser',
+  password: 'testuser',
+  appId: 'test-lib-javascript',
+  domain: 'pryv.li',
+  origin: 'pryv.li'
 };
 
-module.exports.testDiaryStreamId = 'diary';
-module.exports.testDeletedStreamId = 'deleted';
 module.exports.testActivityStreamId = 'activity';
-module.exports.testNoChildStreamId = 'nochildstream';
