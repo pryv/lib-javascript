@@ -7,7 +7,7 @@ Javascript library (browser & Node.js) to access and manipulate Pryv users data.
 
 ## Usage examples on JSFiddle 
 
-[http://jsfiddle.net/user/pryv/fiddles/](http://jsfiddle.net/user/pryv/fiddles/) 
+[Pryv on CodePen](http://codepen.io/pryv/) 
 
 - [Pryv basic example](http://codepen.io/pryv/pen/apQJxz): Example exposing how to request an access and fetching basic informations form a Pryv account.
 - [Pryv notes and values example](http://codepen.io/pryv/pen/apQJrO): Web form, enter notes and values. 
