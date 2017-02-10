@@ -9,9 +9,9 @@ Javascript library (browser & Node.js) to access and manipulate Pryv users data.
 
 [http://jsfiddle.net/user/pryv/fiddles/](http://jsfiddle.net/user/pryv/fiddles/) 
 
-- [Pryv basic example](http://jsfiddle.net/pryv/fr4e834p/): Example exposing how to request an access and fetching basic informations form a Pryv account.
-- [Pryv notes and values example](http://jsfiddle.net/pryv/kmtyxj37/): Web form, enter notes and values. 
-- [Pryv events monitor example](http://jsfiddle.net/pryv/bwpv0b3o/): Monitor changes live on an Pryv account. Create, modifiy and delete events.
+- [Pryv basic example](http://codepen.io/pryv/pen/apQJxz): Example exposing how to request an access and fetching basic informations form a Pryv account.
+- [Pryv notes and values example](http://codepen.io/pryv/pen/apQJrO): Web form, enter notes and values. 
+- [Pryv events monitor example](http://codepen.io/pryv/pen/rjQygX): Monitor changes live on an Pryv account. Create, modifiy and delete events.
 
 
 ### Installation
