@@ -31,14 +31,16 @@ _.extend(Auth.prototype, {
 });
 
 // Initialize style sheet and supported languages
-utility.loadExternalFiles(Auth.prototype.config.sdkFullPath + '/assets/buttonSigninPryv.css', 'css');
+utility.loadExternalFiles(Auth.prototype.config.sdkFullPath +
+  '/assets/buttonSigninPryv.css', 'css');
 Auth.prototype.uiSupportedLanguages = ['en', 'fr'];
 
 /**
  * Setup the authentication process
  * //TODO check settings
  * @param settings: initialization settings
- * @returns {Connection}: the connection managed by Auth. A new one is created each time setup is called.
+ * @returns {Connection}: the connection managed by Auth.
+ *  A new one is created each time setup is called.
  */
 Auth.prototype.setup = function (settings) {
   this.state = null;
