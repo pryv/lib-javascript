@@ -418,7 +418,7 @@ Object.defineProperty(Connection.prototype, 'serialId', {
 
 
 /**
- * static method to login, returns a connection object in the callback if the username/password
+ * Static method to login, returns a connection object in the callback if the username/password
  * pair is valid for the provided appId.
  *
  * @param params key / value map containing username, password and appId fields and optional
@@ -527,6 +527,26 @@ Connection.prototype.batchCall = function(methodsData, callback) {
         return callback(err);
       }
       callback(null, res.results);
+    }.bind(this)
+  });
+};
+
+/**
+ * Method to logout the current connection from API, clearing the SSO cookies
+ * @param callbacks: set of callbacks, in particular:
+ *    callbacks.error: function to be called in case of logout error
+ *    callbacks.signedOut: function to be called after a successful logout
+ */
+Connection.prototype.trustedLogout = function(callbacks) {
+  this.request({
+    method: 'POST',
+    path: '/auth/logout',
+    callback: function (error) {
+      if (error && typeof(callbacks.error) === 'function') {
+        return callbacks.error(error);
+      } else if (!error && typeof(callbacks.signedOut) === 'function') {
+        return callbacks.signedOut(this);
+      }
     }.bind(this)
   });
 };
