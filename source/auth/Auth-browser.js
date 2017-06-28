@@ -79,8 +79,8 @@ Auth.prototype.setup = function (settings) {
   this.settings = settings;
 
   // TODO: Clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
-  var parts =  this.config.registerURL.host.split('.').reverse();
-  this.settings.domain = parts[1] + '.' + parts[0];
+  var z =  this.config.registerURL.host;
+  this.settings.domain = z.substring(z.indexOf('.') + 1);
 
   var params = {
     requestingAppId : settings.requestingAppId,
