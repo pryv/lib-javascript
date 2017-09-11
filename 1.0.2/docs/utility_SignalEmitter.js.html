@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utility/SignalEmitter.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utility/SignalEmitter.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * (event)Emitter renamed to avoid confusion with prvy's events
+ */
+
+
+var _ = require('underscore');
+
+var SignalEmitter = module.exports = function (messagesMap) {
+  SignalEmitter.extend(this, messagesMap);
+};
+
+
+SignalEmitter.extend = function (object, messagesMap, name) {
+  if (! name) {
+    throw new Error('"name" parameter must be set');
+  }
+  object._signalEmitterEvents = {};
+  _.each(_.values(messagesMap), function (value) {
+    object._signalEmitterEvents[value] = [];
+  });
+  _.extend(object, SignalEmitter.prototype);
+  object._signalEmitterName = name;
+};
+
+
+SignalEmitter.Messages = {
+  /** called when a batch of changes is expected, content: &lt;batchId> unique**/
+  BATCH_BEGIN : 'beginBatch',
+  /** called when a batch of changes is done, content: &lt;batchId> unique**/
+  BATCH_DONE : 'doneBatch',
+  /** if an eventListener return this string, it will be removed automatically **/
+  UNREGISTER_LISTENER : 'unregisterMePlease'
+};
+
+/**
+ * Add an event listener
+ * @param signal one of  Messages.SIGNAL.*.*
+ * @param callback function(content) .. content vary on each signal.
+ * If the callback returns SignalEmitter.Messages.UNREGISTER_LISTENER it will be removed
+ * @return the callback function for further reference
+ */
+SignalEmitter.prototype.addEventListener = function (signal, callback) {
+  this._signalEmitterEvents[signal].push(callback);
+  return callback;
+};
+
+
+/**
+ * remove the callback matching this signal
+ */
+SignalEmitter.prototype.removeEventListener = function (signal, callback) {
+  for (var i = 0; i &lt; this._signalEmitterEvents[signal].length; i++) {
+    if (this._signalEmitterEvents[signal][i] === callback) {
+      this._signalEmitterEvents[signal][i] = null;
+    }
+  }
+};
+
+
+/**
+ * A changes occurred on the filter
+ * @param signal
+ * @param content
+ * @param batch
+ * @private
+ */
+SignalEmitter.prototype._fireEvent = function (signal, content, batch) {
+  var batchId = batch ? batch.id : null;
+  if (! signal) { throw new Error(); }
+
+  var batchStr = batchId ? ' batch: ' + batchId + ', ' + batch.batchName : '';
+  console.log('FireEvent-' + this._signalEmitterName  + ' : ' + signal + batchStr);
+
+  _.each(this._signalEmitterEvents[signal], function (callback) {
+    if (callback !== null &amp;&amp;
+      SignalEmitter.Messages.UNREGISTER_LISTENER === callback(content, batch)) {
+      this.removeEventListener(signal, callback);
+    }
+  }, this);
+};
+
+
+SignalEmitter.batchSerial = 0;
+/**
+ * Start a batch process
+ *
+ * @param batchName Name of the new batch
+ * @param orHookOnBatch Existing batch to hook on ("superbatch")
+ * @return A batch object (call `done()` when done)
+ * @private
+ */
+SignalEmitter.prototype.startBatch = function (name, orHookOnBatch) {
+
+  if (! orHookOnBatch) {
+    return new Batch(name, this);
+  }
+  name = orHookOnBatch.name + '/' + name;
+  var batch = new Batch(name, this);
+  orHookOnBatch.waitForMeToFinish(name + ':hook');
+  batch.addOnDoneListener(name, function () {
+    orHookOnBatch.done(name + ':hook');
+  });
+  return batch;
+};
+
+var Batch = function (name, owner) {
+  this.owner = owner;
+  this.name = name || 'x';
+  this.id = owner._signalEmitterName + SignalEmitter.batchSerial++;
+  this.waitFor = 0;
+  this.history = [];
+  this.doneCallbacks = {};
+  this.waitForMeToFinish(this.name);
+  this.owner._fireEvent(SignalEmitter.Messages.BATCH_BEGIN, this.id, this);
+
+};
+
+
+
+/**
+ * listener are stored in key/map fashion, so addOnDoneListener('bob',..)
+ * may be called several time, callback 'bob', will be done just once
+ * @param key a unique key per callback
+ * @param callback
+ */
+Batch.prototype.addOnDoneListener = function (key, callback) {
+  this.checkAlreadyDone('addOnDoneListener(' + key + ')');
+  this.doneCallbacks[key] = callback;
+};
+
+Batch.prototype.waitForMeToFinish = function (key) {
+  this.checkAlreadyDone('waitForMeToFinish(' + key + ')');
+  this.waitFor++;
+  this.history.push({wait: key, waitFor: this.waitFor});
+  return this;
+};
+
+Batch.prototype.done = function (key) {
+  this.checkAlreadyDone('done(' + key + ')');
+  key = key || '--';
+  this.waitFor--;
+  this.history.push({done: key, waitFor: this.waitFor});
+  if (this.waitFor === 0) {
+
+    this.doneTriggered = true;
+    _.each(this.doneCallbacks, function (callback) {
+      callback();
+    });
+    delete this.doneCallbacks; // prevents memory leaks
+    this.owner._fireEvent(SignalEmitter.Messages.BATCH_DONE, this.id, this);
+  }
+};
+
+Batch.prototype.checkAlreadyDone = function (addon) {
+  if (this.doneTriggered) {
+    var msg = 'Batch ' + this.name + ', ' + this.id + ' called ' + addon + '  when already done';
+    throw new Error(msg + '     ' + JSON.stringify(this.history));
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#accesses">accesses</a></li><li><a href="global.html#bookmarks">bookmarks</a></li><li><a href="global.html#events">events</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#FormData">FormData</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#monitors">monitors</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#profile">profile</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#streams">streams</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li><li><a href="global.html#utility">utility</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Sep 11 2017 11:48:38 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
