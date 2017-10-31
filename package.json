@@ -48,7 +48,7 @@
   "main": "source/main.js",
   "repository": {
     "type": "git",
-    "url": "http://github.com/lib-javascript.git"
+    "url": "http://github.com/pryv/lib-javascript.git"
   },
   "dependencies": {
     "form-data": "0.1.x",
