@@ -799,7 +799,7 @@ describe('Connection.events', function () {
   // TODO see if useful or not, since the URL is used directly to get an Attachment content
   describe('getAttachment()', function () {
 
-    var event, formData, attachment, data, originalFile;
+    var event, formData, attachment, originalFile;
 
     before(function (done) {
       originalFile = fs.readFileSync(__dirname + '/../test-support/photo.PNG');
@@ -860,7 +860,6 @@ describe('Connection.events', function () {
       pack.readToken = attachment.readToken;
       pack.fileId = attachment.id;
       pack.eventId = event.id;
-      var testFileName = 'test-delete_me_please.PNG';
       async.series([
         function (stepDone) {
           connection.events.getAttachment(pack, function (err, res) {
