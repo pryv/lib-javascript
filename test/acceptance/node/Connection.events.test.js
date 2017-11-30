@@ -796,11 +796,11 @@ describe('Connection.events', function () {
   // TODO see if useful or not, since the URL is used directly to get an Attachment content
   describe('getAttachment()', function () {
 
-    var event, formData, attachment, data;
+    var event, formData, attachment, data, originalFile;
 
     before(function (done) {
-      var pictureData = fs.readFileSync(__dirname + '/../test-support/photo.PNG');
-      should.exist(pictureData);
+      originalFile = fs.readFileSync(__dirname + '/../test-support/photo.PNG');
+      should.exist(originalFile);
 
       event = {
         streamId: testStream.id, type: 'picture/attached',
@@ -808,7 +808,7 @@ describe('Connection.events', function () {
       };
       var filename = 'testGetAttachmentPicture';
 
-      formData = Pryv.utility.forgeFormData('attachment0', pictureData, {
+      formData = Pryv.utility.forgeFormData('attachment0', originalFile, {
         type: 'image/png',
         filename: filename
       });
@@ -863,14 +863,7 @@ describe('Connection.events', function () {
           connection.events.getAttachment(pack, function (err, res) {
             should.not.exist(err);
             should.exist(res);
-            data = res;
-            stepDone();
-          });
-        },
-        function (stepDone) {
-          fs.writeFile(testFileName, data, function (err) {
-            should.not.exist(err);
-
+            should.equal(Buffer.compare(originalFile,res), 0);
             stepDone();
           });
         }

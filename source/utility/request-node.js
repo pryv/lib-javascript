@@ -75,7 +75,7 @@ module.exports = function (pack) {
           bodyarr.join('') + '\n' + HttpRequestDetails, responseInfo);
         }
       } else if (parseResult === 'binary') {
-        data = res;
+        data = Buffer.concat(bodyarr);
       }
       return pack.success(data, responseInfo);
     });
