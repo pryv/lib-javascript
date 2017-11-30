@@ -18,8 +18,11 @@ describe('Connection.events', function () {
     };
     connection = new Pryv.Connection(config.connectionSettings);
     connection.streams.create(testStream, function (err, newStream) {
+      if (err) {
+        return done(err);
+      }
       testStream = newStream;
-      done(err);
+      done();
     });
   });
 
