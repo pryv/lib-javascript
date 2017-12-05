@@ -60,8 +60,9 @@ module.exports = function (pack) {
       headers: res.headers
     };
 
-    if (parseResult !== 'binary' || (parseResult === 'binary' &&
+    if (parseResult === 'json' || (parseResult === 'binary' &&
       (res.statusCode < 200 || res.statusCode >= 300))) {
+      // We load the full response body and parse the JSON
       var bodyarr = [];
       res.on('data', function (chunk) {
         bodyarr.push(chunk);
@@ -76,9 +77,9 @@ module.exports = function (pack) {
           return pack.error('request failed to parse JSON in response' +
             bodyarr.join('') + '\n' + HttpRequestDetails, responseInfo);
         }
-
         return pack.success(data, responseInfo);
       });
+
     } else { // binary response body without errors, we return a readable stream
       return pack.success(res, responseInfo);
     }
