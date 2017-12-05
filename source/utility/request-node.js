@@ -54,31 +54,36 @@ module.exports = function (pack) {
     }
   }
 
-  var req = http.request(httpOptions, function (res) {
-    var bodyarr = [];
-    res.on('data', function (chunk) {
-      bodyarr.push(chunk);
-    });
+  var req;
 
-    res.on('end', function () {
-      var responseInfo = {
-        code: res.statusCode,
-        headers: res.headers
-      };
-      var data = null;
-      if (parseResult === 'json') {
+  req = http.request(httpOptions, function (res) {
+    var responseInfo = {
+      code: res.statusCode,
+      headers: res.headers
+    };
+
+    if (parseResult !== 'binary' || (parseResult === 'binary' &&
+      (res.statusCode < 200 || res.statusCode >= 300))) {
+      var bodyarr = [];
+      res.on('data', function (chunk) {
+        bodyarr.push(chunk);
+      });
+
+      res.on('end', function () {
+        var data = null;
         try {
           var response = bodyarr.join('').trim() === '' ? '{}' : bodyarr.join('').trim();
           data = JSON.parse(response);
         } catch (error) {
           return pack.error('request failed to parse JSON in response' +
-          bodyarr.join('') + '\n' + HttpRequestDetails, responseInfo);
+            bodyarr.join('') + '\n' + HttpRequestDetails, responseInfo);
         }
-      } else if (parseResult === 'binary') {
-        data = Buffer.concat(bodyarr);
-      }
-      return pack.success(data, responseInfo);
-    });
+
+        return pack.success(data, responseInfo);
+      });
+    } else {
+      return pack.success(res, responseInfo);
+    }
   });
 
   var HttpRequestDetails = 'Request: ' + httpOptions.method + ' ' +

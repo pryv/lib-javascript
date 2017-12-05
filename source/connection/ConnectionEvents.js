@@ -374,11 +374,15 @@ ConnectionEvents.prototype.getAttachment =
     if (typeof(callback) !== 'function') {
       throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
     }
+    if (utility.isBrowser()) {
+      return callback(new Error('Function not implemented for browser, only available in NodeJS.'));
+    }
     this.connection.request({
       method: 'GET',
       path: '/events/' + params.eventId + '/' + params.fileId,
       progressCallback: progressCallback,
       parseResult: 'binary',
+
       callback: function (err, result) {
         if (err) {
           return callback(err);

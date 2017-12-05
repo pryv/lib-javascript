@@ -853,27 +853,46 @@ describe('Connection.events', function () {
       ], done);
     });
 
-    // TODO
     it('must accept an attachment\'s and its event\'s parameters and ' +
-    'return the binary file contents', function (done) {
-      var pack = {};
-      pack.readToken = attachment.readToken;
-      pack.fileId = attachment.id;
-      pack.eventId = event.id;
+    'return a readable stream that contains the file', function (done) {
+      var pack = {
+        readToken: attachment.readToken,
+        fileId: attachment.id,
+        eventId: event.id
+      };
       async.series([
         function (stepDone) {
           connection.events.getAttachment(pack, function (err, res) {
             should.not.exist(err);
             should.exist(res);
-            should.equal(Buffer.compare(originalFile,res), 0);
-            stepDone();
+            var temp = [];
+            res.on('data', function (data) {
+              temp.push(data);
+            });
+            res.on('end', function () {
+              var result = Buffer.concat(temp);
+              should.equal(Buffer.compare(originalFile,result), 0);
+              stepDone();
+            });
+            res.on('error', function (err) {
+              stepDone(err);
+            });
           });
         }
       ], done);
     });
 
-    // TODO
-    it('must return an error in case of invalid parameters');
+    it('must return an error in case of invalid parameters', function (done) {
+      var pack = {
+        readToken: attachment.readToken,
+        fileId: 'not-existent-id',
+        eventId: event.id
+      };
+      connection.events.getAttachment(pack, function (err) {
+        should.exist(err);
+        done();
+      });
+    });
   });
 
 
