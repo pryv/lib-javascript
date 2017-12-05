@@ -54,9 +54,7 @@ module.exports = function (pack) {
     }
   }
 
-  var req;
-
-  req = http.request(httpOptions, function (res) {
+  var req = http.request(httpOptions, function (res) {
     var responseInfo = {
       code: res.statusCode,
       headers: res.headers
@@ -81,7 +79,7 @@ module.exports = function (pack) {
 
         return pack.success(data, responseInfo);
       });
-    } else {
+    } else { // binary response body without errors, we return a readable stream
       return pack.success(res, responseInfo);
     }
   });
