@@ -188,6 +188,44 @@ describe('Connection.events', function () {
     });
   });
 
+  describe('getOne()', function () {
+
+    var event;
+
+    before(function (done) {
+      event = {
+        streamId: testStream.id,
+          type: 'note/txt',
+          content: 'i am an event used to test the events.getOne function'
+      };
+      connection.events.create(event, function (err, createdEvent) {
+        event = createdEvent;
+        done(err);
+      });
+    });
+
+    it('should return the wanted event when providing an existing id', function (done) {
+      connection.events.getOne(event.id, function (err, fetchedEvent) {
+        should.not.exist(err);
+        should.exist(fetchedEvent);
+        event.streamId.should.eql(fetchedEvent.streamId);
+        event.type.should.eql(fetchedEvent.type);
+        event.content.should.eql(fetchedEvent.content);
+        event.time.should.eql(fetchedEvent.time);
+        done();
+      });
+    });
+
+    it('should return an error when providing an unexistant id', function (done) {
+      connection.events.getOne('unexistent-event-id', function (err, nullEvent) {
+        should.not.exist(nullEvent);
+        should.exist(err);
+        done();
+      });
+    });
+
+  });
+
   describe('create()', function () {
     var eventToDelete, singleActivityStream;
 

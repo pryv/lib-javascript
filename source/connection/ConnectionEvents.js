@@ -76,6 +76,28 @@ ConnectionEvents.prototype.get = function (filter, doneCallback, partialResultCa
 };
 
 /**
+ * Returns a single event provided an id
+ *
+ * @param {String} eventId
+ * @param {Connection~requestCallback} callback
+ */
+ConnectionEvents.prototype.getOne = function (eventId, callback) {
+
+  function extractCallback(err, res) {
+    if (err) {
+      return callback(err);
+    }
+    callback(null, res.event);
+  }
+
+  this.connection.request({
+    method: 'GET',
+    path: '/events/' + eventId,
+    callback: extractCallback
+  });
+};
+
+/**
  * @param {Event} event
  * @param {Connection~requestCallback} callback
  */
