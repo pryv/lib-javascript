@@ -796,7 +796,6 @@ describe('Connection.events', function () {
     });
   });
 
-  // TODO see if useful or not, since the URL is used directly to get an Attachment content
   describe('getAttachment()', function () {
 
     var event, formData, attachment, originalFile;
@@ -816,10 +815,6 @@ describe('Connection.events', function () {
         filename: filename
       });
 
-      event = {
-        streamId: testStream.id,
-        type: 'picture/attached'
-      };
       async.series([
         function (stepDone) {
           connection.events.create(event, function (err, newEvent) {
