@@ -87,13 +87,14 @@ ConnectionEvents.prototype.getOne = function (eventId, callback) {
     if (err) {
       return callback(err);
     }
-    callback(null, res.event);
+    var event = new Event(this.connection, res.event);
+    callback(null, event);
   }
 
   this.connection.request({
     method: 'GET',
     path: '/events/' + eventId,
-    callback: extractCallback
+    callback: extractCallback.bind(this)
   });
 };
 
