@@ -85,11 +85,11 @@ ConnectionStreams.prototype.update = function (streamData, callback) {
   }
 
   _.each(streamData, function (e) {
-    var s = _.pick(e, 'id', 'name', 'parentId', 'singleActivity',
+    var s = _.pick(e, 'name', 'parentId', 'singleActivity',
       'clientData', 'trashed');
     this.connection.request({
       method: 'PUT',
-      path: '/streams/' + s.id,
+      path: '/streams/' + e.id,
       callback: function (error, result) {
         if (!error && result && result.stream) {
 
