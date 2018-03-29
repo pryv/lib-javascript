@@ -277,7 +277,7 @@ Connection.prototype.request = function (params) {
     throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
   }
   var headers =  { 'authorization': this.auth };
-  var withoutCredentials = false;
+  var withoutCredentials = params.withoutCredentials ? false : true;
   var payload = JSON.stringify({});
   if (params.jsonData && !params.isFile) {
     payload = JSON.stringify(params.jsonData);
