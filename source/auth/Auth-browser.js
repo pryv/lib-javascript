@@ -644,7 +644,7 @@ Auth.prototype.popupLogin = function popupLogin() {
 //--------------------- Utils ----------//
 
 // Regular expression filtering url parameters
-var statusRegexp = /[?#&]+prYv([^=&]+)=([^&]*)/gi;
+var statusRegexp = /[?#&]+prYv([^=&]+)=([^&]*)/g;
 
 /**
  * Grab status parameter from url query string
