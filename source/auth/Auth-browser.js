@@ -63,9 +63,18 @@ Auth.prototype.setup = function (settings) {
     // Set self as return url?
     if((settings.returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet()) ||
       (settings.returnURL.indexOf('self') === 0)) {
-      var myParams = settings.returnURL.substring(4);
-      // Eventually clean-up current url from previous pryv returnURL
-      settings.returnURL = this._cleanStatusFromURL() + myParams;
+        settings.returnURL = this._cleanStatusFromURL();
+        // If not already ending by &
+        if (settings.returnURL.slice(-1) !== '&') {
+          // If already containing ? or #, add a &
+          if (settings.returnURL.indexOf('?') > -1 || settings.returnURL.indexOf('#') > -1) {
+            settings.returnURL += '&';
+          } 
+          // If no, add a #
+          else {
+            settings.returnURL += '#';
+          }
+        }      
     } else if(settings.returnURL.indexOf('auto') === 0 && !utility.browserIsMobileOrTablet()) {
       settings.returnURL = false;
     }
