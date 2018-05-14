@@ -1,7 +1,8 @@
 var socketIO = require('socket.io-client'),
     _ = require('underscore');
 
-var utility = module.exports = {};
+var utility = module.exports = process.browser ?
+  require('./utility-browser.js') : require('./utility-node.js');
 
 /**
  * @returns {Boolean} `true` if we're in a web browser environment
@@ -71,11 +72,7 @@ utility.ioConnect = function (settings) {
   var url = httpMode + '://' + settings.host + ':' + settings.port + '' +
       settings.path + '?auth=' + settings.auth + '&resource=' + settings.namespace;
 
-  return socketIO.connect(url, {'force new connection': true});
+  return socketIO(url, {forceNew: true});
 };
 
 utility.urls = require('./urls');
-
-// platform-specific members
-_.extend(utility, utility.isBrowser() ?
-    require('./utility-browser.js') : require('./utility-node.js'));

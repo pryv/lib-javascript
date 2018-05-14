@@ -1,4 +1,2 @@
-var utility = require('../utility/utility.js');
-
-module.exports =  utility.isBrowser() ?
+module.exports =  process.browser ?
     require('./Auth-browser.js') : require('./Auth-node.js');
