@@ -72,7 +72,7 @@ utility.ioConnect = function (settings) {
   var url = httpMode + '://' + settings.host + ':' + settings.port + '' +
       settings.path + '?auth=' + settings.auth + '&resource=' + settings.namespace;
 
-  return socketIO(url, {'forceNew': true});
+  return socketIO(url, {forceNew: true});
 };
 
 utility.urls = require('./urls');
