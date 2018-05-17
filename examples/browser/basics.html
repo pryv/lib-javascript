@@ -24,7 +24,7 @@
     var $events = document.getElementById('events');
 
     // .useStaging() only when debug / dev
-    var api = new pryv.Connection('perkikiki', 'TTZycvBTiq', {staging: true});
+    var api = new pryv.Connection({username: 'perkikiki', auth: 'TTZycvBTiq', staging: true});
 
     api.accessInfo(function(error, infos) {
       $accessInfo.value = JSON.stringify(infos, null, 2);

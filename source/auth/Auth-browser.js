@@ -111,7 +111,11 @@ Auth.prototype.setup = function (settings) {
 
   this.stateInitialization();
 
-  this.connection = new Connection(null, null, {ssl: true, domain: this.settings.domain});
+  this.connection = new Connection({
+    username: null,
+    auth: null,
+    ssl: true,
+    domain: this.settings.domain});
   // Look if we have a returning user (document.cookie)
   var cookieUserName = this.cookieEnabled ?
     utility.docCookies.getItem('access_username' + this.settings.domain) : false;
@@ -485,7 +489,9 @@ Auth.prototype.whoAmI = function (settings) {
       if (data.token) {
         this.connection.username = data.username;
         this.connection.auth = data.token;
-        var conn = new Connection(data.username, data.token, {
+        var conn = new Connection({
+          username: data.username,
+          auth: data.token,
           ssl: settings.ssl,
           domain: settings.domain
         });
