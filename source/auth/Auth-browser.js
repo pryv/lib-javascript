@@ -45,6 +45,7 @@ Auth.prototype.uiSupportedLanguages = ['en', 'fr'];
 Auth.prototype.setup = function (settings) {
   this.state = null;
 
+  this.disableCookies = settings.disableCookies || false;
   this._checkCookies();
 
   settings.languageCode =
@@ -691,6 +692,10 @@ Auth.prototype._cleanStatusFromURL = function () {
  * @private
  */
 Auth.prototype._checkCookies = function () {
+  if (this.disableCookies) {
+    return;
+  }
+
   this.cookieEnabled = (navigator.cookieEnabled);
   if (typeof navigator.cookieEnabled === 'undefined' && !this.cookieEnabled) {  //if not IE4+ NS6+
     document.cookie = 'testcookie';
