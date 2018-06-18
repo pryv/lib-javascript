@@ -26,6 +26,7 @@ _.extend(Auth.prototype, {
   settings: null,
   pollingID: false,
   pollingIsOn: true, // may be turned off if we can communicate between windows
+  cookiesForceDisable: false,
   cookieEnabled: false,
   ignoreStateFromURL: false // turned to true in case of loggout
 });
@@ -45,7 +46,7 @@ Auth.prototype.uiSupportedLanguages = ['en', 'fr'];
 Auth.prototype.setup = function (settings) {
   this.state = null;
 
-  this.disableCookies = settings.disableCookies || false;
+  this.cookiesForceDisable = settings.cookiesForceDisable || false;
   this._checkCookies();
 
   settings.languageCode =
@@ -692,7 +693,7 @@ Auth.prototype._cleanStatusFromURL = function () {
  * @private
  */
 Auth.prototype._checkCookies = function () {
-  if (this.disableCookies) {
+  if (this.cookiesForceDisable) {
     return;
   }
 
