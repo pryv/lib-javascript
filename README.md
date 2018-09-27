@@ -41,7 +41,6 @@ Read, then run `./scripts/setup-environment-dev.sh`
 
 `grunt`:
 
-- applies code linting (using eslint)
 - builds documentation into `dist/{version}/docs`
 - browserifies the lib into `dist/{version}` as well as `dist/latest` for 
   browser standalone distribution
