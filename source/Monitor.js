@@ -1,4 +1,4 @@
-var _ = require('underscore'),
+var _ = require('lodash'),
   SignalEmitter = require('./utility/SignalEmitter.js'),
   Filter = require('./Filter.js');
 

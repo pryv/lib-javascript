@@ -1,14 +1,15 @@
-var utility = require('./utility/utility.js'),
-    ConnectionEvents = require('./connection/ConnectionEvents.js'),
-    ConnectionStreams = require('./connection/ConnectionStreams.js'),
-    ConnectionProfile = require('./connection/ConnectionProfile.js'),
-    ConnectionBookmarks = require('./connection/ConnectionBookmarks.js'),
-    ConnectionAccesses = require('./connection/ConnectionAccesses.js'),
-    ConnectionMonitors = require('./connection/ConnectionMonitors.js'),
-    ConnectionAccount = require('./connection/ConnectionAccount.js'),
-    CC = require('./connection/ConnectionConstants.js'),
-    Datastore = require('./Datastore.js'),
-    _ = require('underscore');
+
+const utility = require('./utility/utility.js');
+const ConnectionEvents = require('./connection/ConnectionEvents.js');
+const ConnectionStreams = require('./connection/ConnectionStreams.js');
+const ConnectionProfile = require('./connection/ConnectionProfile.js');
+const ConnectionBookmarks = require('./connection/ConnectionBookmarks.js');
+const ConnectionAccesses = require('./connection/ConnectionAccesses.js');
+const ConnectionMonitors = require('./connection/ConnectionMonitors.js');
+const ConnectionAccount = require('./connection/ConnectionAccount.js');
+const CC = require('./connection/ConnectionConstants.js');
+const Datastore = require('./Datastore.js');
+const _ = require('lodash');
 
 /**
  * @class Connection
@@ -31,40 +32,33 @@ var utility = require('./utility/utility.js'),
  * @param {string} [settings.extraPath = ''] append to the connections. Must start with a '/'
  */
 module.exports = Connection;
-function Connection() {
-  var settings;
-  if (!arguments[0] || typeof arguments[0] === 'string') {
-    console.warn('new Connection(username, auth, settings) is deprecated.',
-      'Please use new Connection(settings)', arguments);
-    this.username = arguments[0];
-    this.auth = arguments[1];
-    settings = arguments[2];
-  } else {
-    settings = arguments[0];
-    this.username = settings.username;
-    this.auth = settings.auth;
-    if (settings.url) {
-      var urlInfo = utility.urls.parseServerURL(settings.url);
-      this.username = urlInfo.username;
-      settings.hostname = urlInfo.hostname;
-      settings.domain = urlInfo.domain;
-      settings.port = urlInfo.port;
-      settings.extraPath = urlInfo.path === '/' ? '' : urlInfo.path;
-      settings.ssl = urlInfo.isSSL();
-    }
-  }
-  this._serialId = Connection._serialCounter++;
+function Connection(options) {
+  // Make sure we don't modify our argument. 
+  const opts = _.cloneDeep(options);
 
-  this.settings = _.extend({
+  this.username = opts.username;
+  this.auth = opts.auth;
+
+  const defaultSettings = {
     port: 443,
     ssl: true,
     extraPath: '',
-    staging: false
-  }, settings);
-
-  this.settings.domain = settings.domain ?
-      settings.domain : utility.urls.defaultDomain;
-
+    staging: false, 
+    domain: utility.urls.defaultDomain, 
+  };
+  
+  let urlSettings = {}; 
+  if (opts.url != null) {
+    urlSettings, this.username = parseSettingsFromUrl(opts.url);
+  }
+  
+  this.settings = _.extend( // Values from (in order of ascending precendence):
+    {},
+    defaultSettings, 
+    opts, 
+    urlSettings,        
+  ); 
+  
   this.serverInfos = {
     // nowLocalTime - nowServerTime
     deltaTime: null,
@@ -75,43 +69,19 @@ function Connection() {
 
   this._accessInfo = null;
   this._privateProfile = null;
+  this.datastore = null;
 
+  this._serialId = Connection._serialCounter++;
   this._streamSerialCounter = 0;
   this._eventSerialCounter = 0;
 
-  /**
-   * Manipulate events for this connection
-   * @type {ConnectionEvents}
-   */
   this.events = new ConnectionEvents(this);
-  /**
-   * Manipulate streams for this connection
-   * @type {ConnectionStreams}
-   */
   this.streams = new ConnectionStreams(this);
-  /**
-  * Manipulate app profile for this connection
-  * @type {ConnectionProfile}
-  */
   this.profile = new ConnectionProfile(this);
-  /**
-  * Manipulate bookmarks for this connection
-  * @type {ConnectionProfile}
-  */
   this.bookmarks = new ConnectionBookmarks(this, Connection);
-  /**
-  * Manipulate accesses for this connection
-  * @type {ConnectionProfile}
-  */
   this.accesses = new ConnectionAccesses(this);
-  /**
-   * Manipulate this connection monitors
-   */
   this.monitors = new ConnectionMonitors(this);
-
   this.account = new ConnectionAccount(this);
-  this.datastore = null;
-
 }
 
 Connection._serialCounter = 0;
@@ -558,4 +528,20 @@ function getHostname(connection) {
   return connection.settings.hostname ||
       connection.username ?
       connection.username + '.' + connection.settings.domain : connection.settings.domain;
+}
+
+// Parses connection settings from an url of the form 
+//    http://domain
+// and returns a (settings, username) tuple. Settings is of the form that is 
+// required for the constructor and may contain 'hostname', 'domain', 
+// 'port', 'extraPath', 'ssl'. 
+//
+function parseSettingsFromUrl(url) {
+  const urlInfo = utility.urls.parseServerURL(url);
+
+  const username = urlInfo.username;
+  const extractedSettings = _.pick(urlInfo, 
+    ['hostname', 'domain', 'port', 'extraPath', 'ssl']);
+
+  return [extractedSettings, username];
 }

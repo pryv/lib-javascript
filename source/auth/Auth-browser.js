@@ -1,10 +1,12 @@
 /* global confirm, document, navigator, location, window */
 
-var utility = require('../utility/utility.js'),
-  Connection = require('../Connection.js'),
-  _ = require('underscore');
+const utility = require('../utility/utility.js');
+const Connection = require('../Connection.js');
+const _ = require('lodash');
 
-//--------------------- Initialization ----------//
+//--------------------- Initialization -----------------------------------------
+
+const logger = console; 
 
 /**
  * @class Auth: handling Pryv authentication through browser popup
@@ -14,7 +16,6 @@ var Auth = function () {};
 _.extend(Auth.prototype, {
   connection: null, // actual connection managed by Auth
   config: {
-    // TODO: clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
     registerURL: {ssl: true, host: 'reg.pryv.me'},
     sdkFullPath: 'https://api.pryv.com/lib-javascript/latest'
   },
@@ -28,81 +29,67 @@ _.extend(Auth.prototype, {
   pollingIsOn: true, // may be turned off if we can communicate between windows
   cookiesForceDisable: false,
   cookieEnabled: false,
-  ignoreStateFromURL: false // turned to true in case of loggout
+  ignoreStateFromURL: false, // turned to true in case of loggout
+  uiSupportedLanguages: ['en', 'fr'], 
 });
 
 // Initialize style sheet and supported languages
 utility.loadExternalFiles(Auth.prototype.config.sdkFullPath +
   '/assets/buttonSigninPryv.css', 'css');
-Auth.prototype.uiSupportedLanguages = ['en', 'fr'];
 
 /**
- * Setup the authentication process
- * //TODO check settings
- * @param settings: initialization settings
- * @returns {Connection}: the connection managed by Auth.
- *  A new one is created each time setup is called.
+ * Sets up the authentication process. 
+ * 
+ * These settings are mandatory: 
+ * 
+ *  - *requestingAppId* App ID that requests access. (see 
+ *    http://api.pryv.com/getting-started/javascript/#authorize-your-app) for 
+ *    details. 
+ *  - *requestedPermissions* Permissions to request. 
+ * 
+ * These settings are optional: 
+ * 
+ *  - *languageCode* Language code to use during auth/consent process. This
+ *    will default to 'en' if not set.
+ *  - *returnURL* URL to redirect the client to after completing the auth
+ *    process. Can be left empty, in which case you need to poll the result 
+ *    of the auth operation. 
+ *  - *oauthState* Debug option. 
+ *  - *clientData* Client data to store in the access object in Pryv.IO. 
+ * 
+ * @returns {Connection}: the connection managed by Auth. A new one is created 
+ *  each time setup is called.
  */
 Auth.prototype.setup = function (settings) {
+  this.settings = settings;
   this.state = null;
 
   this.cookiesForceDisable = settings.cookiesForceDisable || false;
   this._checkCookies();
 
+  // Compute the language code to use. 
   settings.languageCode =
     utility.getPreferredLanguage(this.uiSupportedLanguages, settings.languageCode);
 
-  // ReturnURL
-  settings.returnURL = settings.returnURL || 'auto#';
-  if (settings.returnURL) {
-    // Check the trailer
-    var trailer = settings.returnURL.charAt(settings.returnURL.length - 1);
-    if ('#&?'.indexOf(trailer) < 0) {
-      throw new Error('Pryv access: Last character of --returnURL setting-- is not ' +
-        '"?", "&" or "#": ' + settings.returnURL);
-    }
+  // Verify and compute returnURL from the user settings.
+  settings.returnURL = computeReturnUrl(settings.returnURL);
 
-    // Set self as return url?
-    if((settings.returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet()) ||
-      (settings.returnURL.indexOf('self') === 0)) {
-        settings.returnURL = this._cleanStatusFromURL();
-        // If not already ending by &
-        if (settings.returnURL.slice(-1) !== '&') {
-          // If already containing ? or #, add a &
-          if (settings.returnURL.indexOf('?') > -1 || settings.returnURL.indexOf('#') > -1) {
-            settings.returnURL += '&';
-          } 
-          // If no, add a #
-          else {
-            settings.returnURL += '#';
-          }
-        }      
-    } else if(settings.returnURL.indexOf('auto') === 0 && !utility.browserIsMobileOrTablet()) {
-      settings.returnURL = false;
-    }
-
-    if (settings.returnURL && settings.returnURL.indexOf('http') < 0) {
-      throw new Error('Pryv access: --returnURL setting-- does not start with http: ' +
-        settings.returnURL);
-    }
-  }
-
-  this.settings = settings;
-
-  // TODO: Clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
   var z =  this.config.registerURL.host;
   this.settings.domain = z.substring(z.indexOf('.') + 1);
 
-  var params = {
+  const params = {
     requestingAppId : settings.requestingAppId,
     requestedPermissions : settings.requestedPermissions,
     languageCode : settings.languageCode,
     returnURL : settings.returnURL
   };
 
-  // Advanced dev. option for oauth
-  if (settings.oauthState) {
-    params.oauthState = settings.oauthState;
+  // Copy over advanced options
+  for (let key of ['oauthState', 'clientData']) {
+    const value = settings[key]; 
+    if (value != null) {
+      params[key] = value; 
+    }
   }
 
   // Advanced dev. option for local testing with rec-la
@@ -141,7 +128,6 @@ Auth.prototype.setup = function (settings) {
         if (data.status && data.status !== 'ERROR') {
           this.stateChanged(data);
         } else {
-          // TODO call shouldn't failed
           this.internalError('/access Invalid data: ', data);
         }
       }.bind(this),
@@ -157,7 +143,7 @@ Auth.prototype.setup = function (settings) {
   return this.connection;
 };
 
-//--------------------- UI Content -----------//
+//--------------------- UI Content ---------------------------------------------
 
 /**
  * Generate Pryv login button
@@ -257,7 +243,7 @@ Auth.prototype.uiInButton = function (username) {
  * @param message: reason for refusal
  */
 Auth.prototype.uiRefusedButton = function (message) {
-  console.log('Pryv access [REFUSED]' + message);
+  logger.log('Pryv access [REFUSED]' + message);
   var strs = {
     'en': { 'msg': 'access refused'},
     'fr': { 'msg': 'Accès refusé'}
@@ -291,7 +277,7 @@ Auth.prototype.updateButton = function (html) {
       this.spanButton.onclick = function (e) {
         e.preventDefault();
         var element = document.getElementById('pryv-access-btn');
-        console.log('onClick', this.spanButton,
+        logger.log('onClick', this.spanButton,
           element.getAttribute('data-onclick-action'));
         this.onClick[element.getAttribute('data-onclick-action')]();
       }.bind(this);
@@ -499,7 +485,7 @@ Auth.prototype.whoAmI = function (settings) {
         });
 
         conn.accessInfo(function (error) {
-          console.log('after access info', this.connection);
+          logger.log('after access info', this.connection);
           if(error && (typeof(this.settings.callbacks.error) === 'function')) {
             this.settings.callbacks.error(error);
           } else if(!error && typeof(this.settings.callbacks.signedIn)  === 'function') {
@@ -588,7 +574,7 @@ Auth.prototype.poll = function poll() {
 
     this.pollingID = setTimeout(this.poll.bind(this), this.state.poll_rate_ms);
   } else {
-    console.log('stopped polling: on=' + this.pollingIsOn + ' rate:' + this.state.poll_rate_ms);
+    logger.log('stopped polling: on=' + this.pollingIsOn + ' rate:' + this.state.poll_rate_ms);
   }
 };
 
@@ -601,10 +587,12 @@ Auth.prototype.popupCallBack = function (event) {
   // Do not use 'this' here !
   if (!this.settings.forcePolling) {
     if (event.source !== this.window) {
-      console.log('popupCallBack event.source does not match Auth.window');
+      logger.log('popupCallBack event.source does not match Auth.window');
       return false;
     }
-    console.log('from popup >>> ' + JSON.stringify(event.data));
+
+    logger.log('from popup >>> ' + JSON.stringify(event.data));
+
     this.pollingIsOn = false; // If we can receive messages we stop polling
     this.stateChanged(event.data);
   }
@@ -625,31 +613,25 @@ Auth.prototype.popupLogin = function popupLogin() {
     // Start polling
     setTimeout(this.poll(), 1000);
 
-    var screenX = typeof window.screenX !== 'undefined' ? window.screenX : window.screenLeft,
-      screenY = typeof window.screenY !== 'undefined' ? window.screenY : window.screenTop,
-      outerWidth = typeof window.outerWidth !== 'undefined' ?
-        window.outerWidth : document.body.clientWidth,
-      outerHeight = typeof window.outerHeight !== 'undefined' ?
-        window.outerHeight : (document.body.clientHeight - 22),
-      width    = 270,
-      height   = 420,
-      left     = parseInt(screenX + ((outerWidth - width) / 2), 10),
-      top      = parseInt(screenY + ((outerHeight - height) / 2.5), 10),
-      features = (
-        'width=' + width +
-        ',height=' + height +
-        ',left=' + left +
-        ',top=' + top +
-        ',scrollbars=yes'
-      );
-
-    window.addEventListener('message', this.popupCallBack.bind(this), false);
+    const screenX = window.screenX != null ? window.screenX : window.screenLeft;
+    const screenY = window.screenY != null ? window.screenY : window.screenTop;
+    const outerWidth = window.outerWidth != null ? window.outerWidth : document.body.clientWidth;
+    const outerHeight = window.outerHeight != null ? window.outerHeight : (document.body.clientHeight - 22);
+    const width    = 270;
+    const height   = 420;
+    const left     = Math.floor(screenX + ((outerWidth - width) / 2));
+    const top      = Math.floor(screenY + ((outerHeight - height) / 2.5));
+    
+    const features = 
+      `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`;
+    
+    window.addEventListener('message', 
+      this.popupCallBack.bind(this), false);
 
     this.window = window.open(this.state.url, 'prYv Sign-in', features);
 
-    if (!this.window) {
-      // TODO try to fall back on access
-      console.log('FAILED_TO_OPEN_WINDOW');
+    if (this.window == null) {
+      logger.log('FAILED_TO_OPEN_WINDOW');
     } else if(window.focus) {
       this.window.focus();
     }
@@ -703,5 +685,42 @@ Auth.prototype._checkCookies = function () {
     this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
   }
 };
+
+function computeReturnUrl(userConfig) {
+  let returnURL = userConfig || 'auto#';
+
+  // Check the trailer
+  const tail = returnURL.charAt(returnURL.length - 1);
+  if ('#&?'.indexOf(tail) < 0) {
+    throw new Error('Pryv access: Last character of --returnURL setting-- is not ' +
+      '"?", "&" or "#": ' + returnURL);
+  }
+
+  // Set self as return url?
+  if ((returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet()) ||
+    (returnURL.indexOf('self') === 0)) {
+    returnURL = this._cleanStatusFromURL();
+    // If not already ending by &
+    if (returnURL.slice(-1) !== '&') {
+      // If already containing ? or #, add a &
+      if (returnURL.indexOf('?') > -1 || returnURL.indexOf('#') > -1) {
+        returnURL += '&';
+      }
+      // If no, add a #
+      else {
+        returnURL += '#';
+      }
+    }
+  } else if (returnURL.indexOf('auto') === 0 && !utility.browserIsMobileOrTablet()) {
+    returnURL = false;
+  }
+
+  if (returnURL && returnURL.indexOf('http') < 0) {
+    throw new Error('Pryv access: --returnURL setting-- does not start with http ' +
+      returnURL);
+  }
+
+  return returnURL;
+}
 
 module.exports = new Auth();

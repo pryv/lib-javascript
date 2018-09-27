@@ -1,5 +1,5 @@
-var socketIO = require('socket.io-client'),
-    _ = require('underscore');
+const socketIO = require('socket.io-client');
+const _ = require('lodash');
 
 var utility = module.exports = process.browser ?
   require('./utility-browser.js') : require('./utility-node.js');

@@ -39,6 +39,7 @@ urls.parseServerURL = function (url) {
  */
 function URLInfo(url, type) {
   var loc;
+
   if (typeof document !== 'undefined') {
     // browser
     if (url) {
@@ -54,9 +55,11 @@ function URLInfo(url, type) {
     }
     loc = require('url').parse(url);
   }
+
   if (! (type === 'client' || type === 'server')) {
     throw new Error('`type` must be either "client" or "server"');
   }
+  
   this.type = type;
 
   this.protocol = loc.protocol;

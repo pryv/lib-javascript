@@ -1,5 +1,5 @@
 var utility = require('../utility/utility.js'),
-  _ = require('underscore'),
+  _ = require('lodash'),
   Filter = require('../Filter'),
   Event = require('../Event'),
   CC = require('./ConnectionConstants.js');
