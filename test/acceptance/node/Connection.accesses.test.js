@@ -1,8 +1,7 @@
-/* global describe, it, before, after */
+/* global describe, it, before */
 const Pryv = require('../../../source/main');
 const should = require('should');
 const config = require('../test-support/config.js');
-const async = require('async');
 const _ = require('lodash');
 const bluebird = require('bluebird');
 const assert = require('assert');
@@ -185,7 +184,7 @@ describe('Connection.accesses', function () {
 
   describe('update()', function () {
 
-    var testAccess, testStream, streamConnection;
+    var testAccess, testStream;
 
     before(async () => {
       testStream = await ensureStream.ensure({
@@ -203,8 +202,6 @@ describe('Connection.accesses', function () {
           }
         ]
       });
-
-      streamConnection = new Pryv.Connection(config.connectionSettings);
     });
 
     it('must return the updated access', function (done) {
