@@ -1,7 +1,7 @@
-var package = require('./package.json'),
-    distRoot = './dist/',
-    currentDistPath = distRoot + package.version + '/',
-    latestDistPath = distRoot + 'latest/';
+const package = require('./package.json');
+const distRoot = './dist/';
+const currentDistPath = distRoot + package.version + '/';
+const latestDistPath = distRoot + 'latest/';
 
 module.exports = function (grunt) {
 

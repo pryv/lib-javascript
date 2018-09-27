@@ -11,6 +11,8 @@ const CC = require('./connection/ConnectionConstants.js');
 const Datastore = require('./Datastore.js');
 const _ = require('lodash');
 
+const logger = console; 
+
 /**
  * @class Connection
  * Create an instance of Connection to Pryv API.
@@ -52,11 +54,12 @@ function Connection(options) {
     urlSettings, this.username = parseSettingsFromUrl(opts.url);
   }
   
-  this.settings = _.extend( // Values from (in order of ascending precendence):
+  // Values from (in order of ascending precendence):
+  this.settings = _.extend( 
     {},
     defaultSettings, 
     opts, 
-    urlSettings,        
+    urlSettings
   ); 
   
   this.serverInfos = {
@@ -218,21 +221,22 @@ Connection.prototype.monitor = function (filter) {
 
 /**
  * Do a direct request to Pryv's API.
- * Even if exposed there must be an abstraction for every API call in this library.
+ * 
  * @param {Object} params object with
  * @param {string} params.method - GET | POST | PUT | DELETE
- * @param {string} params.path - to resource, starting with '/' like '/events'
- * @param {Object} params.jsonData - data to POST or PUT
+ * @param {string} params.path - to resource, starting with '/' like '/events'
+ * @param {Object} params.jsonData - data to POST or PUT
  * @param {Boolean} params.isFile indicates if the data is a binary file.
  * @params {string} [params.parseResult = 'json'] - 'json|binary'
- * @param {Connection~requestCallback} params.callback called when the request is finished
- * @param {Connection~requestCallback} params.progressCallback called when the request gives
- * progress updates
+ * @param {Connection~requestCallback} params.callback called when the request 
+ *                                     is finished
+ * @param {Connection~requestCallback} params.progressCallback called when the 
+ *                                     request gives progress updates
  */
 Connection.prototype.request = function (params) {
 
   if (arguments.length > 1) {
-    console.warn('Connection.request(method, path, callback, jsonData, isFile, progressCallback)' +
+    logger.warn('Connection.request(method, path, callback, jsonData, isFile, progressCallback)' +
     ' is deprecated. Please use Connection.request(params).', arguments);
     params = {};
     params.method = arguments[0];
@@ -407,8 +411,10 @@ Connection.login = function (params, callback) {
 
   if (!utility.isBrowser()) {
     var origin = 'https://sw.';
-    origin = params.origin ? origin + params.origin :
-    origin + utility.urls.domains.client.production;
+    origin = params.origin ? 
+      origin + params.origin :
+      origin + utility.urls.domains.client.production;
+
     _.extend(headers, {Origin: origin});
   }
 
@@ -526,8 +532,11 @@ Connection.prototype.trustedLogout = function(callbacks) {
 
 function getHostname(connection) {
   return connection.settings.hostname ||
+    (
       connection.username ?
-      connection.username + '.' + connection.settings.domain : connection.settings.domain;
+        connection.username + '.' + connection.settings.domain : 
+        connection.settings.domain
+    );
 }
 
 // Parses connection settings from an url of the form 

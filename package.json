@@ -1,6 +1,6 @@
 {
   "name": "pryv",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "description": "Javascript library (browser & Node.js) to access and manipulate Pryv users data",
   "keywords": [
     "pryv",
@@ -52,12 +52,13 @@
   },
   "dependencies": {
     "form-data": "0.1.x",
-    "socket.io-client": "2.1.0",
-    "lodash": "latest"
+    "lodash": "latest",
+    "socket.io-client": "2.1.0"
   },
   "devDependencies": {
     "async": "latest",
     "blanket": "latest",
+    "bluebird": "^3.5.2",
     "coffee-script": "latest",
     "eslint": "^5.6.0",
     "grunt": "latest",

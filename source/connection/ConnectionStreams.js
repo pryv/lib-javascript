@@ -1,7 +1,7 @@
-var _ = require('lodash'),
-  utility = require('../utility/utility.js'),
-  Stream = require('../Stream.js'),
-  CC = require('./ConnectionConstants.js');
+const _ = require('lodash');
+const utility = require('../utility/utility.js');
+const Stream = require('../Stream.js');
+const CC = require('./ConnectionConstants.js');
 
 /**
  * @class ConnectionStreams
@@ -26,15 +26,11 @@ function ConnectionStreams(connection) {
 
 /**
  * @typedef ConnectionStreamsOptions parameters than can be passed along a Stream request
- * @property {string} parentId  if parentId is null you will get all the "root" streams.
- * @property {string} [state] 'all' || null  - if null you get only "active" streams
+ * @property {string} parentId  if parentId is null you will get all the "root" streams.
+ * @property {string} [state] 'all' || null  - if null you get only "active" streams
  **/
 
 
-/**
- * @param {ConnectionStreamsOptions} options
- * @param {ConnectionStreams~getCallback} callback - handles the response
- */
 ConnectionStreams.prototype.get = function (options, callback) {
   if (typeof(callback) !== 'function') {
     throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
@@ -130,39 +126,40 @@ ConnectionStreams.prototype.update = function (streamData, callback) {
  * @param mergeEventsWithParent
  */
 ConnectionStreams.prototype.delete = ConnectionStreams.prototype.trash =
-    function (streamData, callback, mergeEventsWithParent) {
-      if (typeof(callback) !== 'function') {
-        throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
-      }
-      var id;
-      if (streamData && streamData.id) {
-        id = streamData.id;
-      } else {
-        id = streamData;
-      }
+  function (streamData, callback, mergeEventsWithParent) {
+    if (typeof(callback) !== 'function') {
+      throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
+    }
+    var id;
+    if (streamData && streamData.id) {
+      id = streamData.id;
+    } else {
+      id = streamData;
+    }
 
-      mergeEventsWithParent = mergeEventsWithParent ? true : false;
-      this.connection.request({
-        method: 'DELETE',
-        path: '/streams/' + id + '?mergeEventsWithParent=' + mergeEventsWithParent,
-        callback: function (error, resultData) {
-          var stream = null;
-          if (!error && resultData && resultData.stream) {
-            streamData.id = resultData.stream.id;
-            stream = new Stream(this.connection, resultData.stream);
-            if (this.connection.datastore) {
-              this.connection.datastore.indexStream(stream);
-            }
+    mergeEventsWithParent = mergeEventsWithParent ? true : false;
+    this.connection.request({
+      method: 'DELETE',
+      path: '/streams/' + id + '?mergeEventsWithParent=' + mergeEventsWithParent,
+      callback: function (error, resultData) {
+        var stream = null;
+        if (!error && resultData && resultData.stream) {
+          streamData.id = resultData.stream.id;
+          stream = new Stream(this.connection, resultData.stream);
+          if (this.connection.datastore) {
+            this.connection.datastore.indexStream(stream);
           }
-          return callback(error, error ? null : resultData.stream);
-        }.bind(this)
-      });
-};
+        }
+
+        return callback(error, error ? null : resultData.stream);
+      }.bind(this)
+    });
+  };
 
 
 /**
  * TODO remove it's unused
- * @param {ConnectionStreamsOptions} options
+ * @param {ConnectionStreamsOptions} options
  * @param {ConnectionStreams~getCallback} callback - handles the response
  */
 ConnectionStreams.prototype.updateProperties = function (stream, properties, options, callback) {
@@ -188,7 +185,7 @@ ConnectionStreams.prototype.updateProperties = function (stream, properties, opt
  * Get a Stream by it's Id.
  * Works only if fetchStructure has been done once.
  * @param {string} streamId
- * @throws {Error} Connection.fetchStructure must have been called before.
+ * @throws {Error} Connection.fetchStructure must have been called before.
  */
 ConnectionStreams.prototype.getById = function (streamId) {
   if (!this.connection.datastore) {
@@ -204,7 +201,7 @@ ConnectionStreams.prototype.getById = function (streamId) {
  * TODO rename _getStreams
  * get streams on the API
  * @private
- * @param {ConnectionStreams~options} opts
+ * @param {ConnectionStreams~options} opts
  * @param callback
  */
 ConnectionStreams.prototype._getData = function (opts, callback) {
@@ -221,7 +218,7 @@ ConnectionStreams.prototype._getData = function (opts, callback) {
  * TODO create a streamLike Object
  * Create a stream on the API with a jsonObject
  * @private
- * @param {Object} streamData an object array.. typically one that can be obtained with
+ * @param {Object} streamData an object array.. typically one that can be obtained with
  * stream.getData()
  * @param callback
  */
@@ -249,7 +246,7 @@ ConnectionStreams.prototype._createWithData = function (streamData, callback) {
 /**
  * Update a stream on the API with a jsonObject
  * @private
- * @param {Object} streamData an object array.. typically one that can be obtained with
+ * @param {Object} streamData an object array.. typically one that can be obtained with
  * stream.getData()
  * @param callback
  */
@@ -266,7 +263,7 @@ ConnectionStreams.prototype._updateWithData = function (streamData, callback) {
 
 /**
  * @private
- * @param {ConnectionStreams~options} options
+ * @param {ConnectionStreams~options} options
  */
 ConnectionStreams.prototype._getObjects = function (options, callback) {
   options = options || {};
@@ -309,7 +306,7 @@ ConnectionStreams.prototype._getObjects = function (options, callback) {
 
 /**
  * Walk the tree structure.. parents are always announced before childrens
- * @param {ConnectionStreams~options} options
+ * @param {ConnectionStreams~options} options
  * @param {ConnectionStreams~walkTreeEachStreams} eachStream
  * @param {ConnectionStreams~walkTreeDone} done
  */
@@ -328,7 +325,7 @@ ConnectionStreams.prototype.walkTree = function (options, eachStream, done) {
 
 /**
  * Get the all the streams of the Tree in a list.. parents firsts
- * @param {ConnectionStreams~options} options
+ * @param {ConnectionStreams~options} options
  * @param {ConnectionStreams~getFlatenedObjectsDone} done
  */
 ConnectionStreams.prototype.getFlatenedObjects = function (options, callback) {
@@ -337,7 +334,7 @@ ConnectionStreams.prototype.getFlatenedObjects = function (options, callback) {
   }
   var result = [];
   this.walkTree(options,
-    function (stream) { // each stream
+    function (stream) { // each stream
       result.push(stream);
     }, function (error) {  // done
       if (error) {

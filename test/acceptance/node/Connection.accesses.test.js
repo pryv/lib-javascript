@@ -1,20 +1,107 @@
 /* global describe, it, before, after */
-var Pryv = require('../../../source/main'),
-  should = require('should'),
-  config = require('../test-support/config.js'),
-  async = require('async');
+const Pryv = require('../../../source/main');
+const should = require('should');
+const config = require('../test-support/config.js');
+const async = require('async');
+const _ = require('lodash');
+const bluebird = require('bluebird');
+const assert = require('assert');
+
+
+// Encodes the strategy we use to ensure an object is in the remote pryv 
+// database before starting a test. 
+//
+// Example: 
+// 
+//   ensureStream = new EnsureEntity({
+//     createClosure: (attrs) => {
+//       // Create a stream with attrs given, return Promise<Stream>.
+//     },
+//     deleteClosure: (attrs) => {
+//       // Delete a stream (identified by attrs)
+//     },
+//   });
+// 
+class EnsureEntity {
+  constructor(opts) {
+    this.configure('create', opts);
+    this.configure('delete', opts);
+  }
+
+  // Configures the action either from 'actionMethod' or 'actionClosure', 
+  // assigns to 'this.actionClosure'. 
+  // 
+  configure(action, opts) {
+    const closureName = `${action}Closure`;
+    const method = opts[`${action}Method`];
+
+    if (method != null) {
+      this[closureName] = async (attrs) => {
+        return bluebird.fromCallback(
+          cb => method(attrs, cb));
+      };
+    }
+    else {
+      const closure = opts[closureName];
+      assert(closure != null, `Please specify either ${action}Method or ${action}Closure.`);
+
+      this[closureName] = closure;
+    }
+  }
+
+  async ensure(attrs) {
+    try {
+      return await this.createClosure(attrs);
+    }
+    catch (err) {
+      // We could not create the object; let's assume it was because it is already
+      // there and wasn't properly cleaned after a test failure. Delete it, 
+      // then retry. 
+
+      await this.deleteClosure(attrs);
+      try {
+        await this.deleteClosure(attrs);
+      } 
+      catch (err) { 
+        // IGNORE
+      }
+      return this.createClosure(attrs);
+    }
+  }
+
+  async createOnly(attrs) {
+    return await this.createClosure(attrs);
+  }
+}
+
+const conn = new Pryv.Connection(config.connectionSettings);
+const streams = conn.streams;
+const ensureStream = new EnsureEntity({
+  deleteMethod: streams.delete.bind(streams), 
+  createMethod: streams.create.bind(streams), 
+});
 
 describe('Connection.accesses', function () {
   this.timeout(10000);
 
-  var accessConnection;
+  let accessConnection;
+  let ensureAccess;
+  before(async () => {
+    accessConnection = await bluebird.fromCallback(
+      cb => Pryv.Connection.login(config.loginParams, cb));
+    
+    const accesses = accessConnection.accesses;
+    ensureAccess = new EnsureEntity({
+      deleteClosure: async (attrs) => {
+        const all = await bluebird.fromCallback(
+          cb => accesses.get(cb));
 
+        const access = _.find(all, a => a.name === attrs.name); 
+        assert(access != null);
 
-  before(function (done) {
-    Pryv.Connection.login(config.loginParams, function (err, newConnection) {
-      accessConnection = newConnection;
-      done(err);
-
+        return bluebird.fromCallback(cb => accesses.delete(access.id, cb));
+      },
+      createMethod: accesses.create.bind(accesses), 
     });
   });
 
@@ -52,36 +139,11 @@ describe('Connection.accesses', function () {
 
     var testAccess, testStream;
 
-    before(function (done) {
-      testStream = {
+    before(async () => {
+      testStream = await ensureStream.ensure({
         id: 'accessTestStream',
         name: 'accessTestStream'
-      };
-      accessConnection.streams.create(testStream, function (err, newStream) {
-        testStream = newStream;
-        done(err);
       });
-    });
-
-    after(function (done) {
-      async.series([
-        function (stepDone) {
-          accessConnection.streams.delete(testStream, function (err, trashedStream) {
-            testStream = trashedStream;
-            stepDone(err);
-          });
-        },
-        function (stepDone) {
-          accessConnection.streams.delete(testStream, function (err) {
-            stepDone(err);
-          });
-        },
-        function (stepDone) {
-          accessConnection.accesses.delete(testAccess.id, function (err) {
-            stepDone(err);
-          });
-        }
-      ], done);
     });
 
     it('must return the created access', function (done) {
@@ -125,12 +187,13 @@ describe('Connection.accesses', function () {
 
     var testAccess, testStream, streamConnection;
 
-    before(function (done) {
-      testStream = {
+    before(async () => {
+      testStream = await ensureStream.ensure({
         id: 'accessTestStream',
         name: 'accessTestStream'
-      };
-      testAccess = {
+      });
+
+      testAccess = await ensureAccess.ensure({
         type: 'shared',
         name: 'testAccess',
         permissions: [
@@ -138,46 +201,10 @@ describe('Connection.accesses', function () {
             streamId: testStream.id,
             level: 'read'
           }
-        ]};
+        ]
+      });
 
       streamConnection = new Pryv.Connection(config.connectionSettings);
-
-      async.series([
-        function (stepDone) {
-          streamConnection.streams.create(testStream, function (err, newStream) {
-            testStream = newStream;
-            stepDone(err);
-          });
-        },
-        function (stepDone) {
-          accessConnection.accesses.create(testAccess, function (err, newAccess) {
-            testAccess = newAccess;
-            stepDone(err);
-          });
-        }
-      ], done);
-
-    });
-
-    after(function (done) {
-      async.series([
-        function (stepDone) {
-          accessConnection.accesses.delete(testAccess.id, function (err) {
-            stepDone(err);
-          });
-        },
-        function (stepDone) {
-          streamConnection.streams.delete(testStream, function (err, trashedStream) {
-            testStream = trashedStream;
-            stepDone(err);
-          });
-        },
-        function (stepDone) {
-          streamConnection.streams.delete(testStream, function (err) {
-            stepDone(err);
-          });
-        }
-      ], done);
     });
 
     it('must return the updated access', function (done) {
@@ -193,11 +220,11 @@ describe('Connection.accesses', function () {
 
     it('must return an error if the updated access\'s parameters are invalid', function (done) {
       testAccess.permissions = [
-          {
-            fakeParam1: 'fghjkvbnm',
-            fakeParam2: 'tzuiogfd'
-          }
-        ];
+        {
+          fakeParam1: 'fghjkvbnm',
+          fakeParam2: 'tzuiogfd'
+        }
+      ];
       accessConnection.accesses.update(testAccess, function (err) {
         should.exist(err);
         done();
@@ -216,14 +243,13 @@ describe('Connection.accesses', function () {
 
   describe('delete()', function () {
 
-    var testAccess, testStream, streamConnection;
-
-    before(function (done) {
-      testStream = {
+    let testAccess, testStream;
+    before(async () => {
+      testStream = await ensureStream.ensure({
         id: 'accessTestStream',
         name: 'accessTestStream'
-      };
-      testAccess = {
+      });
+      testAccess = await ensureAccess.ensure({
         type: 'shared',
         name: 'testAccess',
         permissions: [
@@ -231,41 +257,8 @@ describe('Connection.accesses', function () {
             streamId: testStream.id,
             level: 'read'
           }
-        ]};
-
-      streamConnection = new Pryv.Connection(config.connectionSettings);
-
-      async.series([
-        function (stepDone) {
-          streamConnection.streams.create(testStream, function (err, newStream) {
-            testStream = newStream;
-            stepDone(err);
-          });
-        },
-        function (stepDone) {
-          accessConnection.accesses.create(testAccess, function (err, newAccess) {
-            testAccess = newAccess;
-            stepDone(err);
-          });
-        }
-      ], done);
-
-    });
-
-    after(function (done) {
-      async.series([
-        function (stepDone) {
-          streamConnection.streams.delete(testStream, function (err, trashedStream) {
-            testStream = trashedStream;
-            stepDone(err);
-          });
-        },
-        function (stepDone) {
-          streamConnection.streams.delete(testStream, function (err) {
-            stepDone(err);
-          });
-        }
-      ], done);
+        ]
+      });
     });
 
     it('must return an item deletion with the deleted access\' id', function (done) {
