@@ -20,6 +20,14 @@ module.exports = function (grunt) {
         src: ['./source/main.js'],
         dest: currentDistPath + 'pryv.js',
         options: {
+          transform: [["babelify", { 
+            "presets": [
+              [
+                "env", {
+                  targets: "last 1 version, not dead, > 1%",
+                }
+              ]
+            ]}]],
           alias: ['./source/main.js:pryv'],
           ignore: [ './source/system/*-node.js', './source/utility/*-node.js' ],
           browserifyOptions: {

@@ -57,6 +57,10 @@
   },
   "devDependencies": {
     "async": "latest",
+    "babel-cli": "latest",
+    "babel-core": "latest",
+    "babel-preset-env": "^1.7.0",
+    "babelify": "^8",
     "blanket": "latest",
     "bluebird": "^3.5.2",
     "coffee-script": "latest",
