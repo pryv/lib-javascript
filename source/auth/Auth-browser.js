@@ -74,8 +74,8 @@ Auth.prototype.setup = function (settings) {
   // Verify and compute returnURL from the user settings.
   settings.returnURL = computeReturnUrl(settings.returnURL);
 
-  var z =  this.config.registerURL.host;
-  this.settings.domain = z.substring(z.indexOf('.') + 1);
+  const urlInfo = utility.urls.parseServerURL(this.config.registerURL.host);
+  this.settings.domain = urlInfo.domain;
 
   const params = {
     requestingAppId : settings.requestingAppId,
@@ -93,7 +93,7 @@ Auth.prototype.setup = function (settings) {
   }
 
   // Advanced dev. option for local testing with rec-la
-  if (this.config.reclaDevel) {
+  if (this.config.reclaDevel != null) {
     // Return url will be forced to https://se.rec.la + reclaDevel
     params.reclaDevel = this.config.reclaDevel;
   }
