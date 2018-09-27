@@ -9,9 +9,12 @@ Javascript library (browser & Node.js) to access and manipulate Pryv users data.
 
 [Pryv on CodePen](http://codepen.io/pryv/) 
 
-- [Pryv basic example](http://codepen.io/pryv/pen/apQJxz): Example exposing how to request an access and fetching basic informations form a Pryv account.
-- [Pryv notes and values example](http://codepen.io/pryv/pen/apQJrO): Web form, enter notes and values. 
-- [Pryv events monitor example](http://codepen.io/pryv/pen/rjQygX): Monitor changes live on an Pryv account. Create, modifiy and delete events.
+- [Pryv basic example](http://codepen.io/pryv/pen/apQJxz): Example exposing how 
+  to request an access and fetching basic informations form a Pryv account.
+- [Pryv notes and values example](http://codepen.io/pryv/pen/apQJrO): Web form, 
+  enter notes and values. 
+- [Pryv events monitor example](http://codepen.io/pryv/pen/rjQygX): Monitor 
+  changes live on an Pryv account. Create, modifiy and delete events.
 
 
 ### Installation
@@ -38,18 +41,21 @@ Read, then run `./scripts/setup-environment-dev.sh`
 
 `grunt`:
 
-- applies code linting (with JSHint)
+- applies code linting (using eslint)
 - builds documentation into `dist/{version}/docs`
-- browserifies the lib into `dist/{version}` as well as `dist/latest` for browser standalone distribution
+- browserifies the lib into `dist/{version}` as well as `dist/latest` for 
+  browser standalone distribution
 - runs the tests, outputting coverage info into `test/coverage.html`
 
 Also: `grunt test` & `grunt watch` (runs tests on changes)
 
-`./scripts/update-event-types.bash` updates the default event types and extras by fetching the latest master versions online.
+`./scripts/update-event-types.bash` updates the default event types and extras 
+by fetching the latest master versions online.
 
 ### Publish
 
-After building, just commit and push changes from `dist` (working copy of `gh-pages` branch).
+After building, just commit and push changes from `dist` (working copy of 
+`gh-pages` branch).
 
 
 ## License
