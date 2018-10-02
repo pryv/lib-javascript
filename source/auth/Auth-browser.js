@@ -159,6 +159,10 @@ Auth.prototype.setup = function (settings) {
   return this.connection;
 };
 
+/** 
+ * Calls a callback from the 'this.settings.callbacks' collection. Makes 
+ * sure the callback exists; if it doesn't, logs to the console and returns. 
+ */
 Auth.prototype.callCallback = function callCallback(name, ...args) {
   const callbackNames = [
     'initialization',
@@ -391,7 +395,13 @@ Auth.prototype.updateButton = function (html) {
  * @param data: the new state data
  */
 Auth.prototype.stateChanged = function (data) {
+  // NOTE #internalError used to call #stateChanged to do its bidding. I don't 
+  //  think this belongs here. But since somebody else might be using this code, 
+  //  we'll keep it for a little while. 
   if (data.id != null) { // error
+    logger.warn(
+      'stateChanged called with an internal error. This usage is deprecated, use #internalError.');
+      
     this.callCallback('error', data.id, data.message);
     this.updateButton(this.uiErrorButton());
     
@@ -420,7 +430,7 @@ Auth.prototype.stateChanged = function (data) {
 
 /**
  * State 0: Initialization
- * Pryv button is loading
+ * Pryv button is loading. This is only called when you call 'Auth.setup'. 
  */
 Auth.prototype.stateInitialization = function () {
   this.state = {status : 'initialization'};
@@ -472,12 +482,13 @@ Auth.prototype.stateRefused = function () {
 };
 
 /**
- * Throw an internal error
+ * Throws an internal error.
+ * 
  * @param message: error message
- * @param jsonData: error data
  */
-Auth.prototype.internalError = function (message, jsonData) {
-  this.stateChanged({id: 'INTERNAL_ERROR', message: message, data: jsonData});
+Auth.prototype.internalError = function (message, /* jsonData */) {
+  this.callCallback('error', 'INTERNAL_ERROR', message);
+  this.updateButton(this.uiErrorButton());
 };
 
 //--------------- Connection Management ------------------//
