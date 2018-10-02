@@ -183,7 +183,7 @@ Auth.prototype.callCallback = function callCallback(name, ...args) {
   if (typeof callbacks[name] !== 'function') return;
 
   callbacks[name](...args);
-}
+};
 
 /**
  * Set cookies to remember we were already logged in on this machine/browser. 
@@ -207,7 +207,7 @@ Auth.prototype.rememberLogin = function rememberLogin(username, token, language)
   setItem(this.cookieName('access_username'), username, rememberSeconds);
   setItem(this.cookieName('access_token'), token, rememberSeconds);
   setItem(this.cookieName('access_preferredLanguage'), language, rememberSeconds);
-}
+};
 
 /** 
  * Forgets the login remembered using `rememberLogin`. 
@@ -218,7 +218,7 @@ Auth.prototype.forgetLogin = function forgetLogin() {
   removeItem(this.cookieName('access_username'));
   removeItem(this.cookieName('access_token'));
   removeItem(this.cookieName('access_preferredLanguage'));
-}
+};
 
 Auth.prototype.getLogin = function getLogin() {
   const login = {
@@ -236,7 +236,7 @@ Auth.prototype.getLogin = function getLogin() {
   login.language = getItem(this.cookieName('access_preferredLanguage'));
 
   return login;
-}
+};
 
 /** 
  * Given a `name` returns a cookie name that should be unique (namespaced) for 
@@ -244,7 +244,7 @@ Auth.prototype.getLogin = function getLogin() {
  */
 Auth.prototype.cookieName = function cookieName(name) {
   return name + this.settings.domain; 
-}
+};
 
 //--------------------- UI Content ---------------------------------------------
 
@@ -401,7 +401,7 @@ Auth.prototype.stateChanged = function (data) {
   if (data.id != null) { // error
     logger.warn(
       'stateChanged called with an internal error. This usage is deprecated, use #internalError.');
-      
+
     this.callCallback('error', data.id, data.message);
     this.updateButton(this.uiErrorButton());
     
