@@ -1,6 +1,6 @@
-var utility = require('./utility/utility'),
-  _ = require('lodash'),
-    CC = require('./connection/ConnectionConstants.js');
+const utility = require('./utility/utility');
+const _ = require('lodash');
+const CC = require('./connection/ConnectionConstants.js');
 
 /**
  * Event types directory data.
@@ -91,7 +91,7 @@ eventTypes.hierarchical = function () {
 eventTypes.extras = function (eventType) {
   var parts = eventType.split('/');
   return extras.extras[parts[0]] && extras.extras[parts[0]].formats[parts[1]] ?
-      extras.extras[parts[0]].formats[parts[1]] : null;
+    extras.extras[parts[0]].formats[parts[1]] : null;
 };
 
 eventTypes.isNumerical = function (eventOrEventType) {

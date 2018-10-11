@@ -1,7 +1,7 @@
 const socketIO = require('socket.io-client');
 const _ = require('lodash');
 
-var utility = module.exports = process.browser ?
+var utility = module.exports = process.browser ? // eslint-disable-line no-undef
   require('./utility-browser.js') : require('./utility-node.js');
 
 /**

@@ -5,6 +5,7 @@
  */
 module.exports = function (ready) {
 
+  const logger = console; 
 
   var fns = [], fn, f = false,
       doc = document,
@@ -18,8 +19,8 @@ module.exports = function (ready) {
 
   function flush(f) {
     loaded = 1;
-    while (f = fns.shift()) {
-      f()
+    while (f = fns.shift()) { // eslint-disable-line no-cond-assign
+      f();
     }
   }
 
@@ -37,20 +38,20 @@ module.exports = function (ready) {
   });
 
   return (ready = hack ?
-      function (fn) {
-        self != top ?
-            loaded ? fn() : fns.push(fn) :
-            function () {
-              console.log("on dom ready 2");
-              try {
-                testEl.doScroll('left')
-              } catch (e) {
-                return setTimeout(function() { ready(fn) }, 50)
-              }
-              fn()
-            }()
-      } :
-      function (fn) {
-        loaded ? fn() : fns.push(fn)
-      })
+    function (fn) {
+      self != top ?
+        loaded ? fn() : fns.push(fn) :
+        function () {
+          logger.log('on dom ready 2');
+          try {
+            testEl.doScroll('left');
+          } catch (e) {
+            return setTimeout(function() { ready(fn); }, 50);
+          }
+          fn();
+        }();
+    } :
+    function (fn) {
+      loaded ? fn() : fns.push(fn);
+    });
 }();

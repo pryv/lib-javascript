@@ -4,6 +4,7 @@
 
 
 const _ = require('lodash');
+const logger = console; 
 
 var SignalEmitter = module.exports = function (messagesMap) {
   SignalEmitter.extend(this, messagesMap);
@@ -69,7 +70,7 @@ SignalEmitter.prototype._fireEvent = function (signal, content, batch) {
   if (! signal) { throw new Error(); }
 
   var batchStr = batchId ? ' batch: ' + batchId + ', ' + batch.batchName : '';
-  console.log('FireEvent-' + this._signalEmitterName  + ' : ' + signal + batchStr);
+  logger.log('FireEvent-' + this._signalEmitterName  + ' : ' + signal + batchStr);
 
   _.each(this._signalEmitterEvents[signal], function (callback) {
     if (callback !== null &&

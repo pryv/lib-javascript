@@ -1,3 +1,5 @@
+const logger = console;
+
 /**
  *
  * @param {Object} pack json with
@@ -5,7 +7,7 @@
  * @param {String} pack.host : fully qualified host name
  * @param {Number} pack.port : port to use
  * @param {String} pack.path : the request PATH
- * @param {Object} [pack.headers] : key / value map of headers
+ * @param {Object} [pack.headers] : key / value map of headers
  * @param {Object} [pack.params] : the payload -- only with POST/PUT
  * @param {String} [pack.parseResult = 'json'] : 'text' for no parsing
  * @param {Function} pack.success : function (result, resultInfo)
@@ -26,12 +28,6 @@ module.exports = function (pack)  {
 
   // ------------ request TYPE
   pack.method = pack.method || 'POST';
-  // method override test
-  if (false && pack.method === 'DELETE') {
-    pack.method = 'POST';
-    pack.params =  pack.params || {};
-    pack.params._method = 'DELETE';
-  }
 
   // ------------- request HEADERS
 
@@ -108,7 +104,7 @@ module.exports = function (pack)  {
       };
 
       if (pack.callBackSent) {
-        console.error('xhr.onreadystatechange called with status==4 even if callback is done:' +
+        logger.error('xhr.onreadystatechange called with status==4 even if callback is done:' +
           pack.callBackSent);
         return;
       }
@@ -155,15 +151,15 @@ var _initXHR = function () {
 
   try { XHR = new XMLHttpRequest(); }
   catch (e) {
-    try { XHR = new ActiveXObject('Msxml2.XMLHTTP'); }
+    try { XHR = new ActiveXObject('Msxml2.XMLHTTP'); } // eslint-disable-line no-undef
     catch (e2) {
-      try { XHR = new ActiveXObject('Microsoft.XMLHTTP'); }
+      try { XHR = new ActiveXObject('Microsoft.XMLHTTP'); } // eslint-disable-line no-undef
       catch (e3) {
-        console.log('XMLHttpRequest implementation not found.');
+        logger.log('XMLHttpRequest implementation not found.');
       }
-      console.log('XMLHttpRequest implementation not found.');
+      logger.log('XMLHttpRequest implementation not found.');
     }
-    console.log('XMLHttpRequest implementation not found.');
+    logger.log('XMLHttpRequest implementation not found.');
   }
   return XHR;
 };

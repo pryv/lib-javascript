@@ -3,7 +3,7 @@
 /**
  * Browser-only utils
  */
-var utility = module.exports = {};
+var utility = {};
 
 utility.getHostFromUrl = function (url) {
   var location;
@@ -84,8 +84,8 @@ utility.getPreferredLanguage = function (supportedLanguages, desiredLanguage) {
  * @return boolean
  */
 utility.supportCSS3 = function ()  {
-  var stub = document.createElement('div'),
-    testProperty = 'textShadow';
+  const stub = document.createElement('div');
+  let testProperty = 'textShadow';
 
   if (testProperty in stub.style) { return true; }
 

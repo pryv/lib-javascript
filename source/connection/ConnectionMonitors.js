@@ -1,6 +1,7 @@
-var _ = require('lodash'),
-    utility = require('../utility/utility'),
-    Monitor = require('../Monitor');
+const _ = require('lodash');
+const utility = require('../utility/utility');
+const Monitor = require('../Monitor');
+const logger = console; 
 
 /**
  * @class ConnectionMonitors
@@ -24,7 +25,7 @@ function ConnectionMonitors(connection) {
  */
 ConnectionMonitors.prototype.create = function (filter) {
   if (!this.connection.username) {
-    console.error('Cannot create a monitor for a connection without username:', this.connection);
+    logger.error('Cannot create a monitor for a connection without username:', this.connection);
     return null;
   }
   return new Monitor(this.connection, filter);
@@ -49,7 +50,7 @@ ConnectionMonitors.prototype._stopMonitoring = function (/*callback*/) {
  */
 ConnectionMonitors.prototype._startMonitoring = function (callback) {
   if (!this.connection.username) {
-    console.error('Cannot start monitoring for a connection without username:', this.connection);
+    logger.error('Cannot start monitoring for a connection without username:', this.connection);
     return callback(true);
   }
   if (this.ioSocket) { return callback(null/*, ioSocket*/); }

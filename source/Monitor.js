@@ -1,6 +1,7 @@
-var _ = require('lodash'),
-  SignalEmitter = require('./utility/SignalEmitter.js'),
-  Filter = require('./Filter.js');
+const _ = require('lodash');
+const SignalEmitter = require('./utility/SignalEmitter.js');
+const Filter = require('./Filter.js');
+const logger = console; 
 
 var EXTRA_ALL_EVENTS = {state : 'all', modifiedSince : -100000000 };
 var REALLY_ALL_EVENTS =  EXTRA_ALL_EVENTS;
@@ -89,10 +90,10 @@ Monitor.prototype.getEvents = function () {
 
 // ----------- iOSocket ------//
 Monitor.prototype._onIoConnect = function () {
-  console.log('Monitor onConnect');
+  logger.log('Monitor onConnect');
 };
 Monitor.prototype._onIoError = function (error) {
-  console.log('Monitor _onIoError' + error);
+  logger.log('Monitor _onIoError' + error);
 };
 Monitor.prototype._onIoEventsChanged = function () {
   var batch = this.startBatch('IoEventChanged');
@@ -100,7 +101,7 @@ Monitor.prototype._onIoEventsChanged = function () {
   batch.done('IoEventChanged');
 };
 Monitor.prototype._onIoStreamsChanged = function () {
-  console.log('SOCKETIO', '_onIoStreamsChanged');
+  logger.log('SOCKETIO', '_onIoStreamsChanged');
   var batch = this.startBatch('IoStreamsChanged');
   this._connectionStreamsGetChanges(batch);
   batch.done('IoStreamsChanged');
@@ -125,7 +126,7 @@ Monitor.prototype._onFilterChange = function (signal, batch) {
   var foundsignal = 0;
   if (signal.signal === Filter.Messages.DATE_CHANGE) {  // only load events if date is wider
     foundsignal = 1;
-    console.log('** DATE CHANGE ', changes.timeFrame);
+    logger.log('** DATE CHANGE ', changes.timeFrame);
     if (changes.timeFrame === 0) {
       return;
     }
@@ -137,7 +138,7 @@ Monitor.prototype._onFilterChange = function (signal, batch) {
 
   if (signal.signal === Filter.Messages.STREAMS_CHANGE) {
     foundsignal = 1;
-    console.log('** STREAMS_CHANGE', changes.streams);
+    logger.log('** STREAMS_CHANGE', changes.streams);
     if (changes.streams === 0) {
       return;
     }
@@ -148,7 +149,7 @@ Monitor.prototype._onFilterChange = function (signal, batch) {
 
   if (signal.signal === Filter.Messages.STREAMS_CHANGE) {
     foundsignal = 1;
-    console.log('** STREAMS_CHANGE', changes.streams);
+    logger.log('** STREAMS_CHANGE', changes.streams);
     if (changes.streams === 0) {
       return;
     }
@@ -230,7 +231,7 @@ Monitor.prototype._initEvents = function (batch) {
       var result = [];
 
       _.each(events, function (event) {
-        if (! this.ensureFullCache || this.filter.matchEvent(event)) {
+        if (! this.ensureFullCache || this.filter.matchEvent(event)) {
           this._events.active[event.id] = event;
           result.push(event);
         }
@@ -263,7 +264,7 @@ Monitor.prototype._connectionEventsGetChanges = function (batch) {
   batch = this.startBatch('connectionEventsGetChanges', batch);
   if (this.eventsGetChangesInProgress) {
     this.eventsGetChangesNeeded = true;
-    console.log('[WARNING] Skipping _connectionEventsGetChanges because one is in Progress');
+    logger.log('[WARNING] Skipping _connectionEventsGetChanges because one is in Progress');
     batch.done('connectionEventsGetChanges in Progress');
     return;
   }

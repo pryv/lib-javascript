@@ -1,5 +1,6 @@
-var _ = require('lodash'),
-    SignalEmitter = require('./utility/SignalEmitter.js');
+const _ = require('lodash');
+const SignalEmitter = require('./utility/SignalEmitter.js');
+const logger = console; 
 
 /**
  * TODO Filter is badly missing a correct documentation
@@ -84,7 +85,7 @@ Filter.prototype.matchEvent = function (event) {
 
   if (this._settings.streams) {
 
-    if (this._settings.streams.length === 0) { return false; }
+    if (this._settings.streams.length === 0) { return false; }
 
     if (this._settings.streams.indexOf(event.streamId) < 0) {
       var found = false;
@@ -120,12 +121,11 @@ Filter.prototype.matchEvent = function (event) {
 Filter.prototype.compareToFilterData = function (filterDataTest) {
   var result = { timeFrame : 0, streams : 0 };
 
-
   // timeFrame
   var myTimeFrameST = [this.fromTimeSTNormalized, this.toTimeSTNormalized];
   var testTimeFrameST = _normalizeTimeFrameST(filterDataTest);
-  console.log(myTimeFrameST);
-  console.log(testTimeFrameST);
+  logger.log(myTimeFrameST);
+  logger.log(testTimeFrameST);
 
   if (myTimeFrameST[0] < testTimeFrameST[0]) {
     result.timeFrame = 1;
@@ -365,8 +365,8 @@ Filter.prototype.focusedOnSingleStream = function () {
 /**
  * An pryv Filter or an object corresponding at what we can get with Filter.getData().
  * @typedef {(Filter|Object)} FilterLike
- * @property {String[]} [streams]
- * @property {String[]} [tags]
+ * @property {String[]} [streams]
+ * @property {String[]} [tags]
  * @property {number} [fromTime] -- serverTime
  * @property {number} [toTime] -- serverTime
  * @property {number} [modifiedSince] -- serverTime

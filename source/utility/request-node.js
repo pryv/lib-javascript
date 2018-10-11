@@ -13,7 +13,7 @@ var _ = require('lodash');
  * @param {String} pack.host : fully qualified host name
  * @param {Number} [pack.port] : port to use
  * @param {String} pack.path : the request PATH
- * @param {Object} [pack.headers] : key / value map of headers
+ * @param {Object} [pack.headers] : key / value map of headers
  * @param {Object} [pack.payload] : the payload -- only with POST/PUT
  * @param {String} [pack.parseResult = 'json'] : 'text' for no parsing
  * @param {Function} pack.success : function (data, responseInfo), called when no error occurs in
@@ -37,8 +37,7 @@ module.exports = function (pack) {
   var httpOptions = {
     host: pack.host,
     path: pack.path,
-    port: pack.port || (pack.ssl ? 443 : 80), // if no port is specified, choose HTTPS or
-                                              // HTTP default ports
+    port: pack.port || (pack.ssl ? 443 : 80), // if no port is specified, choose HTTPS or HTTP default ports
     method: pack.method,
     headers: pack.headers
   };
@@ -50,7 +49,7 @@ module.exports = function (pack) {
   } else {
     // if some data is sent to the Back-End, set Content-Length header accordingly
     if (pack.payload) {
-      pack.headers['Content-Length'] = Buffer.byteLength(pack.payload, 'utf-8');
+      pack.headers['Content-Length'] = Buffer.byteLength(pack.payload, 'utf-8'); // eslint-disable-line no-undef
     }
   }
 
