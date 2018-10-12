@@ -2,7 +2,7 @@ const socketIO = require('socket.io-client');
 const _ = require('lodash');
 const FormData = require('form-data');
 
-const utility = {}
+const utility = {};
 module.exports = utility;
 
 utility.request = require('./request');
