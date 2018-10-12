@@ -1,0 +1,7 @@
+
+## 1.1.0
+
+ * Added 'clientData' to the auth process, allowing to create accesses that 
+   contain custom data. 
+
+   
