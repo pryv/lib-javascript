@@ -137,6 +137,11 @@ utility.isBrowser = function () {
   return typeof (window) !== 'undefined';
 };
 
+// This should be a file that is only ever required in a browser environment. 
+// Make sure: 
+if (! utility.isBrowser()) 
+  throw new Error('utility-browser.js was required in a non-browser environment!');
+
 utility.SignalEmitter = require('./SignalEmitter.js');
 
 /**
