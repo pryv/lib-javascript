@@ -3,7 +3,8 @@
 /**
  * Browser-only utils
  */
-var utility = {};
+const utility = {}; 
+module.exports = utility;
 
 utility.getHostFromUrl = function (url) {
   var location;

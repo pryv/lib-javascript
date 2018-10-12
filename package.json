@@ -81,7 +81,7 @@
   },
   "browser": {
     "./source/utility/utility-node.js": "./source/utility/utility-browser.js",
-    "./source/utility/request-node.js": "./source/utility/request-browser.js",
-    "./source/auth/Auth-node.js": "./source/auth/Auth-browser.js"
+    "./source/utility/request.js": "./source/utility/request-browser.js",
+    "./source/auth/Auth.js": "./source/auth/Auth-browser.js"
   }
 }
