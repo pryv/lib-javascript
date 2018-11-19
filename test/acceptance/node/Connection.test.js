@@ -188,7 +188,7 @@ describe('Connection', function () {
 
     var connection = new Pryv.Connection(config.connectionSettings);
 
-    it.skip('execute the requested calls in the appropriate order', function (done) {
+    it('execute the requested calls in the appropriate order', function (done) {
 
       var streamId = 'batchCallStreamId',
           streamName = 'batchCallStreamToDelete',
@@ -237,6 +237,7 @@ describe('Connection', function () {
       ];
 
       connection.batchCall(methodsData, function (err, data) {
+        should.not.exist(err);
         should.exist(data);
         data.length.should.eql(methodsData.length);
         data.forEach(function (result) {
@@ -333,6 +334,7 @@ describe('Connection', function () {
       ];
 
       connection.batchCall(methodsData, function (err, data) {
+        should.not.exist(err);
         should.exist(data);
         data.length.should.eql(methodsData.length);
         should.exist(data[0].error);
