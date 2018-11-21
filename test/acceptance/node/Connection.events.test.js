@@ -3,11 +3,13 @@ var Pryv = require('../../../source/main'),
   should = require('should'),
   config = require('../test-support/config.js'),
   async = require('async'),
-  fs = require('fs');
+  fs = require('fs'),
+  cuid = require('cuid'),
+  _ = require('underscore');
 
 
 describe('Connection.events', function () {
-  this.timeout(20000);
+  this.timeout(30000);
 
   var connection, testStream;
 
@@ -17,87 +19,80 @@ describe('Connection.events', function () {
       name: 'ConnectionEventsTestStream'
     };
     connection = new Pryv.Connection(config.connectionSettings);
-    connection.streams.create(testStream, function (err, newStream) {
+    connection.streams.create(testStream, function (err) {
       if (err) {
         return done(err);
       }
-      testStream = newStream;
       done();
     });
   });
 
   after(function (done) {
-    async.series([
-      function (stepDone) {
-        connection.streams.delete(testStream, function (err, trashedStream) {
-          testStream = trashedStream;
-          stepDone(err);
-        });
+    connection.batchCall([
+      {
+        method: 'streams.delete',
+        params: testStream
       },
-      function (stepDone) {
-        connection.streams.delete(testStream, function (err) {
-          stepDone(err);
-        });
+      {
+        method: 'streams.delete',
+        params: _.extend(testStream, { mergeEventsWithParent: false })
       }
-    ], done);
+    ], function (err, results) {
+      if (err) { return done(err); }
+      for (var i=0; i<results.length; i++) {
+        if (results[i].error) { return done(results[i].error); } 
+      }
+      done();
+    });
   });
 
   describe('get()', function () {
 
-    var deletedEventId, testStartTime, eventCreated;
+    var deletedEventId, testStartTime;
 
     before(function (done) {
+
+      deletedEventId = cuid();
 
       var eventDeleted = {
         content: 'I am a deleted test event from js lib, please kill me',
         type: 'note/txt',
-        streamId: testStream.id
+        streamId: testStream.id,
+        id: deletedEventId
       };
-      async.times(20, function (n, next) {
-        var eventData = {
-          streamId: 'ConnectionEventsTestStream',
-          type: 'note/txt',
-          content: 'Event ' + (n + 1)
-        };
-        connection.events.create(eventData, function (err, event) {
-          testStartTime = event.time;
-          next(err, event);
+      var batchOfEvents = [];
+      for (var i=0; i<3; i++) {
+        batchOfEvents.push({
+          method: 'events.create',
+          params: {
+            streamId: testStream.id,
+            type: 'note/txt',
+            content: 'Event ' + (i+1)
+          }
         });
-      }, function (err, events) {
-        if (err) { return console.error(err); }
-        eventCreated = events;
-      });
-      async.series([
-        function (stepDone) {
-          connection.events.create(eventDeleted, function (err, event) {
-            if(err) {
-              return stepDone(err);
-            }
-            eventDeleted = event;
-            deletedEventId = event.id;
-            stepDone();
-          });
+      }
+      connection.batchCall(batchOfEvents.concat([
+        {
+          method: 'events.create',
+          params: eventDeleted
         },
-        function (stepDone) {
-          connection.events.delete(eventDeleted, function (err) {
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: eventDeleted
         },
-        function (stepDone) {
-          connection.events.delete(eventDeleted, function (err) {
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: eventDeleted
+        },
+      ]), function (err, results) {
+        if (err) { return done(err); }
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { 
+            return done(results[i].error); 
+          }
         }
-      ], done);
-    });
-
-    after(function () {
-      async.times(20, function (i, next) {
-        connection.events.delete(eventCreated[i], function (err, event) {
-          next(err, event);
-        });
-      }, function (err) {
-        if (err) { return console.error(err); }
+        testStartTime = results[0].event.time;
+        done();
       });
     });
 
@@ -121,6 +116,7 @@ describe('Connection.events', function () {
 
 
     it('must return deleted events when the flag includeDeletions is set', function (done) {
+      
       var filter = {includeDeletions: true, modifiedSince: testStartTime};
       connection.events.get(filter, function (err, events) {
         should.not.exist(err);
@@ -230,7 +226,11 @@ describe('Connection.events', function () {
     var eventToDelete, singleActivityStream;
 
     before(function (done) {
-      singleActivityStream = {name: 'singleActivityStream', singleActivity: true};
+      singleActivityStream = {
+        id: 'singleActivityStream',
+        name: 'singleActivityStream', 
+        singleActivity: true
+      };
       connection.streams.create(singleActivityStream, function (err, newStream) {
         should.not.exist(err);
         should.exist(newStream.id);
@@ -241,39 +241,41 @@ describe('Connection.events', function () {
 
     afterEach(function (done) {
       if (eventToDelete !== null) {
-        async.series([
-          function (stepDone) {
-            connection.events.delete(eventToDelete, function (err, trashedEvent) {
-              eventToDelete = trashedEvent;
-              stepDone(err);
-            });
+        connection.batchCall([
+          {
+            method: 'events.delete',
+            params: _.pick(eventToDelete, 'id')
           },
-          function (stepDone) {
-            connection.events.delete(eventToDelete, function (err) {
-              eventToDelete = null;
-              stepDone(err);
-            });
+          {
+            method: 'events.delete',
+            params: _.pick(eventToDelete, 'id')
           }
-        ], done);
+        ], function (err) {
+          if (err) { return done(err); }
+          done();
+        });
       } else {
         done();
       }
     });
 
     after(function (done) {
-      async.series([
-        function (stepDone) {
-          connection.streams.delete(singleActivityStream, function (err, trashedStream) {
-            singleActivityStream = trashedStream;
-            stepDone(err);
-          });
+      connection.batchCall([
+        {
+          method: 'streams.delete',
+          params: _.pick(singleActivityStream, 'id')
         },
-        function (stepDone) {
-          connection.streams.delete(singleActivityStream, function (err) {
-            stepDone(err);
-          });
+        {
+          method: 'streams.delete',
+          params: _.extend(_.pick(singleActivityStream, 'id'), { mergeEventsWithParent: false})
         }
-      ], done);
+      ], function (err, results) {
+        if (err) { return done(err); }
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { return done(results[i].error); }
+        }
+        done();
+      });
     });
 
     it('must accept an event-like object and return an Event object', function (done) {
@@ -399,17 +401,14 @@ describe('Connection.events', function () {
     var eventWithAttachment;
 
     after(function (done) {
-      async.series([
-        function (stepDone) {
-          connection.events.delete(eventWithAttachment, function (err, trashedEvent) {
-            eventWithAttachment = trashedEvent;
-            stepDone(err);
-          });
+      connection.batchCall([
+        {
+          method: 'events.delete',
+          params: _.pick(eventWithAttachment, 'id')
         },
-        function (stepDone) {
-          connection.events.delete(eventWithAttachment, function (err) {
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: _.pick(eventWithAttachment, 'id')
         }
       ], done);
     });
@@ -467,30 +466,24 @@ describe('Connection.events', function () {
     });
 
     after(function (done) {
-      async.series([
-        function (stepDone) {
-          connection.streams.delete(stream, function (err, trashedStream) {
-            stream = trashedStream;
-            stepDone(err);
-          });
+      connection.batchCall([
+        {
+          method: 'streams.delete',
+          params: stream.getData()
         },
-        function (stepDone) {
-          connection.streams.delete(stream, function (err) {
-            stepDone(err);
-          });
+        {
+          method: 'streams.delete',
+          params: stream.getData()
         },
-        function (stepDone) {
-          connection.streams.delete(singleActivityStream, function (err, trashedStream) {
-            singleActivityStream = trashedStream;
-            stepDone(err);
-          });
+        {
+          method: 'streams.delete',
+          params: singleActivityStream.getData()
         },
-        function (stepDone) {
-          connection.streams.delete(singleActivityStream, function (err) {
-            stepDone(err);
-          });
+        {
+          method: 'streams.delete',
+          params: singleActivityStream.getData()
         }
-      ], done());
+      ], done);
     });
 
     it('must start an event and stop it using stopEvent() in normal stream', function (done) {
@@ -576,116 +569,117 @@ describe('Connection.events', function () {
 
     before(function (done) {
 
-      async.series([
-        function (stepDone) {
-          singleActivityStream = {
-            id: 'singleActivityTestStream',
-            name: 'singleActivityTestStream',
-            type: 'activity/plain',
-            singleActivity: true
-          };
-          connection.streams.create(singleActivityStream, function (err, stream) {
-            singleActivityStream = stream;
-            stepDone(err);
-          });
+      singleActivityStream = {
+        id: 'singleActivityTestStream',
+        name: 'singleActivityTestStream',
+        singleActivity: true
+      };
+      eventToUpdate = { 
+        id: cuid(),
+        content: 'I am going to be updated', 
+        streamId: testStream.id, 
+        type: 'note/txt' 
+      };
+      eventToUpdate2 = {
+        id: cuid(),
+        content: 'I am also going to be updated', 
+        streamId: testStream.id,
+        type: 'note/txt'
+      };
+      eventSingleActivityToUpdate = {
+        id: cuid(),
+        streamId: singleActivityStream.id, 
+        type: 'activity/plain',
+        time: 100, 
+        duration: 10
+      };
+      eventSingleActivityToUpdate2 = {
+        id: cuid(),
+        streamId: singleActivityStream.id, 
+        type: 'activity/plain', 
+        time: 200,
+        duration: 10
+      };
+
+      connection.batchCall([
+        {
+          method: 'streams.create',
+          params: singleActivityStream
         },
-        function (stepDone) {
-          eventToUpdate =
-          {content: 'I am going to be updated', streamId: testStream.id, type: 'note/txt'};
-          connection.events.create(eventToUpdate, function (err, event) {
-            eventToUpdate = event;
-            return stepDone(err);
-          });
+        {
+          method: 'events.create',
+          params: eventToUpdate
         },
-        function (stepDone) {
-          eventToUpdate2 = {
-            content: 'I am also going to be updated', streamId: testStream.id,
-            type: 'note/txt'
-          };
-          connection.events.create(eventToUpdate2, function (err, event) {
-            eventToUpdate2 = event;
-            return stepDone(err);
-          });
+        {
+          method: 'events.create',
+          params: eventToUpdate2
         },
-        function (stepDone) {
-          eventSingleActivityToUpdate = {
-            streamId: singleActivityStream.id, type: 'activity/plain',
-            time: 100, duration: 10
-          };
-          connection.events.create(eventSingleActivityToUpdate, function (err, event) {
-            eventSingleActivityToUpdate = event;
-            return stepDone(err);
-          });
+        {
+          method: 'events.create',
+          params: eventSingleActivityToUpdate
         },
-        function (stepDone) {
-          eventSingleActivityToUpdate2 = {
-            streamId: singleActivityStream.id, type: 'activity/plain', time: 200,
-            duration: 10
-          };
-          connection.events.create(eventSingleActivityToUpdate2, function (err, event) {
-            eventSingleActivityToUpdate2 = event;
-            return stepDone(err);
-          });
+        {
+          method: 'events.create',
+          params: eventSingleActivityToUpdate2
         }
-      ], done);
+      ], function (err, results) {
+        if (err) { return done(err); }
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { return done(results[i].error); }
+        }
+        done();
+      });
     });
 
     after(function (done) {
-      async.series([
-        function (stepDone) {
-          connection.events.delete(eventToUpdate, function (err, trashedEvent) {
-            eventToUpdate = trashedEvent;
-            stepDone(err);
-          });
+      connection.batchCall([
+        {
+          method: 'events.delete',
+          params: eventToUpdate
         },
-        function (stepDone) {
-          connection.events.delete(eventToUpdate, function (err) {
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: eventToUpdate
         },
-        function (stepDone) {
-          connection.events.delete(eventToUpdate2, function (err, trashedEvent) {
-            eventToUpdate2 = trashedEvent;
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: eventToUpdate2
         },
-        function (stepDone) {
-          connection.events.delete(eventToUpdate2, function (err) {
-            stepDone(err);
-          });
-        }, function (stepDone) {
-          connection.events.delete(eventSingleActivityToUpdate, function (err, trashedEvent) {
-            eventSingleActivityToUpdate = trashedEvent;
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: eventToUpdate2
         },
-        function (stepDone) {
-          connection.events.delete(eventSingleActivityToUpdate, function (err) {
-            stepDone(err);
-          });
-        }, function (stepDone) {
-          connection.events.delete(eventSingleActivityToUpdate2, function (err, trashedEvent) {
-            eventSingleActivityToUpdate2 = trashedEvent;
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: eventSingleActivityToUpdate
         },
-        function (stepDone) {
-          connection.events.delete(eventSingleActivityToUpdate2, function (err) {
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: eventSingleActivityToUpdate
         },
-        function (stepDone) {
-          connection.streams.delete(singleActivityStream, function (err, trashedStream) {
-            singleActivityStream = trashedStream;
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: eventSingleActivityToUpdate2
         },
-        function (stepDone) {
-          connection.streams.delete(singleActivityStream, function (err) {
-            stepDone(err);
-          });
+        {
+          method: 'events.delete',
+          params: eventSingleActivityToUpdate2
+        },
+        {
+          method: 'streams.delete',
+          params: singleActivityStream
+        },
+        {
+          method: 'streams.delete',
+          params: _.extend(singleActivityStream, { mergeEventsWithParent: false})
         }
-      ], done);
+      ], function (err, results) {
+        if (err) { return done(err); }
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { return done(results[i].error); }
+        }
+        done();
+      });
     });
 
     it('must accept an Event object and return the updated event', function (done) {
@@ -705,7 +699,7 @@ describe('Connection.events', function () {
     it.skip('must accept an event-like object and return an Event object', function (done) {
       var newContent = 'I was updated again';
       eventToUpdate.content = newContent;
-      var eventDataToUpdate = eventToUpdate.getData();
+      var eventDataToUpdate = eventToUpdate;
       connection.events.update(eventDataToUpdate, function (err, updatedEvent) {
         should.not.exist(err);
         should.exist(updatedEvent);
