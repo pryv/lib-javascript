@@ -102,9 +102,15 @@ ConnectionEvents.prototype.getOne = function (eventId, callback) {
  * @param {Event} event
  * @param {Connection~requestCallback} callback
  */
-ConnectionEvents.prototype.update = function (event, callback) {
+ConnectionEvents.prototype.update = function (eventLike, callback) {
   if (typeof(callback) !== 'function') {
     throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
+  }
+  var event = null
+  if (eventLike instanceof Event) {
+    event = eventLike
+  } else {
+    event = new Event(this.connection, eventLike);
   }
   this._updateWithIdAndData(event.id, event.getData(), callback);
 };
