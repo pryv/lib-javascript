@@ -1,5 +1,5 @@
 
-var _ = require('underscore');
+var _ = require('lodash');
 
 var RW_PROPERTIES =
   ['streamId', 'time', 'duration', 'type', 'content', 'tags', 'description',
@@ -141,7 +141,7 @@ Object.defineProperty(Event.prototype, 'url', {
  * An newly created Event (no id, not synched with API)
  * or an object with sufficient properties to be considered as an Event.
  * @typedef {(Event|Object)} NewEventLike
- * @property {String} streamId
- * @property {String} type
+ * @property {String} streamId
+ * @property {String} type
  * @property {number} [time]
  */

@@ -1,6 +1,6 @@
 {
   "name": "pryv",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "description": "Javascript library (browser & Node.js) to access and manipulate Pryv users data",
   "keywords": [
     "pryv",
@@ -52,17 +52,22 @@
   },
   "dependencies": {
     "form-data": "0.1.x",
-    "socket.io-client": "2.1.0",
-    "underscore": "latest"
+    "lodash": "latest",
+    "socket.io-client": "2.1.0"
   },
   "devDependencies": {
     "async": "latest",
+    "babel-cli": "latest",
+    "babel-core": "latest",
+    "babel-preset-env": "^1.7.0",
+    "babelify": "^8",
     "blanket": "latest",
+    "bluebird": "^3.5.2",
     "coffee-script": "latest",
+    "eslint": "^5.6.0",
     "grunt": "latest",
     "grunt-browserify": "latest",
     "grunt-contrib-copy": "latest",
-    "grunt-contrib-jshint": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-contrib-watch": "latest",
     "grunt-env": "latest",
@@ -75,8 +80,8 @@
     "should": "latest"
   },
   "browser": {
-    "./source/utility/utility-node.js": "./source/utility/utility-browser.js",
-    "./source/utility/request-node.js": "./source/utility/request-browser.js",
-    "./source/auth/Auth-node.js": "./source/auth/Auth-browser.js"
+    "./source/utility/utility.js": "./source/utility/utility-browser.js",
+    "./source/utility/request.js": "./source/utility/request-browser.js",
+    "./source/auth/Auth.js": "./source/auth/Auth-browser.js"
   }
 }

@@ -21,7 +21,7 @@ function Profile(connection) {
 
 
 /**
- * @param {String | null} key
+ * @param {String | null} key
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype.getPrivate = function (key, callback) {
@@ -31,7 +31,7 @@ Profile.prototype.getPrivate = function (key, callback) {
   this._get(apiPathPrivateProfile, key, callback);
 };
 /**
- * @param {String | null} key
+ * @param {String | null} key
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype.getPublic = function (key, callback) {
@@ -47,7 +47,7 @@ Profile.prototype.getPublic = function (key, callback) {
  * // set x=25 and delete y
  * conn.profile.setPrivate({x : 25, y : null}, function(error) { console.log('done'); });
  *
- * @param {Object} keyValuePairs
+ * @param {Object} keyValuePairs
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype.setPrivate = function (keyValuePairs, callback) {
@@ -61,7 +61,7 @@ Profile.prototype.setPrivate = function (keyValuePairs, callback) {
  * // set x=25 and delete y
  * conn.profile.setPublic({x : 25, y : null}, function(error) { console.log('done'); });
  *
- * @param {Object} keyValuePairs
+ * @param {Object} keyValuePairs
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype.setPublic = function (keyValuePairs, callback) {
@@ -79,7 +79,7 @@ Profile.prototype.getTimeLimits = function (force, callback) {
     throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
   }
   if (!force && this.timeLimits) {
-      callback(this.timeLimits);
+    callback(this.timeLimits);
   } else {
     var i = 2;
     this.timeLimits = {
@@ -99,7 +99,7 @@ Profile.prototype.getTimeLimits = function (force, callback) {
       }
       i--;
       if (i === 0) {
-          callback(this.timeLimits);
+        callback(this.timeLimits);
       }
     }.bind(this));
     this.connection.events.get({
@@ -115,7 +115,7 @@ Profile.prototype.getTimeLimits = function (force, callback) {
       }
       i--;
       if (i === 0) {
-          callback(this.timeLimits);
+        callback(this.timeLimits);
       }
     }.bind(this));
   }
@@ -126,7 +126,7 @@ Profile.prototype.getTimeLimits = function (force, callback) {
 
 /**
  * @private
- * @param {String | null} key
+ * @param {String | null} key
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype._get = function (path, key, callback) {
@@ -152,7 +152,7 @@ Profile.prototype._get = function (path, key, callback) {
  * // set x=25 and delete y
  * conn.profile.set({x : 25, y : null}, function(error) { console.log('done'); });
  *
- * @param {Object} keyValuePairs
+ * @param {Object} keyValuePairs
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype._set = function (path, keyValuePairs, callback) {

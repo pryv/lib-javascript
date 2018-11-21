@@ -1,8 +1,8 @@
-var utility = require('../utility/utility.js'),
-  _ = require('underscore'),
-  Filter = require('../Filter'),
-  Event = require('../Event'),
-  CC = require('./ConnectionConstants.js');
+const utility = require('../utility/utility.js');
+const _ = require('lodash');
+const Filter = require('../Filter');
+const Event = require('../Event');
+const CC = require('./ConnectionConstants.js');
 
 /**
  * @class ConnectionEvents
@@ -110,7 +110,7 @@ ConnectionEvents.prototype.update = function (event, callback) {
 };
 
 /**
- * @param {Event | eventId} event
+ * @param {Event | eventId} event
  * @param {Connection~requestCallback} callback
  */
 ConnectionEvents.prototype.delete = ConnectionEvents.prototype.trash = function (event, callback) {
@@ -151,11 +151,11 @@ ConnectionEvents.prototype.trashWithId = function (eventId, callback) {
 /**
  * This is the preferred method to create an event, or to create it on the API.
  * The function return the newly created object.. It will be updated when posted on the API.
- * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
+ * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
  * the same connection and not exists on the API.
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {Boolean} [start = false] if set to true will POST the event to /events/start
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.create = function (newEventlike, callback) {
   if (typeof(callback) !== 'function') {
@@ -169,10 +169,10 @@ ConnectionEvents.prototype.create = function (newEventlike, callback) {
  * This is the preferred method to create and start an event, Starts a new period event.
  * This is equivalent to starting an event with a null duration. In singleActivity streams,
  * also stops the previously running period event if any.
- * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
+ * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
  * the same connection and not exists on the API.
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.start = function (newEventlike, callback) {
   if (typeof(callback) !== 'function') {
@@ -198,7 +198,7 @@ function _create(newEventlike, callback, start) {
   }
 
   var url = '/events';
-  if (start) { url = '/events/start'; }
+  if (start) { url = '/events/start'; }
 
 
   this.connection.request({
@@ -238,11 +238,11 @@ function _create(newEventlike, callback, start) {
 
 /**
  * Stop an event by it's Id
- * @param {EventLike} event -- minimum {id} -- if typeof Event, must belong to
+ * @param {EventLike} event -- minimum {id} -- if typeof Event, must belong to
  * the same connection and not exists on the API.
  * @param {Date} [date = now] the date to set to stop the event
  * @param {ConnectionEvents~eventStoppedOnTheAPI} callback
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.stopEvent = function (eventlike, date, callback) {
   if (typeof(callback) !== 'function') {
@@ -279,12 +279,12 @@ ConnectionEvents.prototype.stopEvent = function (eventlike, date, callback) {
 
 /**
  * Stop any event in this stream
- * @param {StreamLike} stream -- minimum {id} -- if typeof Stream, must belong to
+ * @param {StreamLike} stream -- minimum {id} -- if typeof Stream, must belong to
  * the same connection and not exists on the API.
  * @param {Date} [date = now] the date to set to stop the event
  * @param {String} [type = null] stop any matching eventType is this stream.
  * @param {ConnectionEvents~eventStoppedOnTheAPI} callback
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.stopStream = function (streamLike, date, type, callback) {
   if (typeof(callback) !== 'function') {
@@ -292,7 +292,7 @@ ConnectionEvents.prototype.stopStream = function (streamLike, date, type, callba
   }
 
   var data = {streamId : streamLike.id };
-  if (date) { data.time = date.getTime() / 1000; }
+  if (date) { data.time = date.getTime() / 1000; }
   if (type) { data.type = type; }
 
 
@@ -314,12 +314,12 @@ ConnectionEvents.prototype.stopStream = function (streamLike, date, type, callba
 
 
 /**
- * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
+ * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
  * the same connection and not exists on the API.
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {FormData} the formData to post for fileUpload. On node.js
  * refers to pryv.utility.forgeFormData
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.createWithAttachment =
   function (newEventLike, formData, callback, progressCallback) {
@@ -359,38 +359,38 @@ ConnectionEvents.prototype.createWithAttachment =
   };
 
 /**
- * @param {String} eventId
+ * @param {String} eventId
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {FormData} the formData to post for fileUpload. On node.js
  * refers to pryv.utility.forgeFormData
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.addAttachment =
   function (eventId, formData, callback, progressCallback) {
     if (typeof(callback) !== 'function') {
       throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
     }
-  this.connection.request({
-    method: 'POST',
-    path: '/events/' + eventId,
-    jsonData: formData,
-    isFile: true,
-    progressCallback: progressCallback,
-    callback: function (err, result) {
-      if (err) {
-        return callback(err);
+    this.connection.request({
+      method: 'POST',
+      path: '/events/' + eventId,
+      jsonData: formData,
+      isFile: true,
+      progressCallback: progressCallback,
+      callback: function (err, result) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, result.event);
       }
-      callback(null, result.event);
-    }
-  });
-};
+    });
+  };
 
 /**
- * @param {String} eventId
+ * @param {String} eventId
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {FormData} the formData to post for fileUpload. On node.js
  * refers to pryv.utility.forgeFormData
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.getAttachment =
   function (params, callback, progressCallback) {
@@ -416,10 +416,10 @@ ConnectionEvents.prototype.getAttachment =
   };
 
 /**
- * @param {String} eventId
+ * @param {String} eventId
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {String} fileName
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.removeAttachment = function (eventId, fileName, callback) {
   if (typeof(callback) !== 'function') {
@@ -441,7 +441,7 @@ ConnectionEvents.prototype.removeAttachment = function (eventId, fileName, callb
  * @param {Object[]} eventsData -- minimum {streamId, type }
  * @param {ConnectionEvents~eventBatchCreatedOnTheAPI}
  * @param {function} [callBackWithEventsBeforeRequest] mostly for testing purposes
- * @return {Event[]} events
+ * @return {Event[]} events
  */
 ConnectionEvents.prototype.batchWithData =
   function (eventsData, callback, callBackWithEventsBeforeRequest) {
@@ -523,7 +523,7 @@ ConnectionEvents.prototype._get = function (filter, callback) {
 /**
  * TODO anonymise by renaming to function _xx(..
  * @param {String} eventId
- * @param {Object} data
+ * @param {Object} data
  * @param  {Connection~requestCallback} callback
  * @private
  */

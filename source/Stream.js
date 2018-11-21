@@ -1,6 +1,5 @@
-var _ = require('underscore');
-
-
+const _ = require('lodash');
+const logger = console; 
 
 /**
  * TODO write documentation  with use cases.. !!
@@ -39,7 +38,7 @@ Stream.prototype.getData = function () {
  * @example // set x=25 and delete y
  * stream.setClientData({x : 25, y : null}, function(error) { console.log('done'); });
  *
- * @param {Object} keyValueMap
+ * @param {Object} keyValueMap
  * @param {Connection~requestCallback} callback
  */
 Stream.prototype.setClientData = function (keyValueMap, callback) {
@@ -89,7 +88,7 @@ Object.defineProperty(Stream.prototype, 'children', {
           children.push(child);
         }
       } catch (e) {
-        console.warn('cannot find child', e);
+        logger.warn('cannot find child', e);
       }
     }.bind(this));
     return children;

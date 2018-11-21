@@ -1,7 +1,7 @@
-var apiPathBookmarks = '/followed-slices',
-  Connection = require('../Connection.js'),
-  _ = require('underscore'),
-  CC = require('./ConnectionConstants.js');
+const apiPathBookmarks = '/followed-slices';
+let Connection = require('../Connection.js');
+const _ = require('lodash');
+const CC = require('./ConnectionConstants.js');
 
 /**
  * @class Bookmarks
@@ -25,7 +25,7 @@ Bookmarks.prototype.get = function (callback) {
     path: apiPathBookmarks,
     callback: function (error, res) {
       var result = [],
-        bookmarks = res.followedSlices || res.followedSlice;
+          bookmarks = res.followedSlices || res.followedSlice;
       _.each(bookmarks, function (bookmark) {
         bookmark.url = bookmark.url.replace(/\.li/, '.in');
         bookmark.url = bookmark.url.replace(/\.me/, '.io');

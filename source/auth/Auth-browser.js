@@ -1,10 +1,12 @@
 /* global confirm, document, navigator, location, window */
 
-var utility = require('../utility/utility.js'),
-  Connection = require('../Connection.js'),
-  _ = require('underscore');
+const utility = require('../utility/utility.js');
+const Connection = require('../Connection.js');
+const _ = require('lodash');
 
-//--------------------- Initialization ----------//
+//--------------------- Initialization -----------------------------------------
+
+const logger = console; 
 
 /**
  * @class Auth: handling Pryv authentication through browser popup
@@ -14,7 +16,6 @@ var Auth = function () {};
 _.extend(Auth.prototype, {
   connection: null, // actual connection managed by Auth
   config: {
-    // TODO: clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
     registerURL: {ssl: true, host: 'reg.pryv.me'},
     sdkFullPath: 'https://api.pryv.com/lib-javascript/latest'
   },
@@ -28,85 +29,86 @@ _.extend(Auth.prototype, {
   pollingIsOn: true, // may be turned off if we can communicate between windows
   cookiesForceDisable: false,
   cookieEnabled: false,
-  ignoreStateFromURL: false // turned to true in case of loggout
+  ignoreStateFromURL: false, // turned to true in case of loggout
+  uiSupportedLanguages: ['en', 'fr'], 
 });
 
 // Initialize style sheet and supported languages
 utility.loadExternalFiles(Auth.prototype.config.sdkFullPath +
   '/assets/buttonSigninPryv.css', 'css');
-Auth.prototype.uiSupportedLanguages = ['en', 'fr'];
 
 /**
- * Setup the authentication process
- * //TODO check settings
- * @param settings: initialization settings
- * @returns {Connection}: the connection managed by Auth.
- *  A new one is created each time setup is called.
+ * Sets up the authentication process. 
+ * 
+ * These settings are mandatory: 
+ * 
+ *  - *requestingAppId* App ID that requests access. (see 
+ *    http://api.pryv.com/getting-started/javascript/#authorize-your-app) for 
+ *    details. 
+ *  - *requestedPermissions* Permissions to request. 
+ * 
+ * These settings are optional: 
+ * 
+ *  - *languageCode* Language code to use during auth/consent process. This
+ *    will default to 'en' if not set.
+ *  - *returnURL* URL to redirect the client to after completing the auth
+ *    process. Can be left empty, in which case you need to poll the result 
+ *    of the auth operation. 
+ *  - *rememberMe* Set to `true` if the user should be remembered once logged 
+ *    in. 
+ *  - *oauthState* Debug option. 
+ *  - *clientData* Client data to store in the access object in Pryv.IO. 
+ * 
+ * Additionally, these callbacks can be defined and will be called at the 
+ * appropriate moments: 
+ * 
+ *  - *callbacks.initialization*: (), Called when the button is loading. 
+ *  - *callbacks.needSignin*: (url, poll, pollRate) called when a signin is 
+ *    needed. 
+ *  - *callbacks.accepted*: (username, token, lang) Login has succeeded with the 
+ *    given credentials. 
+ *  - *callbacks.signedIn*: (connection, lang) Login has succeeded; provides a 
+ *    working connection. This is called at the same time as 'accepted'. 
+ *  - *callbacks.error*: (error, message) Called whenever an error occurs. 
+ *  - *callbacks.refused*: (reason) The user has refused his consent. 
+ * 
+ * @returns {Connection}: the connection managed by Auth. A new one is created 
+ *  each time setup is called.
  */
 Auth.prototype.setup = function (settings) {
+  this.settings = settings;
   this.state = null;
 
   this.cookiesForceDisable = settings.cookiesForceDisable || false;
   this._checkCookies();
 
+  // Compute the language code to use. 
   settings.languageCode =
     utility.getPreferredLanguage(this.uiSupportedLanguages, settings.languageCode);
 
-  // ReturnURL
-  settings.returnURL = settings.returnURL || 'auto#';
-  if (settings.returnURL) {
-    // Check the trailer
-    var trailer = settings.returnURL.charAt(settings.returnURL.length - 1);
-    if ('#&?'.indexOf(trailer) < 0) {
-      throw new Error('Pryv access: Last character of --returnURL setting-- is not ' +
-        '"?", "&" or "#": ' + settings.returnURL);
-    }
+  // Verify and compute returnURL from the user settings.
+  settings.returnURL = computeReturnUrl(settings.returnURL);
 
-    // Set self as return url?
-    if((settings.returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet()) ||
-      (settings.returnURL.indexOf('self') === 0)) {
-        settings.returnURL = this._cleanStatusFromURL();
-        // If not already ending by &
-        if (settings.returnURL.slice(-1) !== '&') {
-          // If already containing ? or #, add a &
-          if (settings.returnURL.indexOf('?') > -1 || settings.returnURL.indexOf('#') > -1) {
-            settings.returnURL += '&';
-          } 
-          // If no, add a #
-          else {
-            settings.returnURL += '#';
-          }
-        }      
-    } else if(settings.returnURL.indexOf('auto') === 0 && !utility.browserIsMobileOrTablet()) {
-      settings.returnURL = false;
-    }
+  const urlInfo = utility.urls.parseServerURL(this.config.registerURL.host);
+  this.settings.domain = urlInfo.domain;
 
-    if (settings.returnURL && settings.returnURL.indexOf('http') < 0) {
-      throw new Error('Pryv access: --returnURL setting-- does not start with http: ' +
-        settings.returnURL);
-    }
-  }
-
-  this.settings = settings;
-
-  // TODO: Clean up this hard-coded mess and rely on the one and only Pryv URL domains reference
-  var z =  this.config.registerURL.host;
-  this.settings.domain = z.substring(z.indexOf('.') + 1);
-
-  var params = {
+  const params = {
     requestingAppId : settings.requestingAppId,
     requestedPermissions : settings.requestedPermissions,
     languageCode : settings.languageCode,
     returnURL : settings.returnURL
   };
 
-  // Advanced dev. option for oauth
-  if (settings.oauthState) {
-    params.oauthState = settings.oauthState;
+  // Copy over advanced options
+  for (let key of ['oauthState', 'clientData']) {
+    const value = settings[key]; 
+    if (value != null) {
+      params[key] = value; 
+    }
   }
 
   // Advanced dev. option for local testing with rec-la
-  if (this.config.reclaDevel) {
+  if (this.config.reclaDevel != null) {
     // Return url will be forced to https://se.rec.la + reclaDevel
     params.reclaDevel = this.config.reclaDevel;
   }
@@ -118,6 +120,7 @@ Auth.prototype.setup = function (settings) {
     auth: null,
     ssl: true,
     domain: this.settings.domain});
+
   // Look if we have a returning user (document.cookie)
   var cookieUserName = this.cookieEnabled ?
     utility.docCookies.getItem('access_username' + this.settings.domain) : false;
@@ -141,7 +144,6 @@ Auth.prototype.setup = function (settings) {
         if (data.status && data.status !== 'ERROR') {
           this.stateChanged(data);
         } else {
-          // TODO call shouldn't failed
           this.internalError('/access Invalid data: ', data);
         }
       }.bind(this),
@@ -157,7 +159,94 @@ Auth.prototype.setup = function (settings) {
   return this.connection;
 };
 
-//--------------------- UI Content -----------//
+/** 
+ * Calls a callback from the 'this.settings.callbacks' collection. Makes 
+ * sure the callback exists; if it doesn't, logs to the console and returns. 
+ */
+Auth.prototype.callCallback = function callCallback(name, ...args) {
+  const callbackNames = [
+    'initialization',
+    'needSignin',
+    'accepted',
+    'signedIn',
+    'error',
+    'refused',
+  ];
+
+  if (! callbackNames.includes(name)) {
+    logger.error(
+      `Code is trying to call the callback '${name}', but no such callback exists.`);
+    return;
+  }
+
+  const callbacks = this.settings.callbacks; 
+  if (typeof callbacks[name] !== 'function') return;
+
+  callbacks[name](...args);
+};
+
+/**
+ * Set cookies to remember we were already logged in on this machine/browser. 
+ * If cookies are disabled, this does nothing. 
+ * 
+ * @param username User to remember this login by.
+ * @param token Token to remember. 
+ * @param language The user's preferred language. This can be null/undefined.
+ */
+Auth.prototype.rememberLogin = function rememberLogin(username, token, language) {
+  const settings = this.settings; 
+
+  // Are cookies turned on? 
+  if (! this.cookieEnabled) return; 
+  if (! settings.rememberMe) return; 
+
+  // Assert: Yes, we're setting cookies. 
+  const setItem = utility.docCookies.setItem; 
+  const rememberSeconds = 3600; 
+
+  setItem(this.cookieName('access_username'), username, rememberSeconds);
+  setItem(this.cookieName('access_token'), token, rememberSeconds);
+  setItem(this.cookieName('access_preferredLanguage'), language, rememberSeconds);
+};
+
+/** 
+ * Forgets the login remembered using `rememberLogin`. 
+ */
+Auth.prototype.forgetLogin = function forgetLogin() {
+  const removeItem = utility.docCookies.removeItem; 
+
+  removeItem(this.cookieName('access_username'));
+  removeItem(this.cookieName('access_token'));
+  removeItem(this.cookieName('access_preferredLanguage'));
+};
+
+Auth.prototype.getLogin = function getLogin() {
+  const login = {
+    username: null, 
+    token: null, 
+    language: null, 
+  };
+
+  // If cookies are currently not enabled, return default values.   
+  if (! this.cookieEnabled) return login; 
+
+  const getItem = utility.docCookies.getItem; 
+  login.username = getItem(this.cookieName('access_username'));
+  login.token = getItem(this.cookieName('access_token'));
+  login.language = getItem(this.cookieName('access_preferredLanguage'));
+
+  return login;
+};
+
+/** 
+ * Given a `name` returns a cookie name that should be unique (namespaced) for 
+ * this.domain. 
+ */
+Auth.prototype.cookieName = function cookieName(name) {
+  return name + this.settings.domain; 
+};
+
+//--------------------- UI Content ---------------------------------------------
 
 /**
  * Generate Pryv login button
@@ -257,7 +346,7 @@ Auth.prototype.uiInButton = function (username) {
  * @param message: reason for refusal
  */
 Auth.prototype.uiRefusedButton = function (message) {
-  console.log('Pryv access [REFUSED]' + message);
+  logger.log('Pryv access [REFUSED]' + message);
   var strs = {
     'en': { 'msg': 'access refused'},
     'fr': { 'msg': 'Accès refusé'}
@@ -291,7 +380,7 @@ Auth.prototype.updateButton = function (html) {
       this.spanButton.onclick = function (e) {
         e.preventDefault();
         var element = document.getElementById('pryv-access-btn');
-        console.log('onClick', this.spanButton,
+        logger.log('onClick', this.spanButton,
           element.getAttribute('data-onclick-action'));
         this.onClick[element.getAttribute('data-onclick-action')]();
       }.bind(this);
@@ -305,42 +394,48 @@ Auth.prototype.updateButton = function (html) {
  * Handles state changes
  * @param data: the new state data
  */
-Auth.prototype.stateChanged  = function (data) {
-  if (data.id) { // error
-    if (this.settings.callbacks.error) {
-      this.settings.callbacks.error(data.id, data.message);
-    }
+Auth.prototype.stateChanged = function (data) {
+  // NOTE #internalError used to call #stateChanged to do its bidding. I don't 
+  //  think this belongs here. But since somebody else might be using this code, 
+  //  we'll keep it for a little while. 
+  if (data.id != null) { // error
+    logger.warn(
+      'stateChanged called with an internal error. This usage is deprecated, use #internalError.');
+
+    this.callCallback('error', data.id, data.message);
     this.updateButton(this.uiErrorButton());
-    // this.logout();   Why should I retry if it failed already once?
+    
+    return;
   }
 
-  if(!(data.status === this.state.status ||
-    data.status === 'LOADED' ||
-    data.status === 'POPUPINIT')) {
-    this.state = data;
-    switch(this.state.status) {
-      case 'NEED_SIGNIN':
-        this.stateNeedSignin();
-        break;
-      case 'REFUSED':
-        this.stateRefused();
-        break;
-      case 'ACCEPTED':
-        this.stateAccepted();
-    }
+  const state = this.state; 
+  const newState = data; 
+
+  const stateHasChanged = (newState.status !== state.status); 
+  if (! stateHasChanged) return;
+
+  this.state = newState;
+
+  switch (newState.status) {
+    case 'LOADED':      break; 
+    case 'POPUPINIT':   break; 
+    case 'NEED_SIGNIN': this.stateNeedSignin(); break; 
+    case 'REFUSED':     this.stateRefused(); break; 
+    case 'ACCEPTED':    this.stateAccepted(); break; 
+    
+    default: 
+      logger.error(`Entering unknown state: '${newState.status}'.`);
   }
 };
 
 /**
  * State 0: Initialization
- * Pryv button is loading
+ * Pryv button is loading. This is only called when you call 'Auth.setup'. 
  */
 Auth.prototype.stateInitialization = function () {
   this.state = {status : 'initialization'};
   this.updateButton(this.uiLoadingButton());
-  if (this.settings.callbacks.initialization) {
-    this.settings.callbacks.initialization();
-  }
+  this.callCallback('initialization');
 };
 
 /**
@@ -349,10 +444,9 @@ Auth.prototype.stateInitialization = function () {
  */
 Auth.prototype.stateNeedSignin = function () {
   this.updateButton(this.uiSigninButton());
-  if (this.settings.callbacks.needSignin) {
-    this.settings.callbacks.needSignin(this.state.url, this.state.poll,
-      this.state.poll_rate_ms);
-  }
+  this.callCallback('needSignin', 
+    this.state.url, this.state.poll,
+    this.state.poll_rate_ms);
 };
 
 /**
@@ -360,21 +454,22 @@ Auth.prototype.stateNeedSignin = function () {
  * The user is logged in and authorized, saves the credentials
  */
 Auth.prototype.stateAccepted = function () {
-  if (this.cookieEnabled) {
-    utility.docCookies.setItem('access_username' + this.settings.domain, this.state.username, 3600);
-    utility.docCookies.setItem('access_token' + this.settings.domain, this.state.token, 3600);
-  }
-  this.updateButton(this.uiInButton(this.state.username));
+  const state = this.state; 
+  this.rememberLogin(state.username, state.token);
 
-  this.connection.username = this.state.username;
-  this.connection.auth = this.state.token;
-  this.connection.domain = this.settings.domain;
-  if (this.settings.callbacks.accepted) {
-    this.settings.callbacks.accepted(this.state.username, this.state.token, this.state.lang);
-  }
-  if (this.settings.callbacks.signedIn) {
-    this.settings.callbacks.signedIn(this.connection, this.state.lang);
-  }
+  this.updateButton(this.uiInButton(state.username));
+
+  const settings = this.settings; 
+  const connection = this.connection; 
+  
+  // Finish configuration of the connection. 
+  connection.username = state.username;
+  connection.auth = state.token;
+  connection.domain = settings.domain;
+  
+  // Call callbacks. 
+  this.callCallback('accepted', state.username, state.token, state.lang);
+  this.callCallback('signedIn', connection, state.lang);
 };
 
 /**
@@ -383,74 +478,63 @@ Auth.prototype.stateAccepted = function () {
  */
 Auth.prototype.stateRefused = function () {
   this.updateButton(this.uiRefusedButton(this.state.message));
-  if (this.settings.callbacks.refused) {
-    this.settings.callbacks.refused('refused:' + this.state.message);
-  }
+  this.callCallback('refused', 'refused:' + this.state.message);
 };
 
 /**
- * Throw an internal error
+ * Throws an internal error.
+ * 
  * @param message: error message
- * @param jsonData: error data
  */
-Auth.prototype.internalError = function (message, jsonData) {
-  this.stateChanged({id: 'INTERNAL_ERROR', message: message, data: jsonData});
+Auth.prototype.internalError = function (message, /* jsonData */) {
+  this.callCallback('error', 'INTERNAL_ERROR', message);
+  this.updateButton(this.uiErrorButton());
 };
 
 //--------------- Connection Management ------------------//
 
 /**
- * Login the user and save references
- * TODO: discuss whether signature should be `(settings, callback)`
+ * Login the user and save references.
+ * 
  * @param settings: authentication settings
  */
 Auth.prototype.login = function (settings) {
   this._checkCookies();
 
   var defaultDomain = utility.urls.defaultDomain;
+
+  // BUG Assigning to settings will undo all the work done in 'setup'. 
   this.settings = settings = _.defaults(settings, {
     ssl: true,
     domain: defaultDomain
   });
 
-  Connection.login(settings, function(err, conn, res) {
-    if((err || !res.token) && typeof(this.settings.callbacks.error) === 'function') {
-      return this.settings.callbacks.error(err || res);
-    }
+  Connection.login(settings, (err, conn, res) => {
+    // NOTE The 'err || res' bit is legacy code that we kept intact. 
+    if (err != null || res.token == null)
+      return this.callCallback('error', (err || res));
 
     this.connection = conn;
 
-    if (this.cookieEnabled && settings.rememberMe) {
-      utility.docCookies.setItem('access_username' + this.settings.domain,
-        settings.username, 3600);
-      utility.docCookies.setItem('access_token' + this.settings.domain,
-        res.token, 3600);
-      utility.docCookies.setItem('access_preferredLanguage' + this.settings.domain,
-        res.preferredLanguage, 3600);
-    }
-
-    if (typeof(this.settings.callbacks.signedIn)  === 'function') {
-      this.settings.callbacks.signedIn(this.connection);
-    }
-  }.bind(this));
+    this.rememberLogin(settings.username, res.token, res.preferredLanguage);
+    this.callCallback('signedIn', conn);
+  });
 };
 
 /**
  * Logout the user and clear all references
  */
 Auth.prototype.logout = function () {
+  this.forgetLogin(); 
+  
   this.ignoreStateFromURL = true;
-  if (this.cookieEnabled) {
-    utility.docCookies.removeItem('access_username' + this.settings.domain);
-    utility.docCookies.removeItem('access_token' + this.settings.domain);
-  }
   this.state = null;
-  if (this.settings.callbacks.accepted) {
-    this.settings.callbacks.accepted(false, false, false);
-  }
-  if (this.settings.callbacks.signedOut) {
-    this.settings.callbacks.signedOut(this.connection);
-  }
+
+  // Possible BUG: We used to call 'accepted' here, but that makes no sense. 
+  // this.callCallback('accepted', false, false, false);
+
+  this.callCallback('signedOut', this.connection);
+
   this.connection = null;
   this.setup(this.settings);
 };
@@ -467,11 +551,13 @@ Auth.prototype.trustedLogout = function () {
 
 /**
  * Request for access information
- * TODO: belong elsewhere? (e.g. static method of Connection)
+ * 
  * @param settings: request settings
  */
 Auth.prototype.whoAmI = function (settings) {
-  var defaultDomain = utility.urls.defaultDomain;
+  const defaultDomain = utility.urls.defaultDomain;
+
+  // BUG Assigning to settings will undo all the work done in 'setup'. 
   this.settings = settings = _.defaults(settings, {
     ssl: true,
     domain: defaultDomain
@@ -482,40 +568,36 @@ Auth.prototype.whoAmI = function (settings) {
     domain: settings.domain
   });
 
-  var pack = {
+  const pack = {
     ssl: settings.ssl,
     host: settings.username + '.' + settings.domain,
     path :  '/auth/who-am-i',
     method: 'GET',
-    success : function (data)  {
-      if (data.token) {
-        this.connection.username = data.username;
-        this.connection.auth = data.token;
-        var conn = new Connection({
-          username: data.username,
-          auth: data.token,
-          ssl: settings.ssl,
-          domain: settings.domain
-        });
-
-        conn.accessInfo(function (error) {
-          console.log('after access info', this.connection);
-          if(error && (typeof(this.settings.callbacks.error) === 'function')) {
-            this.settings.callbacks.error(error);
-          } else if(!error && typeof(this.settings.callbacks.signedIn)  === 'function') {
-            this.settings.callbacks.signedIn(this.connection);
-          }
-        }.bind(this));
-
-      } else if (typeof(this.settings.callbacks.error) === 'function') {
-        this.settings.callbacks.error(data);
+    success : function (data) {
+      if (data.token == null) {
+        this.callCallback('error', data); 
+        return;
       }
+
+      this.connection.username = data.username;
+      this.connection.auth = data.token;
+      const conn = new Connection({
+        username: data.username,
+        auth: data.token,
+        ssl: settings.ssl,
+        domain: settings.domain
+      });
+
+      conn.accessInfo((error) => {
+        logger.log('after access info', this.connection);
+
+        if (error == null) 
+          this.callCallback('signedIn', this.connection); 
+        else 
+          this.callCallback('error', error); 
+      });
     }.bind(this),
-    error : function (jsonError) {
-      if (typeof(this.settings.callbacks.error) === 'function') {
-        this.settings.callbacks.error(jsonError);
-      }
-    }.bind(this)
+    error: this.callCallback.bind(this, 'error', /* jsonError */),
   };
 
   utility.request(pack);
@@ -523,12 +605,14 @@ Auth.prototype.whoAmI = function (settings) {
 
 /**
  * Login the user using stored cookies
- * TODO: belong elsewhere, merge with standard login? (e.g. member method of Connection)
+ * 
  * @param settings: authentication settings
- * @returns {*}: a successful connection or false
+ * @returns {*}: a successful connection or null
  */
 Auth.prototype.loginWithCookie = function (settings) {
   var defaultDomain = utility.urls.defaultDomain;
+
+  // BUG Assigning to settings will undo all the work done in 'setup'. 
   this.settings = settings = _.defaults(settings, {
     ssl: true,
     domain: defaultDomain
@@ -541,23 +625,18 @@ Auth.prototype.loginWithCookie = function (settings) {
 
   this._checkCookies();
 
-  var cookieUserName = this.cookieEnabled ?
-    utility.docCookies.getItem('access_username' + this.settings.domain) : false;
-  var cookieToken = this.cookieEnabled ?
-    utility.docCookies.getItem('access_token' + this.settings.domain) : false;
-
-  if (cookieUserName && cookieToken) {
-    this.connection.username = cookieUserName;
+  const cookie = this.getLogin(); 
+  if (cookie.username != null && cookie.token != null) {
+    this.connection.username = cookie.username;
     this.connection.domain = this.settings.domain;
-    this.connection.auth = cookieToken;
+    this.connection.auth = cookie.token;
 
-    if (typeof(this.settings.callbacks.signedIn) === 'function') {
-      this.settings.callbacks.signedIn(this.connection);
-    }
+    this.callCallback('signedIn', this.connection);
 
     return this.connection;
   }
-  return false;
+
+  return null;
 };
 
 //--------------- Popup Management ------------------//
@@ -588,7 +667,7 @@ Auth.prototype.poll = function poll() {
 
     this.pollingID = setTimeout(this.poll.bind(this), this.state.poll_rate_ms);
   } else {
-    console.log('stopped polling: on=' + this.pollingIsOn + ' rate:' + this.state.poll_rate_ms);
+    logger.log('stopped polling: on=' + this.pollingIsOn + ' rate:' + this.state.poll_rate_ms);
   }
 };
 
@@ -601,10 +680,12 @@ Auth.prototype.popupCallBack = function (event) {
   // Do not use 'this' here !
   if (!this.settings.forcePolling) {
     if (event.source !== this.window) {
-      console.log('popupCallBack event.source does not match Auth.window');
+      logger.log('popupCallBack event.source does not match Auth.window');
       return false;
     }
-    console.log('from popup >>> ' + JSON.stringify(event.data));
+
+    logger.log('from popup >>> ' + JSON.stringify(event.data));
+
     this.pollingIsOn = false; // If we can receive messages we stop polling
     this.stateChanged(event.data);
   }
@@ -625,31 +706,25 @@ Auth.prototype.popupLogin = function popupLogin() {
     // Start polling
     setTimeout(this.poll(), 1000);
 
-    var screenX = typeof window.screenX !== 'undefined' ? window.screenX : window.screenLeft,
-      screenY = typeof window.screenY !== 'undefined' ? window.screenY : window.screenTop,
-      outerWidth = typeof window.outerWidth !== 'undefined' ?
-        window.outerWidth : document.body.clientWidth,
-      outerHeight = typeof window.outerHeight !== 'undefined' ?
-        window.outerHeight : (document.body.clientHeight - 22),
-      width    = 270,
-      height   = 420,
-      left     = parseInt(screenX + ((outerWidth - width) / 2), 10),
-      top      = parseInt(screenY + ((outerHeight - height) / 2.5), 10),
-      features = (
-        'width=' + width +
-        ',height=' + height +
-        ',left=' + left +
-        ',top=' + top +
-        ',scrollbars=yes'
-      );
-
-    window.addEventListener('message', this.popupCallBack.bind(this), false);
+    const screenX = window.screenX != null ? window.screenX : window.screenLeft;
+    const screenY = window.screenY != null ? window.screenY : window.screenTop;
+    const outerWidth = window.outerWidth != null ? window.outerWidth : document.body.clientWidth;
+    const outerHeight = window.outerHeight != null ? window.outerHeight : (document.body.clientHeight - 22);
+    const width    = 270;
+    const height   = 420;
+    const left     = Math.floor(screenX + ((outerWidth - width) / 2));
+    const top      = Math.floor(screenY + ((outerHeight - height) / 2.5));
+    
+    const features = 
+      `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`;
+    
+    window.addEventListener('message', 
+      this.popupCallBack.bind(this), false);
 
     this.window = window.open(this.state.url, 'prYv Sign-in', features);
 
-    if (!this.window) {
-      // TODO try to fall back on access
-      console.log('FAILED_TO_OPEN_WINDOW');
+    if (this.window == null) {
+      logger.log('FAILED_TO_OPEN_WINDOW');
     } else if(window.focus) {
       this.window.focus();
     }
@@ -703,5 +778,42 @@ Auth.prototype._checkCookies = function () {
     this.cookieEnabled = (document.cookie.indexOf('testcookie') !== -1);
   }
 };
+
+function computeReturnUrl(userConfig) {
+  let returnURL = userConfig || 'auto#';
+
+  // Check the trailer
+  const tail = returnURL.charAt(returnURL.length - 1);
+  if ('#&?'.indexOf(tail) < 0) {
+    throw new Error('Pryv access: Last character of --returnURL setting-- is not ' +
+      '"?", "&" or "#": ' + returnURL);
+  }
+
+  // Set self as return url?
+  if ((returnURL.indexOf('auto') === 0 && utility.browserIsMobileOrTablet()) ||
+    (returnURL.indexOf('self') === 0)) {
+    returnURL = this._cleanStatusFromURL();
+    // If not already ending by &
+    if (returnURL.slice(-1) !== '&') {
+      // If already containing ? or #, add a &
+      if (returnURL.indexOf('?') > -1 || returnURL.indexOf('#') > -1) {
+        returnURL += '&';
+      }
+      // If no, add a #
+      else {
+        returnURL += '#';
+      }
+    }
+  } else if (returnURL.indexOf('auto') === 0 && !utility.browserIsMobileOrTablet()) {
+    returnURL = false;
+  }
+
+  if (returnURL && returnURL.indexOf('http') < 0) {
+    throw new Error('Pryv access: --returnURL setting-- does not start with http ' +
+      returnURL);
+  }
+
+  return returnURL;
+}
 
 module.exports = new Auth();

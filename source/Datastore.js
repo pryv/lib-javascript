@@ -3,7 +3,7 @@
  * @private
  */
 
-var _ = require('underscore');
+var _ = require('lodash');
 var Event = require('./Event');
 var Stream = require('./Stream');
 
@@ -86,7 +86,7 @@ Datastore.prototype.getStreamById = function (streamId) {
 Datastore.prototype.getEventBySerialId = function (serialId) {
   var result = null;
   _.each(this.eventIndex, function (event /*,eventId*/) {
-    if (event.serialId === serialId) { result = event; }
+    if (event.serialId === serialId) { result = event; }
     // TODO optimize and break
   }.bind(this));
   return result;
@@ -107,7 +107,7 @@ Datastore.prototype.getEventById = function (eventId) {
 Datastore.prototype.getEventsMatchingFilter = function (filter) {
   var result = [];
   _.each(this.eventIndex, function (event /*,eventId*/) {
-    if (filter.matchEvent(event)) { result.push(event); }
+    if (filter.matchEvent(event)) { result.push(event); }
   }.bind(this));
   return result;
 };
@@ -160,21 +160,21 @@ Datastore.prototype.createOrReuseEvent = function (data) {
  * @return {Event} event
  */
 Datastore.prototype.createOrReuseStream = function (data) {
-    if (! data.id) {
-        throw new Error('Datastore.createOrReuseStream cannot create stream with ' +
+  if (! data.id) {
+    throw new Error('Datastore.createOrReuseStream cannot create stream with ' +
             ' unkown id' + require('util').inspect(data));
-    }
+  }
 
-    var result = this.getStreamById(data.id);
-    if (result) {  // found event
-        _.extend(result, data);
-        return result;
-    }
-    // create an stream and register it
-    result = new Stream(this.connection, data);
-    this.indexStream(result);
-
+  var result = this.getStreamById(data.id);
+  if (result) {  // found event
+    _.extend(result, data);
     return result;
+  }
+  // create an stream and register it
+  result = new Stream(this.connection, data);
+  this.indexStream(result);
+
+  return result;
 };
 
 

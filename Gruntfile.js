@@ -1,12 +1,11 @@
-var package = require('./package.json'),
-    distRoot = './dist/',
-    currentDistPath = distRoot + package.version + '/',
-    latestDistPath = distRoot + 'latest/';
+const package = require('./package.json');
+const distRoot = './dist/';
+const currentDistPath = distRoot + package.version + '/';
+const latestDistPath = distRoot + 'latest/';
 
 module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-browserify');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-contrib-copy');
@@ -16,18 +15,19 @@ module.exports = function (grunt) {
   grunt.initConfig({
     pkg: package,
 
-    jshint: {
-      files: [ 'gruntfile.js', 'source/**/*.js', 'test/**/*.js' ],
-      options: {
-        jshintrc: '.jshintrc'
-      }
-    },
-
     browserify: {
       dist: {
         src: ['./source/main.js'],
         dest: currentDistPath + 'pryv.js',
         options: {
+          transform: [["babelify", { 
+            "presets": [
+              [
+                "env", {
+                  targets: "last 1 version, not dead, > 1%",
+                }
+              ]
+            ]}]],
           alias: ['./source/main.js:pryv'],
           ignore: [ './source/system/*-node.js', './source/utility/*-node.js' ],
           browserifyOptions: {
@@ -110,8 +110,8 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.registerTask('default', [ 'jshint', 'browserify', 'jsdoc', 'copy', 'mochaTest' ]);
-  grunt.registerTask('test', [ 'jshint', 'browserify', 'copy', 'mochaTest' ]);
-  grunt.registerTask('test:acceptance', [ 'jshint', 'browserify', 'copy', 'mochaTest:acceptance' ]);
-  grunt.registerTask('record', [ 'jshint', 'browserify', 'copy', 'env:record', 'mochaTest' ]);
+  grunt.registerTask('default', [ 'browserify', 'jsdoc', 'copy', 'mochaTest' ]);
+  grunt.registerTask('test', [ 'browserify', 'copy', 'mochaTest' ]);
+  grunt.registerTask('test:acceptance', [ 'browserify', 'copy', 'mochaTest:acceptance' ]);
+  grunt.registerTask('record', [ 'browserify', 'copy', 'env:record', 'mochaTest' ]);
 };

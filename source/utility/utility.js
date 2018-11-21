@@ -1,15 +1,38 @@
-var socketIO = require('socket.io-client'),
-    _ = require('underscore');
+const socketIO = require('socket.io-client');
+const _ = require('lodash');
+const FormData = require('form-data');
 
-var utility = module.exports = process.browser ?
-  require('./utility-browser.js') : require('./utility-node.js');
+const utility = {};
+module.exports = utility;
+
+utility.request = require('./request');
+
+/**
+ * Create or complete FormData object for attachements
+ * @param id {String} id of the element to add (may be 'attachment0')
+ * @param data {Data} the data to send
+ * @param options {Object}
+ * @param options.filename {String}
+ * @param options.type {String}
+ */
+utility.forgeFormData = function (id, data, options, appendTo) {
+  var formData = appendTo || new FormData();
+  formData.append(id, data, options);
+  return formData;
+};
+
 
 /**
  * @returns {Boolean} `true` if we're in a web browser environment
  */
 utility.isBrowser = function () {
-  return typeof(window) !== 'undefined';
+  return typeof (window) !== 'undefined';
 };
+
+// This should be a file that is only ever required in a non-browser environment. 
+// Make sure: 
+if (utility.isBrowser()) 
+  throw new Error('utility.js was required in a browser environment!');
 
 utility.SignalEmitter = require('./SignalEmitter.js');
 
@@ -70,9 +93,9 @@ utility.endsWith = function (string, suffix) {
 utility.ioConnect = function (settings) {
   var httpMode = settings.ssl ? 'https' : 'http';
   var url = httpMode + '://' + settings.host + ':' + settings.port + '' +
-      settings.path + '?auth=' + settings.auth + '&resource=' + settings.namespace;
+    settings.path + '?auth=' + settings.auth + '&resource=' + settings.namespace;
 
-  return socketIO(url, {forceNew: true});
+  return socketIO(url, { forceNew: true });
 };
 
 utility.urls = require('./urls');
