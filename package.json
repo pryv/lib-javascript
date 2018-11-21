@@ -51,6 +51,7 @@
     "url": "http://github.com/pryv/lib-javascript.git"
   },
   "dependencies": {
+    "cuid": "latest",
     "form-data": "0.1.x",
     "socket.io-client": "2.1.0",
     "underscore": "latest"
