@@ -57,8 +57,7 @@ describe('Connection.accesses', function () {
         id: 'accessTestStream',
         name: 'accessTestStream'
       };
-      accessConnection.streams.create(testStream, function (err, newStream) {
-        testStream = newStream;
+      accessConnection.streams.create(testStream, function (err) {
         done(err);
       });
     });
@@ -144,8 +143,7 @@ describe('Connection.accesses', function () {
 
       async.series([
         function (stepDone) {
-          streamConnection.streams.create(testStream, function (err, newStream) {
-            testStream = newStream;
+          streamConnection.streams.create(testStream, function (err) {
             stepDone(err);
           });
         },
@@ -237,8 +235,7 @@ describe('Connection.accesses', function () {
 
       async.series([
         function (stepDone) {
-          streamConnection.streams.create(testStream, function (err, newStream) {
-            testStream = newStream;
+          streamConnection.streams.create(testStream, function (err) {
             stepDone(err);
           });
         },
