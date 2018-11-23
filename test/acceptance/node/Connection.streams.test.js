@@ -2,7 +2,9 @@
 var Pryv = require('../../../source/main'),
   should = require('should'),
   config = require('../test-support/config.js'),
-  async = require('async');
+  async = require('async'),
+  _ = require('underscore'),
+  cuid = require('cuid');
 
 // TODO: wait to have test account with given data to update tests
 // (i.e number of trashed stream/children)
@@ -77,32 +79,30 @@ describe('Connection.streams', function () {
     });
 
     after (function (done) {
-      async.series([
-        function trashDataStream(stepDone) {
-          connection.streams.delete(diaryStream, function (err) {
-            if (err) { console.error(err); }
-            stepDone();
-          });
+      connection.batchCall([
+        {
+          method: 'streams.delete',
+          params: _.pick(diaryStream, 'id')
         },
-        function deleteDataStream(stepDone) {
-          connection.streams.delete(diaryStream, function (err) {
-            if (err) { console.error(err); }
-            stepDone();
-          }, false);
+        {
+          method: 'streams.delete',
+          params: _.extend(_.pick(diaryStream, 'id'), { mergeEventsWithParent: false })
         },
-        function deleteStreamWithNoChild(stepDone) {
-          connection.streams.delete(streamWithNoChildren, function (err) {
-            if (err) { console.error(err); }
-            stepDone();
-          });
+        {
+          method: 'streams.delete',
+          params: _.pick(streamWithNoChildren, 'id')
         },
-        function deleteStreamWithNoChild(stepDone) {
-          connection.streams.delete(streamWithNoChildren, function (err) {
-            if (err) { console.error(err); }
-            stepDone();
-          }, false);
+        {
+          method: 'streams.delete',
+          params: _.extend(_.pick(streamWithNoChildren, 'id'), { mergeEventsWithParent: false })
         }
-      ], done);
+      ], function (err, results) {
+        if (err) { return done(err); }
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { return done(results[i].error); }
+        }
+        done();
+      });
     });
 
     it('must return a tree of non-trashed Stream objects by default', function (done) {
@@ -198,21 +198,30 @@ describe('Connection.streams', function () {
     });
 
     after(function (done) {
-      async.series([
-        function (stepDone) {
-          connection.streams.delete(stream, stepDone);
+      connection.batchCall([
+        {
+          method: 'streams.delete',
+          params: _.pick(stream, 'id')
         },
-        function (stepDone) {
-          connection.streams.delete(stream, stepDone, false);
+        {
+          method: 'streams.delete',
+          params: _.extend(_.pick(stream, 'id'), { mergeEventsWithParent: false })
         },
-        function (stepDone) {
-          connection.streams.delete(stream2, stepDone);
+        {
+          method: 'streams.delete',
+          params: _.pick(stream2, 'id')
         },
-        function (stepDone) {
-          connection.streams.delete(stream2, stepDone, false);
+        {
+          method: 'streams.delete',
+          params: _.extend(_.pick(stream2, 'id'), { mergeEventsWithParent: false })
         }
-      ]);
-      done();
+      ], function (err, results) {
+        if (err) { return done(err); }
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { return done(results[i].error); }
+        }
+        done();
+      });
     });
 
     it('must accept a stream-like object and return a Stream object', function (done) {
@@ -263,62 +272,61 @@ describe('Connection.streams', function () {
 
   describe('update()', function () {
     var streamParent = {
+      id: 'libjs-test-stream-parent-update',
       name: 'libjs-test-stream-parent-update' + getRandomNum(10000),
       parentId: null
     };
     var streamToUpdate = {
+      id: 'libjs-test-stream-update-to-update',
       name: 'libjs-test-stream-update-to-update' + getRandomNum(10000),
       parentId: streamParent.id
     };
     var streamToMove = {
+      id: 'libjs-test-stream-update-to-move',
       name: 'libjs-test-stream-update-to-move' + getRandomNum(10000),
       parentId: streamParent.id
     };
 
     before(function (done) {
-      async.series([
-        function (stepDone) {
-          connection.streams.create(streamParent, function (err, stream) {
-            streamParent = stream;
-            stepDone(err);
-          });
+      connection.batchCall([
+        {
+          method: 'streams.create',
+          params: streamParent
         },
-        function (stepDone) {
-          connection.streams.create(streamToUpdate, function (err, stream) {
-            streamToUpdate = stream;
-            stepDone(err);
-          });
+        {
+          method: 'streams.create',
+          params: streamToUpdate
         },
-        function (stepDone) {
-          connection.streams.create(streamToMove, function (err, stream) {
-            streamToMove = stream;
-            stepDone(err);
-          });
+        {
+          method: 'streams.create',
+          params: streamToMove
         }
-      ], done);
+      ], function (err, results) {
+        if (err) { return done(err); }
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { return done(results[i].error); }
+        }
+        done();
+      });
     });
 
     after(function (done) {
-      async.series([
-        function (stepDone) {
-          connection.streams.delete(streamToMove, stepDone);
+      connection.batchCall([
+        {
+          method: 'streams.delete',
+          params: streamParent
         },
-        function (stepDone) {
-          connection.streams.delete(streamToMove, stepDone, false);
-        },
-        function (stepDone) {
-          connection.streams.delete(streamToUpdate, stepDone);
-        },
-        function (stepDone) {
-          connection.streams.delete(streamToUpdate, stepDone, false);
-        },
-        function (stepDone) {
-          connection.streams.delete(streamParent, stepDone);
-        },
-        function (stepDone) {
-          connection.streams.delete(streamParent, stepDone, false);
+        {
+          method: 'streams.delete',
+          params: _.extend(streamParent, { mergeEventsWithParent: false })
         }
-      ], done);
+      ], function (err, results) {
+        if (err) { return done(err); }
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { return done(results[i].error); }
+        }
+        done();
+      });
     });
 
 
@@ -360,168 +368,140 @@ describe('Connection.streams', function () {
 
   });
 
-  describe('delete()', function () {
-    var eventToMerge = {
-      time: 1404155270,
-      type: 'note/txt',
-      content: 'libjs-test-stream-delete-to-merge'
-    };
-    var eventNoMerge1 = {
-      time: 1404155270,
-      type: 'note/txt',
-      content: 'libjs-test-stream-delete-no-merge1'
-    };
-    var eventNoMerge2 = {
-      time: 1404155270,
-      type: 'note/txt',
-      content: 'libjs-test-stream-delete-no-merge2'
-    };
+  describe('delete()', function () {    
     var streamParent = {
       id: 'libjs-test-stream-parent',
       name: 'libjs-test-stream-parent',
-      parentId: null
+      parentId: null,
     };
     var streamToTrashSimple1 = {
       parentId: streamParent.id,
-      name: 'libjs-test-stream-delete-trash1'
+      name: 'libjs-test-stream-delete-trash1',
+      id: 'libjs-test-stream-delete-trash1'
     };
     var streamToTrashSimple2 = {
       parentId: streamParent.id,
       name: 'libjs-test-stream-delete-trash2',
+      id: 'libjs-test-stream-delete-trash2',
       trashed: true
     };
     var streamToTrashChildMerge = {
       parentId: streamParent.id,
+      id: 'libjs-test-stream-delete-child-merge',
       name: 'libjs-test-stream-delete-child-merge'
     };
     var streamToTrashNoMerge1 = {
+      id: 'libjs-test-stream-delete-no-merge1',
       parentId: streamParent.id,
       name: 'libjs-test-stream-delete-no-merge1'
     };
     var streamToTrashNoMerge2 = {
+      id: 'libjs-test-stream-delete-no-merge2',
       parentId: streamParent.id,
       name: 'libjs-test-stream-delete-no-merge2'
     };
-
+    var eventToMerge = {
+      time: 1404155270,
+      streamId: streamToTrashChildMerge.id,
+      type: 'note/txt',
+      content: 'libjs-test-stream-delete-to-merge',
+      id: cuid()
+    };
+    var eventNoMerge1 = {
+      streamId: streamToTrashNoMerge1.id,
+      time: 1404155270,
+      type: 'note/txt',
+      content: 'libjs-test-stream-delete-no-merge1',
+      id: cuid()
+    };
+    var eventNoMerge2 = {
+      streamId: streamToTrashNoMerge2.id,
+      time: 1404155270,
+      type: 'note/txt',
+      content: 'libjs-test-stream-delete-no-merge2',
+      id: cuid()
+    };
+    
     before(function (done) {
-      async.series([
-        function (stepDone) {
-          connection.streams.delete(streamParent.id, function () {
-            return stepDone();
-          }, false);
+      connection.batchCall([
+        {
+          method: 'streams.create',
+          params: streamParent
         },
-        function (stepDone) {
-          connection.streams.delete(streamParent.id, function () {
-            return stepDone();
-          }, false);
+        {
+          method: 'streams.create',
+          params: streamToTrashSimple1
         },
-        function (stepDone) {
-          connection.streams.create(streamParent, function (error, stream) {
-            if (error) {
-              return stepDone(error);
-            }
-            streamParent = stream;
-            return stepDone();
-          });
+        {
+          method: 'streams.create',
+          params: streamToTrashSimple2
         },
-        function (stepDone) {
-          connection.streams.create(streamToTrashSimple1, function (error, stream) {
-            if (error) {
-              return stepDone(error);
-            }
-            streamToTrashSimple1 = stream;
-            return stepDone();
-          });
+        {
+          method: 'streams.create',
+          params: streamToTrashChildMerge
         },
-        function (stepDone) {
-          connection.streams.create(streamToTrashSimple2, function (error, stream) {
-            if (error) {
-              return stepDone(error);
-            }
-            streamToTrashSimple2 = stream;
-            return stepDone();
-          });
+        {
+          method: 'streams.create',
+          params: streamToTrashNoMerge1
         },
-        function (stepDone) {
-          connection.streams.create(streamToTrashChildMerge, function (error, stream) {
-            if (error) {
-              return stepDone(error);
-            }
-            streamToTrashChildMerge = stream;
-            return stepDone();
-          });
+        {
+          method: 'streams.create',
+          params: streamToTrashNoMerge2
         },
-        function (stepDone) {
-          connection.streams.create(streamToTrashNoMerge1, function (error, stream) {
-            if (error) {
-              return stepDone(error);
-            }
-            streamToTrashNoMerge1 = stream;
-            return stepDone();
-          });
+        {
+          method: 'streams.create',
+          params: streamToTrashSimple2
         },
-        function (stepDone) {
-          connection.streams.create(streamToTrashNoMerge2, function (error, stream) {
-            if (error) {
-              return stepDone(error);
-            }
-            streamToTrashNoMerge2 = stream;
-            return stepDone();
-          });
+        {
+          method: 'events.create',
+          params: eventToMerge
         },
-        function (stepDone) {
-          eventToMerge.streamId = streamToTrashChildMerge.id;
-          connection.events.create(eventToMerge, function (error, event) {
-            if (error) {
-              return stepDone(error);
-            }
-            eventToMerge = event;
-            return stepDone();
-          });
+        {
+          method: 'streams.delete',
+          params: streamToTrashChildMerge
         },
-        function (stepDone) {
-          streamToTrashChildMerge.trashed = true;
-          connection.streams.update(streamToTrashChildMerge, function (error, stream) {
-            if (error) {
-              return stepDone(error);
-            }
-            streamToTrashChildMerge = stream;
-            return stepDone();
-          });
+        {
+          method: 'events.create',
+          params: eventNoMerge1
         },
-        function (stepDone) {
-          eventNoMerge1.streamId = streamToTrashNoMerge1.id;
-          connection.events.create(eventNoMerge1, function (error, event) {
-            if (error) {
-              return stepDone(error);
-            }
-            eventNoMerge1 = event;
-            return stepDone();
-          });
+        {
+          method: 'events.create',
+          params: eventNoMerge2
         },
-        function (stepDone) {
-          eventNoMerge2.streamId = streamToTrashNoMerge2.id;
-          connection.events.create(eventNoMerge2, function (error, event) {
-            if (error) {
-              return stepDone(error);
-            }
-            eventNoMerge2 = event;
-            return stepDone();
-          });
-        },
-        function (stepDone) {
-          streamToTrashNoMerge2.trashed = true;
-          connection.streams.update(streamToTrashNoMerge2, function (error, stream) {
-            if (error) {
-              return stepDone(error);
-            }
-            streamToTrashNoMerge2 = stream;
-            return stepDone();
-          });
+        {
+          method: 'streams.delete',
+          params: streamToTrashNoMerge2
         }
-      ], done);
+      ], function (err) {
+        if (err) { return done(err); }
+        // ignore errors here as it for some reason doesnt execute after if before fails
+        /*
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { return done(results[i].error); }
+        }
+        */
+        done();
+      });
     });
 
+    after(function (done) {
+      connection.batchCall([
+        {
+          method: 'streams.delete',
+          params: streamParent
+        },
+        {
+          method: 'streams.delete',
+          params: _.extend(streamParent, { mergeEventsWithParent: false })
+        }
+      ], function (err, results) {
+        if (err) { return done(err); }
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].error) { return done(results[i].error); }
+        }
+        done();
+      });
+    });
 
     it('must accept a stream-like object and return a Stream object flagged as trashed',
       function (done) {
