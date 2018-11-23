@@ -60,8 +60,8 @@ class EnsureEntity {
       await this.deleteClosure(attrs);
       try {
         await this.deleteClosure(attrs);
-      } 
-      catch (err) { 
+      }
+      catch (err) {
         // IGNORE
       }
       return this.createClosure(attrs);
@@ -76,8 +76,8 @@ class EnsureEntity {
 const conn = new Pryv.Connection(config.connectionSettings);
 const streams = conn.streams;
 const ensureStream = new EnsureEntity({
-  deleteMethod: streams.delete.bind(streams), 
-  createMethod: streams.create.bind(streams), 
+  deleteMethod: streams.delete.bind(streams),
+  createMethod: streams.create.bind(streams),
 });
 
 describe('Connection.accesses', function () {
@@ -88,19 +88,19 @@ describe('Connection.accesses', function () {
   before(async () => {
     accessConnection = await bluebird.fromCallback(
       cb => Pryv.Connection.login(config.loginParams, cb));
-    
+
     const accesses = accessConnection.accesses;
     ensureAccess = new EnsureEntity({
       deleteClosure: async (attrs) => {
         const all = await bluebird.fromCallback(
           cb => accesses.get(cb));
 
-        const access = _.find(all, a => a.name === attrs.name); 
+        const access = _.find(all, a => a.name === attrs.name);
         assert(access != null);
 
         return bluebird.fromCallback(cb => accesses.delete(access.id, cb));
       },
-      createMethod: accesses.create.bind(accesses), 
+      createMethod: accesses.create.bind(accesses),
     });
   });
 
@@ -110,7 +110,7 @@ describe('Connection.accesses', function () {
         should.not.exist(err);
         should.exist(res);
         res.should.be.instanceOf(Array);
-        res.forEach( function (access) {
+        res.forEach(function (access) {
           should.exist(access.id);
           should.exist(access.token);
           should.exist(access.name);
@@ -154,7 +154,8 @@ describe('Connection.accesses', function () {
             streamId: testStream.id,
             level: 'read'
           }
-        ]};
+        ]
+      };
       accessConnection.accesses.create(testAccess, function (err, newAccess) {
         should.not.exist(err);
         should.exist(newAccess);
@@ -173,7 +174,8 @@ describe('Connection.accesses', function () {
             streamId: testStream.id,
             level: 'wrongLevel'
           }
-        ]};
+        ]
+      };
       accessConnection.accesses.create(invalidAccess, function (err) {
         should.exist(err);
         done();
@@ -205,7 +207,7 @@ describe('Connection.accesses', function () {
     });
 
     it('must return the updated access', function (done) {
-      testAccess.name = 'myNewAccessName';
+      testAccess.name = 'myNewAccessName2';
       accessConnection.accesses.update(testAccess, function (err, updatedAccess) {
         should.not.exist(err);
         should.exist(updatedAccess);
