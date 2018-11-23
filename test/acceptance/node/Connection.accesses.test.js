@@ -76,6 +76,7 @@ describe('Connection.accesses', function () {
           });
         },
         function (stepDone) {
+          if (! testAccess) { return stepDone(); }
           accessConnection.accesses.delete(testAccess.id, function (err) {
             stepDone(err);
           });
@@ -179,12 +180,11 @@ describe('Connection.accesses', function () {
     });
 
     it('must return the updated access', function (done) {
-      testAccess.name = 'myNewAccessName';
+      testAccess.name = 'myNewAccessName2';
       accessConnection.accesses.update(testAccess, function (err, updatedAccess) {
         should.not.exist(err);
         should.exist(updatedAccess);
         testAccess.name.should.eql(updatedAccess.name);
-        testAccess = updatedAccess;
         done();
       });
     });
