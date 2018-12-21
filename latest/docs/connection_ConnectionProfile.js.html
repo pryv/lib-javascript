@@ -49,7 +49,7 @@ function Profile(connection) {
 
 
 /**
- * @param {String | null} key
+ * @param {String | null} key
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype.getPrivate = function (key, callback) {
@@ -59,7 +59,7 @@ Profile.prototype.getPrivate = function (key, callback) {
   this._get(apiPathPrivateProfile, key, callback);
 };
 /**
- * @param {String | null} key
+ * @param {String | null} key
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype.getPublic = function (key, callback) {
@@ -75,7 +75,7 @@ Profile.prototype.getPublic = function (key, callback) {
  * // set x=25 and delete y
  * conn.profile.setPrivate({x : 25, y : null}, function(error) { console.log('done'); });
  *
- * @param {Object} keyValuePairs
+ * @param {Object} keyValuePairs
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype.setPrivate = function (keyValuePairs, callback) {
@@ -89,7 +89,7 @@ Profile.prototype.setPrivate = function (keyValuePairs, callback) {
  * // set x=25 and delete y
  * conn.profile.setPublic({x : 25, y : null}, function(error) { console.log('done'); });
  *
- * @param {Object} keyValuePairs
+ * @param {Object} keyValuePairs
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype.setPublic = function (keyValuePairs, callback) {
@@ -107,7 +107,7 @@ Profile.prototype.getTimeLimits = function (force, callback) {
     throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
   }
   if (!force &amp;&amp; this.timeLimits) {
-    callback(this.timeLimits);
+      callback(this.timeLimits);
   } else {
     var i = 2;
     this.timeLimits = {
@@ -127,7 +127,7 @@ Profile.prototype.getTimeLimits = function (force, callback) {
       }
       i--;
       if (i === 0) {
-        callback(this.timeLimits);
+          callback(this.timeLimits);
       }
     }.bind(this));
     this.connection.events.get({
@@ -143,7 +143,7 @@ Profile.prototype.getTimeLimits = function (force, callback) {
       }
       i--;
       if (i === 0) {
-        callback(this.timeLimits);
+          callback(this.timeLimits);
       }
     }.bind(this));
   }
@@ -154,7 +154,7 @@ Profile.prototype.getTimeLimits = function (force, callback) {
 
 /**
  * @private
- * @param {String | null} key
+ * @param {String | null} key
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype._get = function (path, key, callback) {
@@ -180,7 +180,7 @@ Profile.prototype._get = function (path, key, callback) {
  * // set x=25 and delete y
  * conn.profile.set({x : 25, y : null}, function(error) { console.log('done'); });
  *
- * @param {Object} keyValuePairs
+ * @param {Object} keyValuePairs
  * @param {Connection~requestCallback} callback - handles the response
  */
 Profile.prototype._set = function (path, keyValuePairs, callback) {
@@ -202,13 +202,13 @@ module.exports = Profile;</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#accesses">accesses</a></li><li><a href="global.html#bookmarks">bookmarks</a></li><li><a href="global.html#events">events</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#FormData">FormData</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#monitors">monitors</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#profile">profile</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#streams">streams</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li><li><a href="global.html#utility">utility</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Nov 22 2018 13:58:49 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Sep 11 2017 11:48:57 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

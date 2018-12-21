@@ -26,16 +26,14 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const logger = console;
-
-/**
+            <pre class="prettyprint source linenums"><code>/**
  *
  * @param {Object} pack json with
  * @param {Object} [pack.type = 'POST'] : 'GET/DELETE/POST/PUT'
  * @param {String} pack.host : fully qualified host name
  * @param {Number} pack.port : port to use
  * @param {String} pack.path : the request PATH
- * @param {Object} [pack.headers] : key / value map of headers
+ * @param {Object} [pack.headers] : key / value map of headers
  * @param {Object} [pack.params] : the payload -- only with POST/PUT
  * @param {String} [pack.parseResult = 'json'] : 'text' for no parsing
  * @param {Function} pack.success : function (result, resultInfo)
@@ -56,6 +54,12 @@ module.exports = function (pack)  {
 
   // ------------ request TYPE
   pack.method = pack.method || 'POST';
+  // method override test
+  if (false &amp;&amp; pack.method === 'DELETE') {
+    pack.method = 'POST';
+    pack.params =  pack.params || {};
+    pack.params._method = 'DELETE';
+  }
 
   // ------------- request HEADERS
 
@@ -132,7 +136,7 @@ module.exports = function (pack)  {
       };
 
       if (pack.callBackSent) {
-        logger.error('xhr.onreadystatechange called with status==4 even if callback is done:' +
+        console.error('xhr.onreadystatechange called with status==4 even if callback is done:' +
           pack.callBackSent);
         return;
       }
@@ -179,15 +183,15 @@ var _initXHR = function () {
 
   try { XHR = new XMLHttpRequest(); }
   catch (e) {
-    try { XHR = new ActiveXObject('Msxml2.XMLHTTP'); } // eslint-disable-line no-undef
+    try { XHR = new ActiveXObject('Msxml2.XMLHTTP'); }
     catch (e2) {
-      try { XHR = new ActiveXObject('Microsoft.XMLHTTP'); } // eslint-disable-line no-undef
+      try { XHR = new ActiveXObject('Microsoft.XMLHTTP'); }
       catch (e3) {
-        logger.log('XMLHttpRequest implementation not found.');
+        console.log('XMLHttpRequest implementation not found.');
       }
-      logger.log('XMLHttpRequest implementation not found.');
+      console.log('XMLHttpRequest implementation not found.');
     }
-    logger.log('XMLHttpRequest implementation not found.');
+    console.log('XMLHttpRequest implementation not found.');
   }
   return XHR;
 };
@@ -228,13 +232,13 @@ function parseResponseHeaders(headerStr) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#accesses">accesses</a></li><li><a href="global.html#bookmarks">bookmarks</a></li><li><a href="global.html#events">events</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#FormData">FormData</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#monitors">monitors</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#profile">profile</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#streams">streams</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li><li><a href="global.html#utility">utility</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Nov 22 2018 13:58:49 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Sep 11 2017 11:48:57 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

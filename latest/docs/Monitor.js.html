@@ -26,10 +26,9 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const _ = require('lodash');
-const SignalEmitter = require('./utility/SignalEmitter.js');
-const Filter = require('./Filter.js');
-const logger = console; 
+            <pre class="prettyprint source linenums"><code>var _ = require('underscore'),
+  SignalEmitter = require('./utility/SignalEmitter.js'),
+  Filter = require('./Filter.js');
 
 var EXTRA_ALL_EVENTS = {state : 'all', modifiedSince : -100000000 };
 var REALLY_ALL_EVENTS =  EXTRA_ALL_EVENTS;
@@ -118,10 +117,10 @@ Monitor.prototype.getEvents = function () {
 
 // ----------- iOSocket ------//
 Monitor.prototype._onIoConnect = function () {
-  logger.log('Monitor onConnect');
+  console.log('Monitor onConnect');
 };
 Monitor.prototype._onIoError = function (error) {
-  logger.log('Monitor _onIoError' + error);
+  console.log('Monitor _onIoError' + error);
 };
 Monitor.prototype._onIoEventsChanged = function () {
   var batch = this.startBatch('IoEventChanged');
@@ -129,7 +128,7 @@ Monitor.prototype._onIoEventsChanged = function () {
   batch.done('IoEventChanged');
 };
 Monitor.prototype._onIoStreamsChanged = function () {
-  logger.log('SOCKETIO', '_onIoStreamsChanged');
+  console.log('SOCKETIO', '_onIoStreamsChanged');
   var batch = this.startBatch('IoStreamsChanged');
   this._connectionStreamsGetChanges(batch);
   batch.done('IoStreamsChanged');
@@ -154,7 +153,7 @@ Monitor.prototype._onFilterChange = function (signal, batch) {
   var foundsignal = 0;
   if (signal.signal === Filter.Messages.DATE_CHANGE) {  // only load events if date is wider
     foundsignal = 1;
-    logger.log('** DATE CHANGE ', changes.timeFrame);
+    console.log('** DATE CHANGE ', changes.timeFrame);
     if (changes.timeFrame === 0) {
       return;
     }
@@ -166,7 +165,7 @@ Monitor.prototype._onFilterChange = function (signal, batch) {
 
   if (signal.signal === Filter.Messages.STREAMS_CHANGE) {
     foundsignal = 1;
-    logger.log('** STREAMS_CHANGE', changes.streams);
+    console.log('** STREAMS_CHANGE', changes.streams);
     if (changes.streams === 0) {
       return;
     }
@@ -177,7 +176,7 @@ Monitor.prototype._onFilterChange = function (signal, batch) {
 
   if (signal.signal === Filter.Messages.STREAMS_CHANGE) {
     foundsignal = 1;
-    logger.log('** STREAMS_CHANGE', changes.streams);
+    console.log('** STREAMS_CHANGE', changes.streams);
     if (changes.streams === 0) {
       return;
     }
@@ -259,7 +258,7 @@ Monitor.prototype._initEvents = function (batch) {
       var result = [];
 
       _.each(events, function (event) {
-        if (! this.ensureFullCache || this.filter.matchEvent(event)) {
+        if (! this.ensureFullCache || this.filter.matchEvent(event)) {
           this._events.active[event.id] = event;
           result.push(event);
         }
@@ -292,7 +291,7 @@ Monitor.prototype._connectionEventsGetChanges = function (batch) {
   batch = this.startBatch('connectionEventsGetChanges', batch);
   if (this.eventsGetChangesInProgress) {
     this.eventsGetChangesNeeded = true;
-    logger.log('[WARNING] Skipping _connectionEventsGetChanges because one is in Progress');
+    console.log('[WARNING] Skipping _connectionEventsGetChanges because one is in Progress');
     batch.done('connectionEventsGetChanges in Progress');
     return;
   }
@@ -544,13 +543,13 @@ module.exports = Monitor;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#accesses">accesses</a></li><li><a href="global.html#bookmarks">bookmarks</a></li><li><a href="global.html#events">events</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#FormData">FormData</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#monitors">monitors</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#profile">profile</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#streams">streams</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li><li><a href="global.html#utility">utility</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Nov 22 2018 13:58:49 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Sep 11 2017 11:48:57 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

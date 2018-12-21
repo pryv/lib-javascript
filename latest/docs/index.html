@@ -43,64 +43,35 @@
 
 
     <section>
-        <article><p><a href="http://badge.fury.io/js/pryv"><img src="https://badge.fury.io/js/pryv.png" alt="NPM version"></a></p>
-<h1>SYNOPSIS</h1><p>This is the javascript client library for Pryv.IO, a data store for your private
-data. This library allows easy access to the Pryv.IO API from different javascript
-environments. </p>
-<h1>OVERVIEW</h1><p>This library will allow you to use Pryv.IO functionality from almost anywhere 
-javascript can be run. Here's a usage example: </p>
-<pre class="prettyprint source lang-javascript"><code>const pryv = require('pryv');
-const api = new pryv.Connection({
-  username: 'PRYVIO_USERNAME', 
-  auth: 'PRYVIO_AUTH_TOKEN'
-});
-
-api.streams.get(null, function(error, streams) {
-  // streams contains an array of streams
-});
-
-const filter = new pryv.Filter({limit : 20});
-api.events.get(filter, function(error, events) {
-  // events contains the last 20 events in your Pryv.IO account
-});</code></pre><p>Here are some usage examples to try out right now: </p>
+        <article><h1>Pryv library for Javascript</h1><p>Javascript library (browser &amp; Node.js) to access and manipulate Pryv users data.</p>
+<p><a href="http://badge.fury.io/js/pryv"><img src="https://badge.fury.io/js/pryv.png" alt="NPM version"></a>  <a href="http://waffle.io/pryv/lib-javascript"><img src="https://badge.waffle.io/pryv/lib-javascript.svg?label=ready&amp;title=Ready" alt="Stories in Ready"></a></p>
+<h2>Usage examples on CodePen</h2><p><a href="http://codepen.io/pryv/">Pryv on CodePen</a> </p>
 <ul>
-<li><a href="http://codepen.io/pryv/pen/apQJxz">Pryv basic example</a>: Example exposing how 
-to request an access and fetching basic informations form a Pryv account.</li>
-<li><a href="http://codepen.io/pryv/pen/apQJrO">Pryv notes and values example</a>: Web form, 
-enter notes and values. </li>
-<li><a href="http://codepen.io/pryv/pen/rjQygX">Pryv events monitor example</a>: Monitor 
-changes live on an Pryv account. Create, modifiy and delete events.</li>
+<li><a href="http://codepen.io/pryv/pen/apQJxz">Pryv basic example</a>: Example exposing how to request an access and fetching basic informations form a Pryv account.</li>
+<li><a href="http://codepen.io/pryv/pen/apQJrO">Pryv notes and values example</a>: Web form, enter notes and values. </li>
+<li><a href="http://codepen.io/pryv/pen/rjQygX">Pryv events monitor example</a>: Monitor changes live on an Pryv account. Create, modifiy and delete events.</li>
 </ul>
-<h1>INSTALL</h1><p>To use this library in your <strong>client-side javascript projects</strong>, you can include it
-directly from this url: http://api.pryv.com/lib-javascript/latest/pryv.js</p>
-<p>Here's the full script tag: </p>
-<pre class="prettyprint source lang-html"><code>&lt;script type=&quot;text/javascript&quot; 
-  src=&quot;http://api.pryv.com/lib-javascript/latest/pryv.js&quot;>&lt;/script></code></pre><p>For use in your <strong>nodejs projects</strong>, you can simply do either</p>
-<pre class="prettyprint source lang-shell"><code>$ npm install pryv</code></pre><p>or - if you use yarn: </p>
-<pre class="prettyprint source lang-shell"><code>$ yarn add pryv</code></pre><p>The above will also work for <strong>webpack based builds</strong>, allowing you to use pryv
-as part of your application package. </p>
-<p>If you encounter a situation where importing or requiring this library does 
-not work, please let us know by filing a github issue. We want this to work 
-in as many places as possible, but the situation around javascript environments 
-is complex. </p>
-<h1>DOCUMENTATION</h1><ul>
+<h3>Installation</h3><ul>
+<li>Browser: <code>&lt;script type=&quot;text/javascript&quot; src=&quot;http://api.pryv.com/lib-javascript/latest/pryv.js&quot;&gt;&lt;/script&gt;</code></li>
+<li>Node.js: <code>npm install pryv</code></li>
+</ul>
+<h3>Docs</h3><ul>
 <li><a href="http://pryv.github.io/getting-started/javascript/">Getting started guide</a></li>
 <li><a href="http://pryv.github.io/lib-javascript/latest/docs/">JS docs</a></li>
 </ul>
-<h1>HACKING</h1><p>Read, then run <code>./scripts/setup-environment-dev.sh</code>.</p>
-<p>To build this project, use <code>grunt</code>:</p>
+<h2>Contribute</h2><p>See the issues on the <a href="http://waffle.io/pryv/lib-javascript">Waffle board</a>.</p>
+<h3>Dev environment setup</h3><p>Read, then run <code>./scripts/setup-environment-dev.sh</code></p>
+<h3>Build and tests</h3><p><code>grunt</code>:</p>
 <ul>
+<li>applies code linting (with JSHint)</li>
 <li>builds documentation into <code>dist/{version}/docs</code></li>
-<li>browserifies the lib into <code>dist/{version}</code> as well as <code>dist/latest</code> for 
-browser standalone distribution</li>
+<li>browserifies the lib into <code>dist/{version}</code> as well as <code>dist/latest</code> for browser standalone distribution</li>
 <li>runs the tests, outputting coverage info into <code>test/coverage.html</code></li>
 </ul>
 <p>Also: <code>grunt test</code> &amp; <code>grunt watch</code> (runs tests on changes)</p>
-<p><code>./scripts/update-event-types.bash</code> updates the default event types and extras 
-by fetching the latest master versions online.</p>
-<p>After building, run <code>./scripts/upload.sh &quot;Commit message&quot;</code> to push
-changes from <code>dist</code> to <code>gh-pages</code> branch.</p>
-<h1>LICENSE</h1><p><a href="https://github.com/pryv/documents/blob/master/license-bsd-revised.md">Revised BSD license</a></p></article>
+<p><code>./scripts/update-event-types.bash</code> updates the default event types and extras by fetching the latest master versions online.</p>
+<h3>Publish</h3><p>After building, just commit and push changes from <code>dist</code> (working copy of <code>gh-pages</code> branch).</p>
+<h2>License</h2><p><a href="https://github.com/pryv/documents/blob/master/license-bsd-revised.md">Revised BSD license</a></p></article>
     </section>
 
 
@@ -111,13 +82,13 @@ changes from <code>dist</code> to <code>gh-pages</code> branch.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#accesses">accesses</a></li><li><a href="global.html#bookmarks">bookmarks</a></li><li><a href="global.html#events">events</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#FormData">FormData</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#monitors">monitors</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#profile">profile</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#streams">streams</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li><li><a href="global.html#utility">utility</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Nov 22 2018 13:58:49 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Sep 11 2017 11:48:57 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

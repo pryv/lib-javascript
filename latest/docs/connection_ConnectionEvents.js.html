@@ -26,11 +26,11 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const utility = require('../utility/utility.js');
-const _ = require('lodash');
-const Filter = require('../Filter');
-const Event = require('../Event');
-const CC = require('./ConnectionConstants.js');
+            <pre class="prettyprint source linenums"><code>var utility = require('../utility/utility.js'),
+  _ = require('underscore'),
+  Filter = require('../Filter'),
+  Event = require('../Event'),
+  CC = require('./ConnectionConstants.js');
 
 /**
  * @class ConnectionEvents
@@ -104,29 +104,6 @@ ConnectionEvents.prototype.get = function (filter, doneCallback, partialResultCa
 };
 
 /**
- * Returns a single event provided an id
- *
- * @param {String} eventId
- * @param {Connection~requestCallback} callback
- */
-ConnectionEvents.prototype.getOne = function (eventId, callback) {
-
-  function extractCallback(err, res) {
-    if (err) {
-      return callback(err);
-    }
-    var event = new Event(this.connection, res.event);
-    callback(null, event);
-  }
-
-  this.connection.request({
-    method: 'GET',
-    path: '/events/' + eventId,
-    callback: extractCallback.bind(this)
-  });
-};
-
-/**
  * @param {Event} event
  * @param {Connection~requestCallback} callback
  */
@@ -138,7 +115,7 @@ ConnectionEvents.prototype.update = function (event, callback) {
 };
 
 /**
- * @param {Event | eventId} event
+ * @param {Event | eventId} event
  * @param {Connection~requestCallback} callback
  */
 ConnectionEvents.prototype.delete = ConnectionEvents.prototype.trash = function (event, callback) {
@@ -179,11 +156,11 @@ ConnectionEvents.prototype.trashWithId = function (eventId, callback) {
 /**
  * This is the preferred method to create an event, or to create it on the API.
  * The function return the newly created object.. It will be updated when posted on the API.
- * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
+ * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
  * the same connection and not exists on the API.
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {Boolean} [start = false] if set to true will POST the event to /events/start
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.create = function (newEventlike, callback) {
   if (typeof(callback) !== 'function') {
@@ -197,10 +174,10 @@ ConnectionEvents.prototype.create = function (newEventlike, callback) {
  * This is the preferred method to create and start an event, Starts a new period event.
  * This is equivalent to starting an event with a null duration. In singleActivity streams,
  * also stops the previously running period event if any.
- * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
+ * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
  * the same connection and not exists on the API.
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.start = function (newEventlike, callback) {
   if (typeof(callback) !== 'function') {
@@ -226,7 +203,7 @@ function _create(newEventlike, callback, start) {
   }
 
   var url = '/events';
-  if (start) { url = '/events/start'; }
+  if (start) { url = '/events/start'; }
 
 
   this.connection.request({
@@ -266,11 +243,11 @@ function _create(newEventlike, callback, start) {
 
 /**
  * Stop an event by it's Id
- * @param {EventLike} event -- minimum {id} -- if typeof Event, must belong to
+ * @param {EventLike} event -- minimum {id} -- if typeof Event, must belong to
  * the same connection and not exists on the API.
  * @param {Date} [date = now] the date to set to stop the event
  * @param {ConnectionEvents~eventStoppedOnTheAPI} callback
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.stopEvent = function (eventlike, date, callback) {
   if (typeof(callback) !== 'function') {
@@ -307,12 +284,12 @@ ConnectionEvents.prototype.stopEvent = function (eventlike, date, callback) {
 
 /**
  * Stop any event in this stream
- * @param {StreamLike} stream -- minimum {id} -- if typeof Stream, must belong to
+ * @param {StreamLike} stream -- minimum {id} -- if typeof Stream, must belong to
  * the same connection and not exists on the API.
  * @param {Date} [date = now] the date to set to stop the event
  * @param {String} [type = null] stop any matching eventType is this stream.
  * @param {ConnectionEvents~eventStoppedOnTheAPI} callback
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.stopStream = function (streamLike, date, type, callback) {
   if (typeof(callback) !== 'function') {
@@ -320,7 +297,7 @@ ConnectionEvents.prototype.stopStream = function (streamLike, date, type, callba
   }
 
   var data = {streamId : streamLike.id };
-  if (date) { data.time = date.getTime() / 1000; }
+  if (date) { data.time = date.getTime() / 1000; }
   if (type) { data.type = type; }
 
 
@@ -342,12 +319,12 @@ ConnectionEvents.prototype.stopStream = function (streamLike, date, type, callba
 
 
 /**
- * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
+ * @param {NewEventLike} event -- minimum {streamId, type } -- if typeof Event, must belong to
  * the same connection and not exists on the API.
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {FormData} the formData to post for fileUpload. On node.js
  * refers to pryv.utility.forgeFormData
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.createWithAttachment =
   function (newEventLike, formData, callback, progressCallback) {
@@ -387,53 +364,49 @@ ConnectionEvents.prototype.createWithAttachment =
   };
 
 /**
- * @param {String} eventId
+ * @param {String} eventId
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {FormData} the formData to post for fileUpload. On node.js
  * refers to pryv.utility.forgeFormData
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.addAttachment =
   function (eventId, formData, callback, progressCallback) {
     if (typeof(callback) !== 'function') {
       throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
     }
-    this.connection.request({
-      method: 'POST',
-      path: '/events/' + eventId,
-      jsonData: formData,
-      isFile: true,
-      progressCallback: progressCallback,
-      callback: function (err, result) {
-        if (err) {
-          return callback(err);
-        }
-        callback(null, result.event);
+  this.connection.request({
+    method: 'POST',
+    path: '/events/' + eventId,
+    jsonData: formData,
+    isFile: true,
+    progressCallback: progressCallback,
+    callback: function (err, result) {
+      if (err) {
+        return callback(err);
       }
-    });
-  };
+      callback(null, result.event);
+    }
+  });
+};
 
 /**
- * @param {String} eventId
+ * @param {String} eventId
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {FormData} the formData to post for fileUpload. On node.js
  * refers to pryv.utility.forgeFormData
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.getAttachment =
   function (params, callback, progressCallback) {
     if (typeof(callback) !== 'function') {
       throw new Error(CC.Errors.CALLBACK_IS_NOT_A_FUNCTION);
     }
-    if (utility.isBrowser()) {
-      return callback(new Error('Function not implemented for browser, only available in NodeJS.'));
-    }
     this.connection.request({
       method: 'GET',
       path: '/events/' + params.eventId + '/' + params.fileId,
       progressCallback: progressCallback,
       parseResult: 'binary',
-
       callback: function (err, result) {
         if (err) {
           return callback(err);
@@ -444,10 +417,10 @@ ConnectionEvents.prototype.getAttachment =
   };
 
 /**
- * @param {String} eventId
+ * @param {String} eventId
  * @param {ConnectionEvents~eventCreatedOnTheAPI} callback
  * @param {String} fileName
- * @return {Event} event
+ * @return {Event} event
  */
 ConnectionEvents.prototype.removeAttachment = function (eventId, fileName, callback) {
   if (typeof(callback) !== 'function') {
@@ -469,7 +442,7 @@ ConnectionEvents.prototype.removeAttachment = function (eventId, fileName, callb
  * @param {Object[]} eventsData -- minimum {streamId, type }
  * @param {ConnectionEvents~eventBatchCreatedOnTheAPI}
  * @param {function} [callBackWithEventsBeforeRequest] mostly for testing purposes
- * @return {Event[]} events
+ * @return {Event[]} events
  */
 ConnectionEvents.prototype.batchWithData =
   function (eventsData, callback, callBackWithEventsBeforeRequest) {
@@ -551,7 +524,7 @@ ConnectionEvents.prototype._get = function (filter, callback) {
 /**
  * TODO anonymise by renaming to function _xx(..
  * @param {String} eventId
- * @param {Object} data
+ * @param {Object} data
  * @param  {Connection~requestCallback} callback
  * @private
  */
@@ -639,13 +612,13 @@ module.exports = ConnectionEvents;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#accesses">accesses</a></li><li><a href="global.html#bookmarks">bookmarks</a></li><li><a href="global.html#events">events</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#FormData">FormData</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#monitors">monitors</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#profile">profile</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#streams">streams</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li><li><a href="global.html#utility">utility</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Nov 22 2018 13:58:49 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Sep 11 2017 11:48:57 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

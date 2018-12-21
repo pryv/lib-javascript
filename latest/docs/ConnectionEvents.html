@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>ConnectionEvents<span class="signature">(connection)</span><span class="type-signature"></span></h2>
+        <h2>ConnectionEvents</h2>
         
             <div class="class-description"><p>ConnectionEvents</p>
 <p>Coverage of the API
@@ -53,9 +53,7 @@
     <h2>Constructor</h2>
     
 
-    
     <h4 class="name" id="ConnectionEvents"><span class="type-signature"></span>new ConnectionEvents<span class="signature">(connection)</span><span class="type-signature"></span></h4>
-    
 
     
 
@@ -177,8 +175,6 @@
 
 
 
-
-
     
     </div>
 
@@ -188,9 +184,7 @@
 
     
 
-    
-
-    
+     
 
     
 
@@ -239,7 +233,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line116">line 116</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line93">line 93</a>
     </li></ul></dd>
     
 
@@ -266,9 +260,7 @@
 
     
 
-    
     <h4 class="name" id="addAttachment"><span class="type-signature"></span>addAttachment<span class="signature">(eventId, callback, the)</span><span class="type-signature"> &rarr; {<a href="Event.html">Event</a>}</span></h4>
-    
 
     
 
@@ -359,7 +351,7 @@
             <td class="type">
             
                 
-<span class="param-type">FormData</span>
+<span class="param-type"><a href="global.html#FormData">FormData</a></span>
 
 
             
@@ -411,7 +403,7 @@ refers to pryv.utility.forgeFormData</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line368">line 368</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line345">line 345</a>
     </li></ul></dd>
     
 
@@ -459,16 +451,12 @@ refers to pryv.utility.forgeFormData</p></td>
 
 
 
-
-
         
             
 
     
 
-    
     <h4 class="name" id="batchWithData"><span class="type-signature"></span>batchWithData<span class="signature">(eventsData, callback, callBackWithEventsBeforeRequest<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Event.html">Event</a>>}</span></h4>
-    
 
     
 
@@ -649,7 +637,7 @@ This is the prefered method to create events in batch</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line446">line 446</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line419">line 419</a>
     </li></ul></dd>
     
 
@@ -697,16 +685,12 @@ This is the prefered method to create events in batch</p>
 
 
 
-
-
         
             
 
     
 
-    
     <h4 class="name" id="create"><span class="type-signature"></span>create<span class="signature">(event, callback, start<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Event.html">Event</a>}</span></h4>
-    
 
     
 
@@ -900,7 +884,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line160">line 160</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line137">line 137</a>
     </li></ul></dd>
     
 
@@ -948,16 +932,12 @@ the same connection and not exists on the API.</li>
 
 
 
-
-
         
             
 
     
 
-    
     <h4 class="name" id="createWithAttachment"><span class="type-signature"></span>createWithAttachment<span class="signature">(event, callback, the)</span><span class="type-signature"> &rarr; {<a href="Event.html">Event</a>}</span></h4>
-    
 
     
 
@@ -1051,7 +1031,7 @@ the same connection and not exists on the API.</li>
             <td class="type">
             
                 
-<span class="param-type">FormData</span>
+<span class="param-type"><a href="global.html#FormData">FormData</a></span>
 
 
             
@@ -1103,7 +1083,7 @@ refers to pryv.utility.forgeFormData</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line324">line 324</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line301">line 301</a>
     </li></ul></dd>
     
 
@@ -1151,16 +1131,12 @@ refers to pryv.utility.forgeFormData</p></td>
 
 
 
-
-
         
             
 
     
 
-    
     <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(filter, doneCallback, partialResultCallback)</span><span class="type-signature"></span></h4>
-    
 
     
 
@@ -1327,8 +1303,6 @@ refers to pryv.utility.forgeFormData</p></td>
 
 
 
-
-
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>// get events from the Diary stream
@@ -1345,9 +1319,7 @@ conn.events.get({streamId : 'diary'},
 
     
 
-    
     <h4 class="name" id="getAttachment"><span class="type-signature"></span>getAttachment<span class="signature">(eventId, callback, the)</span><span class="type-signature"> &rarr; {<a href="Event.html">Event</a>}</span></h4>
-    
 
     
 
@@ -1438,7 +1410,7 @@ conn.events.get({streamId : 'diary'},
             <td class="type">
             
                 
-<span class="param-type">FormData</span>
+<span class="param-type"><a href="global.html#FormData">FormData</a></span>
 
 
             
@@ -1490,7 +1462,7 @@ refers to pryv.utility.forgeFormData</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line395">line 395</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line372">line 372</a>
     </li></ul></dd>
     
 
@@ -1538,174 +1510,12 @@ refers to pryv.utility.forgeFormData</p></td>
 
 
 
-
-
         
             
 
     
 
-    
-    <h4 class="name" id="getOne"><span class="type-signature"></span>getOne<span class="signature">(eventId, callback)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Returns a single event provided an id</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>eventId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Connection.html#~requestCallback">Connection~requestCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line84">line 84</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
     <h4 class="name" id="removeAttachment"><span class="type-signature"></span>removeAttachment<span class="signature">(eventId, callback, fileName)</span><span class="type-signature"> &rarr; {<a href="Event.html">Event</a>}</span></h4>
-    
 
     
 
@@ -1847,7 +1657,7 @@ refers to pryv.utility.forgeFormData</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line424">line 424</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line397">line 397</a>
     </li></ul></dd>
     
 
@@ -1895,16 +1705,12 @@ refers to pryv.utility.forgeFormData</p></td>
 
 
 
-
-
         
             
 
     
 
-    
     <h4 class="name" id="start"><span class="type-signature"></span>start<span class="signature">(event, callback)</span><span class="type-signature"> &rarr; {<a href="Event.html">Event</a>}</span></h4>
-    
 
     
 
@@ -2032,7 +1838,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line177">line 177</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -2080,16 +1886,12 @@ the same connection and not exists on the API.</li>
 
 
 
-
-
         
             
 
     
 
-    
     <h4 class="name" id="stopEvent"><span class="type-signature"></span>stopEvent<span class="signature">(event, date<span class="signature-attributes">opt</span>, callback)</span><span class="type-signature"> &rarr; {<a href="Event.html">Event</a>}</span></h4>
-    
 
     
 
@@ -2282,7 +2084,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line247">line 247</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line224">line 224</a>
     </li></ul></dd>
     
 
@@ -2330,16 +2132,12 @@ the same connection and not exists on the API.</li>
 
 
 
-
-
         
             
 
     
 
-    
     <h4 class="name" id="stopStream"><span class="type-signature"></span>stopStream<span class="signature">(stream, date<span class="signature-attributes">opt</span>, type<span class="signature-attributes">opt</span>, callback)</span><span class="type-signature"> &rarr; {<a href="Event.html">Event</a>}</span></h4>
-    
 
     
 
@@ -2571,7 +2369,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line289">line 289</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line266">line 266</a>
     </li></ul></dd>
     
 
@@ -2619,16 +2417,12 @@ the same connection and not exists on the API.</li>
 
 
 
-
-
         
             
 
     
 
-    
     <h4 class="name" id="trashWithId"><span class="type-signature"></span>trashWithId<span class="signature">(eventId, callback)</span><span class="type-signature"></span></h4>
-    
 
     
 
@@ -2747,7 +2541,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line127">line 127</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line104">line 104</a>
     </li></ul></dd>
     
 
@@ -2773,16 +2567,12 @@ the same connection and not exists on the API.</li>
 
 
 
-
-
         
             
 
     
 
-    
     <h4 class="name" id="update"><span class="type-signature"></span>update<span class="signature">(event, callback)</span><span class="type-signature"></span></h4>
-    
 
     
 
@@ -2901,7 +2691,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line105">line 105</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line82">line 82</a>
     </li></ul></dd>
     
 
@@ -2911,8 +2701,6 @@ the same connection and not exists on the API.</li>
 
     
 </dl>
-
-
 
 
 
@@ -2940,9 +2728,7 @@ the same connection and not exists on the API.</li>
 
     
 
-    
     <h4 class="name" id="~eventBatchCreatedOnTheAPI"><span class="type-signature"></span>eventBatchCreatedOnTheAPI<span class="signature">(error, events)</span><span class="type-signature"></span></h4>
-    
 
     
 
@@ -3065,7 +2851,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line598">line 598</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line571">line 571</a>
     </li></ul></dd>
     
 
@@ -3091,16 +2877,12 @@ the same connection and not exists on the API.</li>
 
 
 
-
-
             
                 
 
     
 
-    
     <h4 class="name" id="~eventCreatedOnTheAPI"><span class="type-signature"></span>eventCreatedOnTheAPI<span class="signature">(error, event)</span><span class="type-signature"></span></h4>
-    
 
     
 
@@ -3223,7 +3005,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line584">line 584</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line557">line 557</a>
     </li></ul></dd>
     
 
@@ -3249,16 +3031,12 @@ the same connection and not exists on the API.</li>
 
 
 
-
-
             
                 
 
     
 
-    
     <h4 class="name" id="~eventStoppedOnTheAPI"><span class="type-signature"></span>eventStoppedOnTheAPI<span class="signature">(error, stoppedEventId)</span><span class="type-signature"></span></h4>
-    
 
     
 
@@ -3381,7 +3159,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line591">line 591</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line564">line 564</a>
     </li></ul></dd>
     
 
@@ -3407,16 +3185,12 @@ the same connection and not exists on the API.</li>
 
 
 
-
-
             
                 
 
     
 
-    
     <h4 class="name" id="~getCallback"><span class="type-signature"></span>getCallback<span class="signature">(error, result)</span><span class="type-signature"></span></h4>
-    
 
     
 
@@ -3539,7 +3313,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line569">line 569</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line542">line 542</a>
     </li></ul></dd>
     
 
@@ -3565,16 +3339,12 @@ the same connection and not exists on the API.</li>
 
 
 
-
-
             
                 
 
     
 
-    
     <h4 class="name" id="~partialResultCallback"><span class="type-signature"></span>partialResultCallback<span class="signature">(result)</span><span class="type-signature"></span></h4>
-    
 
     
 
@@ -3674,7 +3444,7 @@ the same connection and not exists on the API.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line577">line 577</a>
+        <a href="connection_ConnectionEvents.js.html">connection/ConnectionEvents.js</a>, <a href="connection_ConnectionEvents.js.html#line550">line 550</a>
     </li></ul></dd>
     
 
@@ -3684,8 +3454,6 @@ the same connection and not exists on the API.</li>
 
     
 </dl>
-
-
 
 
 
@@ -3716,13 +3484,13 @@ the same connection and not exists on the API.</li>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#accesses">accesses</a></li><li><a href="global.html#bookmarks">bookmarks</a></li><li><a href="global.html#events">events</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#FormData">FormData</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#monitors">monitors</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#profile">profile</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#streams">streams</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li><li><a href="global.html#utility">utility</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Nov 22 2018 13:58:49 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Sep 11 2017 11:48:57 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

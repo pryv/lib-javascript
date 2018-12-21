@@ -26,41 +26,17 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const socketIO = require('socket.io-client');
-const _ = require('lodash');
-const FormData = require('form-data');
+            <pre class="prettyprint source linenums"><code>var socketIO = require('socket.io-client'),
+    _ = require('underscore');
 
-const utility = {};
-module.exports = utility;
-
-utility.request = require('./request');
-
-/**
- * Create or complete FormData object for attachements
- * @param id {String} id of the element to add (may be 'attachment0')
- * @param data {Data} the data to send
- * @param options {Object}
- * @param options.filename {String}
- * @param options.type {String}
- */
-utility.forgeFormData = function (id, data, options, appendTo) {
-  var formData = appendTo || new FormData();
-  formData.append(id, data, options);
-  return formData;
-};
-
+var utility = module.exports = {};
 
 /**
  * @returns {Boolean} `true` if we're in a web browser environment
  */
 utility.isBrowser = function () {
-  return typeof (window) !== 'undefined';
+  return typeof(window) !== 'undefined';
 };
-
-// This should be a file that is only ever required in a non-browser environment. 
-// Make sure: 
-if (utility.isBrowser()) 
-  throw new Error('utility.js was required in a browser environment!');
 
 utility.SignalEmitter = require('./SignalEmitter.js');
 
@@ -121,12 +97,17 @@ utility.endsWith = function (string, suffix) {
 utility.ioConnect = function (settings) {
   var httpMode = settings.ssl ? 'https' : 'http';
   var url = httpMode + '://' + settings.host + ':' + settings.port + '' +
-    settings.path + '?auth=' + settings.auth + '&amp;resource=' + settings.namespace;
+      settings.path + '?auth=' + settings.auth + '&amp;resource=' + settings.namespace;
 
-  return socketIO(url, { forceNew: true });
+  return socketIO.connect(url, {'force new connection': true});
 };
 
-utility.urls = require('./urls');</code></pre>
+utility.urls = require('./urls');
+
+// platform-specific members
+_.extend(utility, utility.isBrowser() ?
+    require('./utility-browser.js') : require('./utility-node.js'));
+</code></pre>
         </article>
     </section>
 
@@ -136,13 +117,13 @@ utility.urls = require('./urls');</code></pre>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Accesses.html">Accesses</a></li><li><a href="Auth.html">Auth</a></li><li><a href="Bookmarks.html">Bookmarks</a></li><li><a href="ConnectionEvents.html">ConnectionEvents</a></li><li><a href="ConnectionStreams.html">ConnectionStreams</a></li><li><a href="Event.html">Event</a></li><li><a href="Filter.html">Filter</a></li><li><a href="module.html#.exports">exports</a></li><li><a href="Monitor.html">Monitor</a></li><li><a href="Profile.html">Profile</a></li><li><a href="URLInfo.html">URLInfo</a></li></ul><h3>Global</h3><ul><li><a href="global.html#_">_</a></li><li><a href="global.html#accesses">accesses</a></li><li><a href="global.html#bookmarks">bookmarks</a></li><li><a href="global.html#events">events</a></li><li><a href="global.html#eventTypes">eventTypes</a></li><li><a href="global.html#FormData">FormData</a></li><li><a href="global.html#getPreferredLanguage">getPreferredLanguage</a></li><li><a href="global.html#isValidExtrasFile">isValidExtrasFile</a></li><li><a href="global.html#isValidTypesFile">isValidTypesFile</a></li><li><a href="global.html#loadExternalFiles">loadExternalFiles</a></li><li><a href="global.html#monitors">monitors</a></li><li><a href="global.html#parseResponseHeaders">parseResponseHeaders</a></li><li><a href="global.html#profile">profile</a></li><li><a href="global.html#Stream">Stream</a></li><li><a href="global.html#streams">streams</a></li><li><a href="global.html#supportCSS3">supportCSS3</a></li><li><a href="global.html#utility">utility</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Nov 22 2018 13:58:49 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Sep 11 2017 11:48:57 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
