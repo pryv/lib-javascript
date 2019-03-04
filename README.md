@@ -94,6 +94,10 @@ by fetching the latest master versions online.
 After building, run `./scripts/upload.sh "Commit message"` to push
 changes from `dist` to `gh-pages` branch.
 
+# SUPPORT AND WARRANTY
+
+Pryv provides this software for educational and demonstration purposes with no support or warranty.
+
 # LICENSE
 
 [Revised BSD license](https://github.com/pryv/documents/blob/master/license-bsd-revised.md)
