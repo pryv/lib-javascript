@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "cuid": "latest",
-    "form-data": "0.1.x",
+    "form-data": "2.3.3",
     "lodash": "latest",
     "socket.io-client": "2.1.0"
   },
@@ -64,7 +64,7 @@
     "babelify": "^8",
     "blanket": "latest",
     "bluebird": "^3.5.2",
-    "coffee-script": "latest",
+    "coffeescript": "latest",
     "eslint": "^5.6.0",
     "grunt": "latest",
     "grunt-browserify": "latest",
