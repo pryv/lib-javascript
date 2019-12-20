@@ -27,8 +27,6 @@ Bookmarks.prototype.get = function (callback) {
       var result = [],
         bookmarks = res.followedSlices || res.followedSlice;
       _.each(bookmarks, function (bookmark) {
-        bookmark.url = bookmark.url.replace(/\.li/, '.in');
-        bookmark.url = bookmark.url.replace(/\.me/, '.io');
         var conn =  new Connection({
           auth: bookmark.accessToken,
           url: bookmark.url,
