@@ -1,5 +1,9 @@
 [![NPM version](https://badge.fury.io/js/pryv.png)](http://badge.fury.io/js/pryv)
 
+# Deprecated
+
+This library is deprecated, please use the v2 version at [https://github.com/pryv/lib-js](https://github.com/pryv/lib-js)
+
 # SYNOPSIS
 
 This is the javascript client library for Pryv.IO, a data store for your private
